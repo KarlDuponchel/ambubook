@@ -1,36 +1,164 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AmbuBook
 
-## Getting Started
+Plateforme de prise de rendez-vous pour services ambulanciers. Permet aux patients de demander un transport sanitaire en ligne, et aux ambulanciers de gérer leurs demandes via un dashboard.
 
-First, run the development server:
+## Stack technique
+
+- **Frontend/Backend** : Next.js 16 (App Router)
+- **Base de données** : PostgreSQL 16
+- **ORM** : Prisma
+- **Authentification** : Better Auth
+- **Styling** : Tailwind CSS
+
+## Installation
+
+### Prérequis
+
+- Node.js 18+
+- Docker (pour PostgreSQL)
+
+### 1. Cloner et installer les dépendances
+
+```bash
+git clone <repo-url>
+cd ambubook
+npm install
+```
+
+### 2. Configuration de l'environnement
+
+Copier le fichier d'exemple et le personnaliser :
+
+```bash
+cp .env.example .env
+```
+
+Variables importantes :
+- `DATABASE_URL` : URL de connexion PostgreSQL
+- `BETTER_AUTH_SECRET` : Clé secrète pour les tokens (générer avec `openssl rand -base64 32`)
+
+### 3. Lancer PostgreSQL
+
+```bash
+docker compose up -d
+```
+
+Cela démarre PostgreSQL sur le port **5433** (pour éviter les conflits).
+
+### 4. Appliquer les migrations
+
+```bash
+npx prisma migrate dev
+```
+
+### 5. Lancer le serveur de développement
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrir [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Structure du projet
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+ambubook/
+├── app/                    # Next.js App Router
+│   ├── api/auth/           # Routes API Better Auth
+│   ├── globals.css         # Styles globaux
+│   ├── layout.tsx          # Layout racine
+│   └── page.tsx            # Page d'accueil
+├── lib/                    # Utilitaires et configurations
+│   ├── auth.ts             # Configuration Better Auth (serveur)
+│   ├── auth-client.ts      # Client Better Auth (frontend)
+│   └── prisma.ts           # Instance Prisma singleton
+├── prisma/
+│   ├── schema.prisma       # Schéma de la base de données
+│   └── migrations/         # Migrations SQL
+├── tasks/                  # Documentation de développement
+│   ├── sprint.md           # Planning des sprints
+│   └── lessons.md          # Erreurs et solutions
+└── docker-compose.yml      # PostgreSQL local
+```
 
-## Learn More
+## Base de données
 
-To learn more about Next.js, take a look at the following resources:
+### Modèles principaux
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Table | Description |
+|-------|-------------|
+| `users` | Utilisateurs (ambulanciers, admins) |
+| `companies` | Sociétés d'ambulance |
+| `transport_requests` | Demandes de transport des patients |
+| `sessions` | Sessions de connexion |
+| `accounts` | Comptes liés (auth) |
+| `verifications` | Tokens de vérification |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Commandes Prisma utiles
 
-## Deploy on Vercel
+```bash
+# Voir la BDD dans le navigateur
+npx prisma studio
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Générer le client après modification du schéma
+npx prisma generate
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Créer une migration
+npx prisma migrate dev --name nom_migration
+
+# Réinitialiser la BDD (attention: perte de données)
+npx prisma migrate reset
+```
+
+## Authentification
+
+L'authentification utilise Better Auth avec email/password.
+
+### Endpoints API
+
+- `POST /api/auth/sign-up` : Inscription
+- `POST /api/auth/sign-in/email` : Connexion
+- `POST /api/auth/sign-out` : Déconnexion
+- `GET /api/auth/session` : Session courante
+
+### Utilisation côté client
+
+```tsx
+import { signIn, signUp, signOut, useSession } from "@/lib/auth-client";
+
+// Dans un composant React
+const { data: session } = useSession();
+
+// Connexion
+await signIn.email({ email: "...", password: "..." });
+
+// Inscription
+await signUp.email({ email: "...", password: "...", name: "..." });
+
+// Déconnexion
+await signOut();
+```
+
+## Scripts npm
+
+| Commande | Description |
+|----------|-------------|
+| `npm run dev` | Serveur de développement |
+| `npm run build` | Build de production |
+| `npm run start` | Lancer le build de production |
+| `npm run lint` | Vérification ESLint |
+
+## Roadmap
+
+Voir [tasks/sprint.md](./tasks/sprint.md) pour le planning détaillé.
+
+### MVP (6 semaines)
+- [x] Setup BDD + Auth
+- [ ] Formulaire patient
+- [ ] Dashboard ambulancier
+- [ ] Notifications SMS/Email
+
+### Post-MVP
+- [ ] Marketplace multi-ambulanciers
+- [ ] Géolocalisation et carte
+- [ ] Paiement en ligne

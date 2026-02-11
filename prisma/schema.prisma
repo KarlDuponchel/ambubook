@@ -1,0 +1,206 @@
+// AmbuBook - Schéma Prisma
+// Documentation: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  // URL configurée dans prisma.config.ts
+}
+
+// ============================================
+// BETTER AUTH - Tables d'authentification
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  name          String
+  image         String?
+  phone         String?
+  role          UserRole  @default(AMBULANCIER)
+  isActive      Boolean   @default(false) // Compte désactivé par défaut, activé par l'admin
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations Better Auth
+  sessions Session[]
+  accounts Account[]
+
+  // Relations métier
+  company   Company? @relation(fields: [companyId], references: [id])
+  companyId String?
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verifications")
+}
+
+// ============================================
+// MÉTIER - Tables applicatives
+// ============================================
+
+enum UserRole {
+  ADMIN
+  AMBULANCIER
+}
+
+enum TransportType {
+  AMBULANCE
+  VSL
+}
+
+enum RequestStatus {
+  PENDING          // En attente de traitement
+  ACCEPTED         // Acceptée par l'ambulancier
+  REFUSED          // Refusée
+  COUNTER_PROPOSAL // Contre-proposition de créneau
+  CANCELLED        // Annulée par le patient
+  COMPLETED        // Transport effectué
+}
+
+model Company {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique // URL publique: /ambulances-dupont
+  address     String?
+  city        String?
+  postalCode  String?
+  phone       String?
+  email       String?
+  siret       String?  @unique
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  users             User[]
+  transportRequests TransportRequest[]
+  invitations       Invitation[]
+
+  @@map("companies")
+}
+
+model Invitation {
+  id        String    @id @default(cuid())
+  code      String    @unique // Code court ex: "ABC123"
+  expiresAt DateTime  // Date d'expiration
+  usedAt    DateTime? // Date d'utilisation (null si pas utilisé)
+  createdAt DateTime  @default(now())
+
+  // Company à rejoindre
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String
+
+  // Utilisateur qui a créé l'invitation
+  createdById String
+
+  // Utilisateur qui a utilisé l'invitation (null si pas encore utilisé)
+  usedById String?
+
+  @@index([code])
+  @@index([companyId])
+  @@map("invitations")
+}
+
+model TransportRequest {
+  id          String        @id @default(cuid())
+  trackingId  String        @unique @default(cuid()) // Pour le suivi public
+  status      RequestStatus @default(PENDING)
+
+  // Informations patient
+  patientFirstName String
+  patientLastName  String
+  patientPhone     String
+  patientEmail     String?
+
+  // Transport demandé
+  transportType      TransportType
+  requestedDate      DateTime
+  requestedTime      String // Format HH:mm
+  hasTransportVoucher Boolean @default(false) // Bon de transport
+
+  // Adresses
+  pickupAddress    String
+  pickupCity       String
+  pickupPostalCode String
+  pickupDetails    String? // Étage, code, etc.
+
+  destinationAddress    String
+  destinationCity       String
+  destinationPostalCode String
+  destinationDetails    String?
+
+  // Motif et notes
+  reason String? // Motif du transport
+  notes  String? // Notes supplémentaires
+
+  // Contre-proposition (si applicable)
+  proposedDate DateTime?
+  proposedTime String?
+
+  // Réponse de l'ambulancier
+  responseNote String?
+  respondedAt  DateTime?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  company   Company @relation(fields: [companyId], references: [id])
+  companyId String
+
+  @@index([companyId])
+  @@index([status])
+  @@index([trackingId])
+  @@map("transport_requests")
+}
