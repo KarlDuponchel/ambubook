@@ -24,12 +24,13 @@ export const auth = betterAuth({
       role: {
         type: "string",
         required: false,
-        defaultValue: "AMBULANCIER",
+        defaultValue: "CUSTOMER", // Customers par défaut
         input: false, // Non modifiable par l'utilisateur lors de l'inscription
       },
       phone: {
         type: "string",
         required: false,
+        input: true, // Permet de passer le téléphone lors de l'inscription
       },
       companyId: {
         type: "string",
@@ -39,7 +40,7 @@ export const auth = betterAuth({
       isActive: {
         type: "boolean",
         required: false,
-        defaultValue: false, // Compte désactivé par défaut
+        defaultValue: true, // Actif par défaut (customers)
         input: false,
       },
     },

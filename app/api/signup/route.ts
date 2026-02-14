@@ -136,12 +136,13 @@ async function handleInviteSignup(params: {
       throw new Error("Échec de la création du compte");
     }
 
-    // Mettre à jour l'utilisateur avec companyId, phone et isActive=true
+    // Mettre à jour l'utilisateur avec companyId, phone, role et isActive=true
     const user = await tx.user.update({
       where: { id: signUpResponse.user.id },
       data: {
         companyId: invitation.companyId,
         phone: phone || null,
+        role: "AMBULANCIER", // Rôle ambulancier explicite
         isActive: true, // Compte actif directement car invité
       },
     });
@@ -234,7 +235,8 @@ async function handleNewCompanySignup(params: {
       data: {
         companyId: company.id,
         phone: phone || null,
-        // isActive reste false par défaut
+        role: "AMBULANCIER",
+        isActive: false, // Désactivé - en attente validation admin
       },
     });
 

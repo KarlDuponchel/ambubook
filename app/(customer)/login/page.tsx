@@ -1,15 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { signIn, signOut } from "@/lib/auth-client";
+import { signIn } from "@/lib/auth-client";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const registered = searchParams.get("registered");
-  const joined = searchParams.get("joined");
+  const redirect = searchParams.get("redirect");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -32,25 +33,13 @@ export default function LoginPage() {
         return;
       }
 
-      // Vérifier si le compte est actif
-      const statusResponse = await fetch("/api/auth/check-status");
-      const statusData = await statusResponse.json();
-
-      if (!statusData.isActive) {
-        // Déconnecter l'utilisateur si le compte n'est pas actif
-        await signOut();
-        setError("Votre compte est en attente de validation par notre équipe. Vous recevrez un email dès qu'il sera activé.");
-        setLoading(false);
-        return;
-      }
-
-      // Redirection selon le rôle
-      if (statusData.role === "ADMIN") {
-        router.push("/admin");
+      // Redirection vers la page demandée ou l'accueil
+      if (redirect) {
+        router.push(redirect);
       } else {
-        router.push("/dashboard");
+        router.push("/");
       }
-    } catch (err) {
+    } catch {
       setError("Une erreur est survenue. Veuillez réessayer.");
       setLoading(false);
     }
@@ -59,24 +48,16 @@ export default function LoginPage() {
   return (
     <div className="bg-white rounded-lg shadow-md p-8">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">AmbuBook</h1>
-        <p className="text-gray-600 mt-2">Connectez-vous à votre espace</p>
+        <h1 className="text-2xl font-bold text-gray-900">Connexion</h1>
+        <p className="text-gray-600 mt-2">Accédez à votre espace patient</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {registered && (
-          <div className="bg-amber-50 text-amber-700 p-3 rounded-md text-sm">
+          <div className="bg-green-50 text-green-700 p-3 rounded-md text-sm">
             <strong>Compte créé avec succès !</strong>
             <br />
-            Votre demande est en cours de vérification. Vous recevrez un email dès que votre compte sera activé.
-          </div>
-        )}
-
-        {joined && (
-          <div className="bg-green-50 text-green-700 p-3 rounded-md text-sm">
-            <strong>Bienvenue dans l'équipe !</strong>
-            <br />
-            Votre compte est actif, vous pouvez vous connecter.
+            Vous pouvez maintenant vous connecter.
           </div>
         )}
 
@@ -99,7 +80,7 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-black focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-black focus:ring-primary-500 focus:border-transparent"
             placeholder="votre@email.fr"
           />
         </div>
@@ -117,7 +98,7 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-black focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-black focus:ring-primary-500 focus:border-transparent"
             placeholder="Votre mot de passe"
           />
         </div>
@@ -125,7 +106,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full bg-primary-600 text-white py-2 px-4 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? "Connexion..." : "Se connecter"}
         </button>
@@ -134,21 +115,32 @@ export default function LoginPage() {
       <div className="mt-6 text-center text-sm text-gray-600">
         <p>
           Pas encore de compte ?{" "}
-          <Link href="/signup" className="text-blue-600 hover:underline">
+          <Link
+            href={redirect ? `/signup?redirect=${encodeURIComponent(redirect)}` : "/signup"}
+            className="text-primary-600 hover:underline"
+          >
             Créer un compte
           </Link>
         </p>
       </div>
-
-      <div className="mt-4 text-center text-sm text-gray-500">
-        <p>Comptes de test :</p>
-        <p className="mt-1">
-          <code className="bg-gray-100 px-1 rounded">admin@ambubook.fr</code> / admin123
-        </p>
-        <p>
-          <code className="bg-gray-100 px-1 rounded">ambulancier@ambulances-dupont.fr</code> / ambulancier123
-        </p>
-      </div>
     </div>
+  );
+}
+
+export default function CustomerLoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="bg-white rounded-lg shadow-md p-8 animate-pulse">
+        <div className="h-8 bg-gray-200 rounded w-1/2 mx-auto mb-4"></div>
+        <div className="h-4 bg-gray-200 rounded w-2/3 mx-auto mb-8"></div>
+        <div className="space-y-4">
+          <div className="h-10 bg-gray-200 rounded"></div>
+          <div className="h-10 bg-gray-200 rounded"></div>
+          <div className="h-10 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
