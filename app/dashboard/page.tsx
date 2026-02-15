@@ -1,61 +1,79 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useSession, signOut } from "@/lib/auth-client";
+import { FileText, Calendar, TrendingUp, Clock } from "lucide-react";
+import { PageHeader, Card, CardHeader, CardContent, EmptyState } from "@/components/ui";
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const { data: session, isPending } = useSession();
-
-  const handleSignOut = async () => {
-    await signOut();
-    router.push("/login");
-  };
-
-  if (isPending) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Chargement...</p>
-      </div>
-    );
-  }
-
-  if (!session) {
-    router.push("/login");
-    return null;
-  }
+  // Données fictives pour la démo
+  const stats = [
+    {
+      label: "Demandes en attente",
+      value: 5,
+      icon: Clock,
+      color: "text-warning-600",
+      bgColor: "bg-warning-50",
+    },
+    {
+      label: "Demandes du jour",
+      value: 8,
+      icon: FileText,
+      color: "text-primary-600",
+      bgColor: "bg-primary-50",
+    },
+    {
+      label: "Cette semaine",
+      value: 24,
+      icon: Calendar,
+      color: "text-secondary-600",
+      bgColor: "bg-secondary-50",
+    },
+    {
+      label: "Ce mois",
+      value: 87,
+      icon: TrendingUp,
+      color: "text-accent-600",
+      bgColor: "bg-accent-50",
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold text-gray-900">AmbuBook</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">
-              {session.user.name} ({session.user.email})
-            </span>
-            <button
-              onClick={handleSignOut}
-              className="text-sm text-red-600 hover:text-red-800"
-            >
-              Déconnexion
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="space-y-6">
+      <PageHeader
+        title="Tableau de bord"
+        subtitle="Bienvenue sur votre espace ambulancier"
+      />
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-4">Bienvenue sur votre dashboard</h2>
+      {/* Statistiques */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={stat.label}>
+              <CardContent>
+                <div className="flex items-center gap-4">
+                  <div className={`p-3 rounded-lg ${stat.bgColor}`}>
+                    <Icon className={`h-6 w-6 ${stat.color}`} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-neutral-900">
+                      {stat.value}
+                    </p>
+                    <p className="text-sm text-neutral-500">{stat.label}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
 
-          <div className="bg-gray-50 rounded-md p-4">
-            <h3 className="font-medium text-gray-700 mb-2">Informations de session :</h3>
-            <pre className="text-sm text-gray-600 overflow-auto">
-              {JSON.stringify(session, null, 2)}
-            </pre>
-          </div>
-        </div>
-      </main>
+      {/* Demandes récentes */}
+      <Card>
+        <CardHeader title="Demandes récentes" />
+        <CardContent>
+          <EmptyState description="Aucune demande récente à afficher" />
+        </CardContent>
+      </Card>
     </div>
   );
 }

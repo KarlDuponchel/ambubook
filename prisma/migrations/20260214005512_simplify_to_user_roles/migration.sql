@@ -11,8 +11,13 @@
 -- CreateEnum
 CREATE TYPE "AddressType" AS ENUM ('HOME', 'WORK', 'MEDICAL', 'OTHER');
 
--- AlterEnum
-ALTER TYPE "UserRole" ADD VALUE 'CUSTOMER';
+-- AlterEnum: Recréer l'enum avec CUSTOMER pour éviter l'erreur PostgreSQL
+-- "unsafe use of new value"
+ALTER TYPE "UserRole" RENAME TO "UserRole_old";
+CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'AMBULANCIER', 'CUSTOMER');
+ALTER TABLE "users" ALTER COLUMN "role" DROP DEFAULT;
+ALTER TABLE "users" ALTER COLUMN "role" TYPE "UserRole" USING ("role"::text::"UserRole");
+DROP TYPE "UserRole_old";
 
 -- DropForeignKey
 ALTER TABLE "customer_accounts" DROP CONSTRAINT "customer_accounts_customerId_fkey";

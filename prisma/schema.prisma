@@ -32,12 +32,17 @@ model User {
   accounts Account[]
 
   // Relations métier (ambulanciers)
-  company   Company? @relation(fields: [companyId], references: [id])
-  companyId String?
+  company        Company?  @relation("CompanyEmployees", fields: [companyId], references: [id])
+  companyId      String?
+  ownedCompanies Company[] @relation("CompanyOwner") // Entreprises dont l'user est gérant
 
   // Relations métier (customers)
   addresses         UserAddress[]
   transportRequests TransportRequest[] @relation("CustomerRequests")
+
+  // Historique et pièces jointes
+  historyActions RequestHistory[]    @relation("UserHistoryActions")
+  attachments    RequestAttachment[] @relation("UserAttachments")
 
   @@map("users")
 }
@@ -123,6 +128,25 @@ enum RequestStatus {
   COMPLETED        // Transport effectué
 }
 
+enum HistoryEventType {
+  CREATED           // Demande créée
+  STATUS_CHANGED    // Changement de statut
+  COUNTER_PROPOSAL  // Contre-proposition envoyée
+  CUSTOMER_RESPONSE // Réponse du client à une contre-proposition
+  NOTE_ADDED        // Note ajoutée
+  ATTACHMENT_ADDED  // Pièce jointe ajoutée
+}
+
+enum AttachmentType {
+  TRANSPORT_VOUCHER // Bon de transport
+  INVOICE           // Facture
+  PRESCRIPTION      // Ordonnance/prescription
+  ID_DOCUMENT       // Pièce d'identité
+  MUTUELLE          // Carte mutuelle
+  SOCIAL_SECURITY   // Carte vitale / attestation sécu
+  OTHER             // Autre
+}
+
 enum AddressType {
   HOME    // Domicile
   WORK    // Travail
@@ -146,8 +170,12 @@ model Company {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Gérant de l'entreprise
+  owner   User?   @relation("CompanyOwner", fields: [ownerId], references: [id])
+  ownerId String?
+
   // Relations
-  users             User[]
+  users             User[] @relation("CompanyEmployees")
   transportRequests TransportRequest[]
   invitations       Invitation[]
 
@@ -269,10 +297,80 @@ model TransportRequest {
   user   User?   @relation("CustomerRequests", fields: [userId], references: [id])
   userId String?
 
+  // Historique et pièces jointes
+  history     RequestHistory[]
+  attachments RequestAttachment[]
+
   @@index([companyId])
   @@index([userId])
   @@index([status])
   @@index([trackingId])
   @@index([requestedDate])
   @@map("transport_requests")
+}
+
+// ============================================
+// HISTORIQUE DES DEMANDES
+// ============================================
+
+model RequestHistory {
+  id String @id @default(cuid())
+
+  // Type d'événement
+  eventType HistoryEventType
+
+  // Ancien/nouveau statut (pour les changements de statut)
+  previousStatus RequestStatus?
+  newStatus      RequestStatus?
+
+  // Contre-proposition (si applicable)
+  proposedDate DateTime?
+  proposedTime String?
+
+  // Métadonnées
+  comment   String? // Note explicative
+  createdAt DateTime @default(now())
+
+  // Relation avec la demande
+  request   TransportRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  requestId String
+
+  // Qui a fait l'action (null si système ou utilisateur non connecté)
+  user   User?   @relation("UserHistoryActions", fields: [userId], references: [id])
+  userId String?
+
+  @@index([requestId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("request_history")
+}
+
+// ============================================
+// PIÈCES JOINTES
+// ============================================
+
+model RequestAttachment {
+  id String @id @default(cuid())
+
+  // Informations du fichier
+  fileName   String         // Nom original du fichier
+  fileType   AttachmentType // Type de document
+  fileUrl    String         // URL du fichier (stockage externe)
+  fileKey    String?        // Clé du fichier dans le stockage (pour suppression)
+  fileSizeKb Int            // Taille en KB
+  mimeType   String         // application/pdf, image/jpeg, etc.
+
+  createdAt DateTime @default(now())
+
+  // Relation avec la demande
+  request   TransportRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  requestId String
+
+  // Qui a uploadé le fichier
+  uploadedBy   User   @relation("UserAttachments", fields: [uploadedById], references: [id])
+  uploadedById String
+
+  @@index([requestId])
+  @@index([uploadedById])
+  @@map("request_attachments")
 }

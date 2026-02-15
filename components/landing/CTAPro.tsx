@@ -66,13 +66,13 @@ export function CTAPro() {
 
                 <div className="mt-10 flex flex-col sm:flex-row gap-4">
                   <Link
-                    href="/signup"
+                    href="/pro-signup"
                     className="inline-flex items-center justify-center px-8 py-4 bg-white text-primary-700 font-semibold text-lg rounded-xl hover:bg-primary-50 transition-colors shadow-lg"
                   >
                     Créer mon espace gratuit
                   </Link>
                   <Link
-                    href="/login"
+                    href="/pro-login"
                     className="inline-flex items-center justify-center px-8 py-4 bg-transparent text-white font-semibold text-lg rounded-xl border-2 border-white/30 hover:bg-white/10 transition-colors"
                   >
                     Se connecter

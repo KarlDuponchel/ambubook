@@ -1,31 +1,5 @@
 import { CompanyCard } from "./CompanyCard";
-
-interface Company {
-  id: string;
-  name: string;
-  slug: string;
-  address: string | null;
-  city: string | null;
-  postalCode: string | null;
-  phone: string | null;
-  distance?: number;
-}
-
-interface GeoSearchResponse {
-  type: "geo";
-  query: string;
-  coordinates: { latitude: number; longitude: number };
-  radius: number;
-  results: Company[];
-}
-
-interface TextSearchResponse {
-  type: "text";
-  query: string;
-  results: Company[];
-}
-
-type SearchResponse = GeoSearchResponse | TextSearchResponse;
+import type { SearchResponse } from "@/lib/types";
 
 interface SearchResultsProps {
   query: string;

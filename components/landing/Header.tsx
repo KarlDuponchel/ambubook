@@ -133,7 +133,7 @@ export function Header() {
               </Link>
             )}
             <Link
-              href="/dashboard/login"
+              href="/pro-login"
               className="inline-flex items-center px-5 py-2.5 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
             >
               Espace Pro

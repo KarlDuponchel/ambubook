@@ -4,20 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { formatDistance } from "@/lib/geo";
 import { BookingModal, Company } from "@/components/booking";
-
-interface CompanyData {
-  id: string;
-  name: string;
-  slug: string;
-  address: string | null;
-  city: string | null;
-  postalCode: string | null;
-  phone: string | null;
-  distance?: number;
-}
+import type { CompanySearchResult } from "@/lib/types";
 
 interface CompanyCardProps {
-  company: CompanyData;
+  company: CompanySearchResult;
 }
 
 export function CompanyCard({ company }: CompanyCardProps) {

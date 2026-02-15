@@ -1,87 +1,139 @@
-# Cahier des Charges MVP — AmbuBook
+# AmbuBook — Plateforme de Réservation de Transports Sanitaires
 
-Vision : Permettre aux ambulanciers de recevoir des demandes de réservation en ligne, réduire les appels téléphoniques.
-Périmètre MVP
+## Vision
 
-## On fait :
+AmbuBook est une plateforme de prise de rendez-vous en ligne pour services ambulanciers. Elle permet aux patients de demander un transport médical (ambulance ou VSL) et aux ambulanciers de gérer les demandes via un dashboard.
 
-    Formulaire patient pour demander un transport
-    Dashboard ambulancier pour gérer les demandes
-    Notifications SMS/email
+---
 
-## On ne fait PAS (v1) :
+## Fonctionnalités Implémentées
 
-    Marketplace multi-ambulanciers
-    Paiement en ligne
-    Intégration CPAM
-    App mobile native
+### Côté Patient (Public)
+- **Recherche d'ambulanciers** par nom ou localisation géographique
+- **Géolocalisation** avec calcul de distance (API adresse.data.gouv.fr + Haversine)
+- **Inscription/Connexion** avec gestion de session
+- **Réservation de transport** via modal multi-étapes :
+  1. Informations patient (nom, téléphone, email)
+  2. Type de transport (Ambulance/VSL, aller simple/retour, mobilité)
+  3. Adresses (départ/arrivée avec autocomplétion)
+  4. Planification (dates et heures)
+- **Suivi de demande** via tracking ID unique
 
-## Use Cases
-### UC1 — Patient soumet une demande
+### Côté Ambulancier (Auth)
+- Dashboard de gestion des demandes (en cours)
+- Système d'invitation par code pour onboarding
 
-    Accède au formulaire via l'URL de l'ambulancier
-    Remplit : nom, téléphone, date/heure, adresses départ/arrivée, type (ambulance/VSL), motif, bon de transport oui/non
-    Valide → reçoit confirmation + lien de suivi
+### Administration
+- Gestion des utilisateurs et entreprises
+- Gestion des codes d'invitation
 
-### UC2 — Ambulancier consulte les demandes
+---
 
-    Se connecte à son dashboard
-    Voit la liste avec badge "Nouvelles"
-    Clique pour voir le détail
+## Stack Technique
 
-### UC3 — Ambulancier accepte
+| Composant | Technologie |
+|-----------|-------------|
+| Framework | Next.js 16 (App Router, full-stack) |
+| Langage | TypeScript 5 (strict mode) |
+| Base de données | PostgreSQL 16 |
+| ORM | Prisma 7 |
+| Authentification | Better Auth 1.4 |
+| Styling | Tailwind CSS 4 |
+| Validation | Zod |
+| Emails | Resend |
+| Icônes | Lucide React |
 
-    Clique "Accepter" sur une demande
-    Confirme l'heure
-    Patient reçoit SMS de confirmation
+---
 
-### UC4 — Ambulancier propose autre créneau
+## Architecture
 
-    Clique "Proposer un créneau"
-    Saisit nouvelle date/heure
-    Patient reçoit la proposition, peut accepter/refuser
+```
+ambubook/
+├── app/                    # Next.js App Router
+│   ├── api/                # Routes API REST
+│   │   ├── auth/           # Better Auth endpoints
+│   │   ├── search/         # Recherche ambulanciers
+│   │   ├── transport-requests/  # Gestion demandes
+│   │   ├── customer-signup/     # Inscription patients
+│   │   └── address/autocomplete/
+│   ├── (customer)/         # Pages publiques (signup, login)
+│   ├── dashboard/          # Espace client connecté
+│   ├── recherche/          # Page de recherche
+│   └── admin/              # Administration
+│
+├── components/
+│   ├── ui/                 # Composants réutilisables (Button, Input, Modal...)
+│   ├── landing/            # Page d'accueil (Header, Hero, Footer...)
+│   └── booking/            # Flux de réservation (BookingModal, steps/)
+│
+├── lib/                    # Utilitaires
+│   ├── auth.ts             # Config Better Auth
+│   ├── prisma.ts           # Instance Prisma
+│   ├── geo.ts              # Géolocalisation
+│   └── validations/        # Schémas Zod
+│
+├── prisma/
+│   └── schema.prisma       # Modèles de données
+│
+└── tasks/                  # Documentation de travail
+```
 
-### UC5 — Ambulancier refuse
+---
 
-    Clique "Refuser" + motif optionnel
-    Patient est notifié
+## Modèles de Données
 
-### UC6 — Patient suit sa demande
+### Principaux
+- **User** : utilisateurs (ADMIN, AMBULANCIER, CUSTOMER)
+- **Company** : entreprises ambulancières (nom, adresse, coords GPS)
+- **TransportRequest** : demandes de transport avec statut et tracking
+- **UserAddress** : adresses enregistrées des patients
+- **Invitation** : codes d'invitation pour onboarding ambulanciers
 
-    Clique sur le lien reçu par SMS
-    Voit le statut en temps réel
+### Statuts de Demande
+`PENDING` → `ACCEPTED` | `REFUSED` | `COUNTER_PROPOSAL` → `COMPLETED` | `CANCELLED`
 
-## Écrans
+### Types de Transport
+- **AMBULANCE** / **VSL**
+- **ONE_WAY** / **ROUND_TRIP**
+- Mobilité : **WALKING** / **WHEELCHAIR** / **STRETCHER**
 
-### Patient (public)
+---
 
-    Formulaire : /ambulances-dupont
-    Confirmation post-soumission
-    Suivi : /suivi/abc123
+## Variables d'Environnement
 
-### Ambulancier (auth)
+```env
+DATABASE_URL="postgresql://..."
+BETTER_AUTH_SECRET="..."
+BETTER_AUTH_URL="http://localhost:3000"
+RESEND_API_KEY="..."
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
 
-    Login
-    Dashboard (liste + filtres)
-    Détail demande + actions
-    Paramètres
+---
 
-### Stack suggérée
-Composant	Tech
-Frontend/Backend	Next.js (App Router)
-Base de données	PostgreSQL (Prisma ORM)
-Auth	BetterAuth
-SMS	Twilio
-Email	Resend
-Hébergement	Vercel
-Planning (6 semaines)
-Semaine	Objectif
-1-2	Setup, auth, modèle de données, formulaire patient
-3-4	Dashboard, actions accepter/refuser, page suivi
-5	Notifications email + SMS
-6	Tests avec pilote, corrections, mise en prod
-Critères de succès
+## Commandes
 
-    L'ambulancier pilote utilise l'outil chaque jour
-    Il déclare gagner du temps
-    10+ demandes traitées le premier mois
+```bash
+npm run dev          # Serveur de développement
+npm run build        # Build production
+npx prisma studio    # Navigateur BDD
+npx prisma migrate dev  # Migrations
+```
+
+---
+
+## Roadmap
+
+### Fait
+- [x] Setup BDD + Auth
+- [x] Recherche ambulanciers (texte + géo)
+- [x] Inscription/connexion patients
+- [x] Modal de réservation (4 étapes)
+- [x] Persistance des demandes
+
+### À faire
+- [ ] Dashboard ambulancier complet
+- [ ] Notifications SMS/Email
+- [ ] Contre-propositions de créneau
+- [ ] Page de suivi patient
+- [ ] Admin dashboard

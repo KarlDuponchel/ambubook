@@ -1,3 +1,14 @@
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+/**
+ * Fusionne les classes Tailwind de manière intelligente
+ * Utilise clsx pour la composition et tailwind-merge pour résoudre les conflits
+ */
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
 /**
  * Génère un slug URL-friendly à partir d'un nom
  * Ex: "Ambulances Dupont & Fils" → "ambulances-dupont-fils"
