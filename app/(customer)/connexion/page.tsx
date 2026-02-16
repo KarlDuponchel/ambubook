@@ -116,7 +116,7 @@ function LoginForm() {
         <p>
           Pas encore de compte ?{" "}
           <Link
-            href={redirect ? `/signup?redirect=${encodeURIComponent(redirect)}` : "/signup"}
+            href={redirect ? `/inscription?redirect=${encodeURIComponent(redirect)}` : "/inscription"}
             className="text-primary-600 hover:underline"
           >
             Créer un compte

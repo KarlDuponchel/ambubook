@@ -5,3 +5,6 @@ export { Reassurance } from "./Reassurance";
 export { HowItWorks } from "./HowItWorks";
 export { CTAPro } from "./CTAPro";
 export { Footer } from "./Footer";
+export { ServicesSection } from "./ServicesSection";
+export { CitiesSection } from "./CitiesSection";
+export { AccordionSection } from "./Accordion";

@@ -34,6 +34,19 @@ export async function SearchResults({ query }: SearchResultsProps) {
   }
 
   if (data.results.length === 0) {
+    const getMessage = () => {
+      switch (data.type) {
+        case "geo":
+          return `Aucun ambulancier ne couvre la zone de "${data.query}".`;
+        case "region":
+          return `Aucun ambulancier inscrit en ${data.query} pour le moment.`;
+        case "city":
+          return `Aucun ambulancier trouvé à "${data.query}".`;
+        default:
+          return `Aucun ambulancier ne correspond à "${data.query}".`;
+      }
+    };
+
     return (
       <div className="text-center py-12">
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-neutral-100 flex items-center justify-center">
@@ -55,34 +68,55 @@ export async function SearchResults({ query }: SearchResultsProps) {
           Aucun résultat trouvé
         </h3>
         <p className="text-neutral-600 max-w-md mx-auto">
-          {data.type === "geo"
-            ? `Aucun ambulancier trouvé dans un rayon de ${data.radius} km autour de "${data.query}".`
-            : `Aucun ambulancier ne correspond à "${data.query}".`}
+          {getMessage()}
         </p>
         <p className="text-neutral-500 text-sm mt-4">
-          Essayez une autre ville ou un autre nom.
+          Essayez une autre ville, région ou un autre nom.
         </p>
       </div>
     );
   }
 
+  const getResultMessage = () => {
+    const count = data.results.length;
+    const plural = count > 1 ? "s" : "";
+
+    switch (data.type) {
+      case "geo":
+        return (
+          <>
+            <span className="font-medium">{count}</span> ambulancier{plural} couvrant{" "}
+            <span className="font-medium">{data.query}</span>
+          </>
+        );
+      case "region":
+        return (
+          <>
+            <span className="font-medium">{count}</span> ambulancier{plural} en{" "}
+            <span className="font-medium">{data.query}</span>
+          </>
+        );
+      case "city":
+        return (
+          <>
+            <span className="font-medium">{count}</span> ambulancier{plural} à{" "}
+            <span className="font-medium">{data.query}</span>
+          </>
+        );
+      default:
+        return (
+          <>
+            <span className="font-medium">{count}</span> résultat{plural} pour &quot;
+            <span className="font-medium">{data.query}</span>&quot;
+          </>
+        );
+    }
+  };
+
   return (
     <div>
       <p className="text-neutral-600 mb-6">
-        {data.type === "geo" ? (
-          <>
-            <span className="font-medium">{data.results.length}</span> ambulancier
-            {data.results.length > 1 ? "s" : ""} trouvé
-            {data.results.length > 1 ? "s" : ""} près de{" "}
-            <span className="font-medium">{data.query}</span>
-          </>
-        ) : (
-          <>
-            <span className="font-medium">{data.results.length}</span> résultat
-            {data.results.length > 1 ? "s" : ""} pour &quot;
-            <span className="font-medium">{data.query}</span>&quot;
-          </>
-        )}
+        {getResultMessage()}
       </p>
 
       <div className="grid gap-4">

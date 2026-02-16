@@ -16,6 +16,7 @@ const signUpSchema = z.object({
   // Champs pour nouvelle société (optionnels si inviteCode fourni)
   companyName: z.string().optional(),
   companySiret: z.string().optional(),
+  companyLicenseNumber: z.string().optional(), // N° agrément ARS
   // Code d'invitation (optionnel)
   inviteCode: z.string().optional(),
 });
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, email, password, phone, companyName, companySiret, inviteCode } = validation.data;
+    const { name, email, password, phone, companyName, companySiret, companyLicenseNumber, inviteCode } = validation.data;
 
     // 2. Vérifier que l'email n'existe pas déjà
     const existingUser = await prisma.user.findUnique({
@@ -75,6 +76,7 @@ export async function POST(request: NextRequest) {
         phone,
         companyName,
         companySiret,
+        companyLicenseNumber,
       });
     }
   } catch (error) {
@@ -180,8 +182,9 @@ async function handleNewCompanySignup(params: {
   phone?: string;
   companyName: string;
   companySiret?: string;
+  companyLicenseNumber?: string;
 }) {
-  const { name, email, password, phone, companyName, companySiret } = params;
+  const { name, email, password, phone, companyName, companySiret, companyLicenseNumber } = params;
 
   // Générer le slug et vérifier son unicité
   let slug = generateSlug(companyName);
@@ -219,6 +222,7 @@ async function handleNewCompanySignup(params: {
         name: companyName,
         slug,
         siret: companySiret || null,
+        licenseNumber: companyLicenseNumber || null,
       },
     });
 

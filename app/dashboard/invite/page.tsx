@@ -48,7 +48,7 @@ export default function InvitePage() {
   const handleCopyCode = (code: string) => handleCopy(code, `code-${code}`);
 
   const handleCopyLink = (code: string) => {
-    const link = `${window.location.origin}/dashboard/signup?code=${code}`;
+    const link = `${window.location.origin}/dashboard/inscription?code=${code}`;
     handleCopy(link, `link-${code}`);
   };
 

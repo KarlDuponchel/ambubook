@@ -2,9 +2,27 @@
 
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
-import { User, LogOut, UserCircle2 } from "lucide-react";
-import { Container } from "@/components/ui";
+import { LogOut, Truck, ChevronDown, Calendar, User, LayoutDashboard, Building2, Search } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
+
+function UserAvatar({ name, size = "md" }: { name: string; size?: "sm" | "md" }) {
+  const initials = name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  const sizeClasses = size === "sm" ? "w-8 h-8 text-xs" : "w-9 h-9 text-sm";
+
+  return (
+    <div
+      className={`${sizeClasses} rounded-full bg-linear-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold shadow-sm`}
+    >
+      {initials}
+    </div>
+  );
+}
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -12,6 +30,11 @@ export function Header() {
   const menuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { data: session } = useSession();
+
+  // Vérifier le rôle de l'utilisateur
+  const userRole = (session?.user as { role?: string })?.role;
+  const isAmbulancier = userRole === "AMBULANCIER" || userRole === "ADMIN";
+  const isCustomer = userRole === "CUSTOMER" || !userRole;
 
   // Fermer les menus si on clique en dehors
   useEffect(() => {
@@ -52,14 +75,13 @@ export function Header() {
   }, [mobileMenuOpen]);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-neutral-200">
-      <Container>
-        <nav className="flex items-center justify-between h-16 lg:h-20">
+    <header className="fixed top-4 left-4 right-4 z-50 mx-auto max-w-7xl">
+      <nav className="flex items-center justify-between h-14 lg:h-16 px-4 lg:px-6 bg-white/80 backdrop-blur-md border border-neutral-200/60 rounded-2xl shadow-sm shadow-neutral-900/5">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-linear-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 bg-linear-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
               <svg
-                className="w-6 h-6 text-white"
+                className="w-5 h-5 text-white"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -67,7 +89,7 @@ export function Header() {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
+                  strokeWidth={2.5}
                   d="M13 10V3L4 14h7v7l9-11h-7z"
                 />
               </svg>
@@ -78,78 +100,190 @@ export function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-1">
             <Link
-              href="#comment-ca-marche"
-              className="text-neutral-600 hover:text-neutral-900 font-medium transition-colors"
+              href="/recherche"
+              className="px-4 py-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 font-medium rounded-lg transition-all"
+            >
+              Trouver un ambulancier
+            </Link>
+            <Link
+              href="/#comment-ca-marche"
+              className="px-4 py-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 font-medium rounded-lg transition-all"
             >
               Comment ça marche
             </Link>
             <Link
-              href="#professionnels"
-              className="text-neutral-600 hover:text-neutral-900 font-medium transition-colors"
+              href="/#faq"
+              className="px-4 py-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 font-medium rounded-lg transition-all"
             >
-              Professionnels
+              FAQ
             </Link>
           </div>
 
-          {/* Desktop CTA */}
-          <div className="hidden md:flex items-center gap-4">
+          {/* Desktop Actions */}
+          <div className="hidden lg:flex items-center gap-3">
             {session?.user ? (
               <div className="relative" ref={userMenuRef}>
                 <button
                   type="button"
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className={`flex items-center gap-2 p-2 text-neutral-700 hover:bg-primary-50 hover:text-primary-500 rounded-lg transition-all ease-in-out ${userMenuOpen ? "bg-primary-50 text-primary-500" : ""}`}
+                  className={`flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border transition-all ${
+                    userMenuOpen
+                      ? "border-primary-200 bg-primary-50"
+                      : "border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50"
+                  }`}
                 >
-                  <UserCircle2 className="w-6 h-6" />
+                  <UserAvatar name={session.user.name || "U"} size="sm" />
+                  <ChevronDown
+                    className={`w-4 h-4 text-neutral-500 transition-transform ${
+                      userMenuOpen ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
-                {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-neutral-200 py-1 z-50">
-                    <div className="px-4 py-2 border-b border-neutral-100">
-                      <p className="text-sm font-medium text-neutral-900">
-                        {session.user.name}
-                      </p>
-                      <p className="text-xs text-neutral-500">{session.user.email}</p>
-                    </div>
-                    <Link href="/profil" className="w-full flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"><User className="w-4 h-4" /> Mon profil</Link>
+
+                {/* Dropdown menu */}
+                <div
+                  className={`absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden z-50 transform transition-all duration-200 origin-top-right ${
+                    userMenuOpen
+                      ? "opacity-100 scale-100"
+                      : "opacity-0 scale-95 pointer-events-none"
+                  }`}
+                >
+                  {/* User info */}
+                  <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
+                    <p className="font-medium text-neutral-900 truncate">
+                      {session.user.name}
+                    </p>
+                    <p className="text-sm text-neutral-500 truncate">
+                      {session.user.email}
+                    </p>
+                  </div>
+
+                  {/* Menu items - différent selon le rôle */}
+                  <div className="py-1">
+                    {isAmbulancier ? (
+                      <>
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-50 transition-colors"
+                        >
+                          <LayoutDashboard className="w-4 h-4 text-neutral-400" />
+                          <span>Tableau de bord</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/calendrier"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-50 transition-colors"
+                        >
+                          <Calendar className="w-4 h-4 text-neutral-400" />
+                          <span>Calendrier</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/mon-entreprise"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-50 transition-colors"
+                        >
+                          <Building2 className="w-4 h-4 text-neutral-400" />
+                          <span>Mon entreprise</span>
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          href="/mes-transports"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-50 transition-colors"
+                        >
+                          <Calendar className="w-4 h-4 text-neutral-400" />
+                          <span>Mes transports</span>
+                        </Link>
+                        <Link
+                          href="/recherche"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-50 transition-colors"
+                        >
+                          <Search className="w-4 h-4 text-neutral-400" />
+                          <span>Trouver un ambulancier</span>
+                        </Link>
+                      </>
+                    )}
+                    <Link
+                      href={isAmbulancier ? "/dashboard/profil" : "/profil"}
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-50 transition-colors"
+                    >
+                      <User className="w-4 h-4 text-neutral-400" />
+                      <span>Mon profil</span>
+                    </Link>
+                  </div>
+
+                  {/* Logout */}
+                  <div className="border-t border-neutral-100 py-1">
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
+                      className="flex items-center gap-3 w-full px-4 py-2.5 text-neutral-700 hover:bg-red-50 hover:text-red-600 transition-colors"
                     >
                       <LogOut className="w-4 h-4" />
-                      Déconnexion
+                      <span>Déconnexion</span>
                     </button>
                   </div>
-                )}
+                </div>
               </div>
             ) : (
-              <Link
-                href="/login"
-                className="text-neutral-700 hover:text-neutral-900 font-medium transition-colors"
-              >
-                Connexion
-              </Link>
+              <>
+                <Link
+                  href="/connexion"
+                  className="px-4 py-2 text-neutral-700 hover:text-neutral-900 font-medium rounded-lg hover:bg-neutral-50 transition-all"
+                >
+                  Connexion
+                </Link>
+                <Link
+                  href="/inscription"
+                  className="px-4 py-2 text-primary-600 hover:text-primary-700 font-medium rounded-lg hover:bg-primary-50 transition-all"
+                >
+                  Créer un compte
+                </Link>
+              </>
             )}
-            <Link
-              href="/pro-login"
-              className="inline-flex items-center px-5 py-2.5 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
-            >
-              Espace Pro
-            </Link>
+
+            {/* Separator + Pro CTA - seulement si non ambulancier connecté */}
+            {!(session?.user && isAmbulancier) && (
+              <>
+                <div className="w-px h-6 bg-neutral-200" />
+                <Link
+                  href="/dashboard/connexion"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white font-medium rounded-lg hover:bg-neutral-800 transition-all shadow-sm"
+                >
+                  <Truck className="w-4 h-4" />
+                  <span>Espace Ambulancier</span>
+                </Link>
+              </>
+            )}
           </div>
 
-          {/* Mobile menu button */}
-          <button
-            type="button"
-            className="md:hidden p-2 text-neutral-600 hover:text-neutral-900 transition-colors"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-expanded={mobileMenuOpen}
-            aria-label="Menu principal"
-          >
+          {/* Mobile actions */}
+          <div className="flex lg:hidden items-center gap-1">
+            {/* Recherche mobile */}
+            <Link
+              href="/recherche"
+              className="p-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"
+              aria-label="Rechercher"
+            >
+              <Search className="w-5 h-5" />
+            </Link>
+
+            {/* Menu button */}
+            <button
+              type="button"
+              className="p-2 -mr-2 text-neutral-600 hover:text-neutral-900 transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-expanded={mobileMenuOpen}
+              aria-label="Menu principal"
+            >
             <div className="relative w-6 h-6">
-              {/* Hamburger icon with animation */}
               <span
                 className={`absolute left-0 block h-0.5 w-6 bg-current transform transition-all duration-300 ease-out ${
                   mobileMenuOpen ? "top-3 rotate-45" : "top-1 rotate-0"
@@ -166,94 +300,175 @@ export function Header() {
                 }`}
               />
             </div>
-          </button>
+            </button>
+          </div>
         </nav>
-      </Container>
 
       {/* Mobile menu overlay */}
       <div
-        className={`fixed inset-0 bg-neutral-900/20 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-neutral-900/20 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${
           mobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
-        style={{ top: "64px" }}
+        style={{ top: "80px" }}
         onClick={() => setMobileMenuOpen(false)}
       />
 
       {/* Mobile menu panel */}
       <div
         ref={menuRef}
-        className={`absolute left-0 right-0 bg-white border-b border-neutral-200 shadow-lg z-50 md:hidden transform transition-all duration-300 ease-out ${
+        className={`absolute left-0 right-0 top-16 mt-2 bg-white border border-neutral-200/60 rounded-2xl shadow-lg z-50 lg:hidden transform transition-all duration-300 ease-out ${
           mobileMenuOpen
             ? "translate-y-0 opacity-100"
             : "-translate-y-4 opacity-0 pointer-events-none"
         }`}
       >
-        <Container>
-          <div className="py-6 flex flex-col gap-2">
-            <Link
-              href="#comment-ca-marche"
-              className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <svg className="w-5 h-5 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Comment ça marche
-            </Link>
-            <Link
-              href="#professionnels"
-              className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <svg className="w-5 h-5 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-              Professionnels
-            </Link>
+        <div className="p-4">
+            {/* Navigation links */}
+            <div className="space-y-1">
+              <Link
+                href="/recherche"
+                className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Trouver un ambulancier
+              </Link>
+              <Link
+                href="/#comment-ca-marche"
+                className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Comment ça marche
+              </Link>
+              <Link
+                href="/#faq"
+                className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                FAQ
+              </Link>
+            </div>
 
-            <hr className="my-2 border-neutral-100" />
+            <hr className="my-3 border-neutral-100" />
 
+            {/* User section */}
             {session?.user ? (
-              <>
-                <div className="px-4 py-3">
-                  <p className="text-sm font-medium text-neutral-900">
-                    {session.user.name}
-                  </p>
-                  <p className="text-xs text-neutral-500">{session.user.email}</p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-3 px-4 py-3">
+                  <UserAvatar name={session.user.name || "U"} />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-neutral-900 truncate">
+                      {session.user.name}
+                    </p>
+                    <p className="text-sm text-neutral-500 truncate">
+                      {session.user.email}
+                    </p>
+                  </div>
                 </div>
+
+                {/* Liens selon le rôle */}
+                {isAmbulancier ? (
+                  <>
+                    <Link
+                      href="/dashboard"
+                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="w-5 h-5 text-neutral-400" />
+                      Tableau de bord
+                    </Link>
+                    <Link
+                      href="/dashboard/calendrier"
+                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Calendar className="w-5 h-5 text-neutral-400" />
+                      Calendrier
+                    </Link>
+                    <Link
+                      href="/dashboard/mon-entreprise"
+                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Building2 className="w-5 h-5 text-neutral-400" />
+                      Mon entreprise
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/mes-transports"
+                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Calendar className="w-5 h-5 text-neutral-400" />
+                      Mes transports
+                    </Link>
+                    <Link
+                      href="/recherche"
+                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Search className="w-5 h-5 text-neutral-400" />
+                      Trouver un ambulancier
+                    </Link>
+                  </>
+                )}
+
+                <Link
+                  href={isAmbulancier ? "/dashboard/profil" : "/profil"}
+                  className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <User className="w-5 h-5 text-neutral-400" />
+                  Mon profil
+                </Link>
+
                 <button
                   type="button"
                   onClick={() => {
                     handleLogout();
                     setMobileMenuOpen(false);
                   }}
-                  className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50 font-medium rounded-xl transition-colors w-full"
+                  className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 font-medium rounded-xl transition-colors w-full"
                 >
-                  <LogOut className="w-5 h-5 text-neutral-400" />
+                  <LogOut className="w-5 h-5" />
                   Déconnexion
                 </button>
-              </>
+              </div>
             ) : (
-              <>
+              <div className="space-y-2">
                 <Link
-                  href="/login"
-                  className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                  href="/connexion"
+                  className="flex items-center justify-center px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl border border-neutral-200 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <User className="w-5 h-5 text-neutral-400" />
-                  Connexion
+                  Connexion patient
                 </Link>
                 <Link
-                  href="/signup"
-                  className="flex items-center justify-center gap-2 mx-4 mt-2 px-5 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-colors shadow-sm"
+                  href="/inscription"
+                  className="flex items-center justify-center px-4 py-3 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Créer un compte
+                  Créer un compte patient
+                </Link>
+              </div>
+            )}
+
+            {/* Pro CTA - seulement si non ambulancier connecté */}
+            {!(session?.user && isAmbulancier) && (
+              <>
+                <hr className="my-3 border-neutral-100" />
+                <Link
+                  href="/dashboard/connexion"
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-neutral-900 text-white font-medium rounded-xl hover:bg-neutral-800 transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Truck className="w-5 h-5" />
+                  Espace Ambulancier
                 </Link>
               </>
             )}
           </div>
-        </Container>
       </div>
     </header>
   );

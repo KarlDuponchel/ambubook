@@ -69,7 +69,7 @@ export function Sidebar({ user }: SidebarProps) {
       label: "Mon entreprise",
       href: "/dashboard/mon-entreprise",
       icon: Building2,
-      showIf: user.isOwner === true,
+      showIf: true,
     },
     {
       label: "Inviter",
@@ -93,7 +93,7 @@ export function Sidebar({ user }: SidebarProps) {
 
   const handleLogout = async () => {
     await authClient.signOut();
-    window.location.href = "/dashboard/login";
+    window.location.href = "/dashboard/connexion";
   };
 
   const filteredNavItems = navItems.filter((item) => item.showIf);

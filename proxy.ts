@@ -6,7 +6,7 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Pages d'auth ambulanciers : pas de protection
-  if (pathname === "/dashboard/login" || pathname === "/dashboard/signup") {
+  if (pathname === "/dashboard/connexion" || pathname === "/dashboard/inscription") {
     return NextResponse.next();
   }
 
@@ -17,7 +17,7 @@ export async function proxy(request: NextRequest) {
 
   // Non connecté → redirection vers login ambulancier
   if (!session?.user) {
-    return NextResponse.redirect(new URL("/dashboard/login", request.url));
+    return NextResponse.redirect(new URL("/dashboard/connexion", request.url));
   }
 
   const userRole = (session.user as { role?: string }).role;

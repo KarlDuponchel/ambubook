@@ -108,7 +108,8 @@ export async function notifyUserAccountActivated(params: {
       <h2>Bonne nouvelle, ${userName} !</h2>
       <p>Votre compte AmbuBook a été <strong>validé et activé</strong>.</p>
       <p>Vous pouvez maintenant vous connecter et commencer à utiliser la plateforme.</p>
-      <p><a href="${process.env.BETTER_AUTH_URL || "http://localhost:3000"}/login">Se connecter à AmbuBook</a></p>
+      <p><a href="${process.env.BETTER_AUTH_URL || "http://localhost:3000"}/connexion">Se connecter à AmbuBook</Link>
+</p>
       <br>
       <p>À très bientôt,</p>
       <p>L'équipe AmbuBook</p>

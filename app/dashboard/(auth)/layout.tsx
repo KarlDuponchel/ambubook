@@ -23,7 +23,7 @@ export default function DashboardAuthLayout({
       <footer className="py-4 text-center text-sm text-neutral-500">
         <p>
           Vous êtes patient ?{" "}
-          <Link href="/login" className="text-primary-600 hover:underline">
+          <Link href="/connexion" className="text-primary-600 hover:underline">
             Accédez à votre espace patient
           </Link>
         </p>

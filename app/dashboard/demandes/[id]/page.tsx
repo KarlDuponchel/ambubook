@@ -524,22 +524,24 @@ export default function DemandeDetailPage({ params }: { params: Promise<{ id: st
                 </div>
 
                 <div className="space-y-2">
-                  <a
+                  <Link
                     href={`tel:${demande.patientPhone}`}
                     className="flex items-center gap-3 w-full px-4 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors"
                   >
                     <Phone className="h-5 w-5" />
                     <span className="font-medium">{demande.patientPhone}</span>
-                  </a>
+                  </Link>
+
 
                   {demande.patientEmail && (
-                    <a
+                    <Link
                       href={`mailto:${demande.patientEmail}`}
                       className="flex items-center gap-3 w-full px-4 py-3 border border-primary-200 text-primary-600 rounded-xl hover:bg-primary-50 transition-colors"
                     >
                       <Mail className="h-5 w-5" />
                       <span className="text-sm truncate">{demande.patientEmail}</span>
-                    </a>
+                    </Link>
+
                   )}
                 </div>
               </div>

@@ -1,3 +1,5 @@
+export { Accordion } from "./Accordion";
+export type { FAQItem } from "./Accordion";
 export { Autocomplete } from "./Autocomplete";
 export { Button } from "./Button";
 export { Card, CardHeader, CardContent } from "./Card";

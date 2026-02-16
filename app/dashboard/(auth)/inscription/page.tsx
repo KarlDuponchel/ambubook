@@ -19,6 +19,7 @@ function SignUpForm() {
     phone: "",
     companyName: "",
     companySiret: "",
+    companyLicenseNumber: "",
     inviteCode: codeFromUrl || "",
   });
   const [error, setError] = useState("");
@@ -78,11 +79,15 @@ function SignUpForm() {
       phone: formData.phone,
       ...(mode === "invite"
         ? { inviteCode: formData.inviteCode }
-        : { companyName: formData.companyName, companySiret: formData.companySiret }),
+        : {
+            companyName: formData.companyName,
+            companySiret: formData.companySiret,
+            companyLicenseNumber: formData.companyLicenseNumber,
+          }),
     };
 
     try {
-      const response = await fetch("/api/signup", {
+      const response = await fetch("/api/inscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submitData),
@@ -301,6 +306,24 @@ function SignUpForm() {
                   className="w-full px-4 py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 text-neutral-900"
                   placeholder="123 456 789 00012"
                 />
+              </div>
+
+              <div>
+                <label htmlFor="companyLicenseNumber" className="block text-sm font-medium text-neutral-700 mb-1">
+                  N° agrément ARS (recommandé)
+                </label>
+                <input
+                  id="companyLicenseNumber"
+                  name="companyLicenseNumber"
+                  type="text"
+                  value={formData.companyLicenseNumber}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 text-neutral-900"
+                  placeholder="XX-XXXX-XXXX"
+                />
+                <p className="mt-1 text-xs text-neutral-500">
+                  Numéro d&apos;agrément délivré par l&apos;Agence Régionale de Santé
+                </p>
               </div>
             </div>
           )}

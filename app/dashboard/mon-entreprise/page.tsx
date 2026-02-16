@@ -1,198 +1,169 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Building2, MapPin, Phone, Mail, FileText, Save } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Loader2 } from "lucide-react";
+import { CompanyFull, CompanyHour, UserData } from "@/lib/types";
+import { PageHeader } from "@/components/ui";
+import { CompanyHeader } from "@/components/ambulancier/mon-entreprise/CompanyHeader";
+import { CompanyInfoCard } from "@/components/ambulancier/mon-entreprise/CompanyInfoCard";
+import { CompanyDescriptionCard } from "@/components/ambulancier/mon-entreprise/CompanyDescriptionCard";
+import { CompanyServicesCard } from "@/components/ambulancier/mon-entreprise/CompanyServicesCard";
+import { CompanyHoursCard } from "@/components/ambulancier/mon-entreprise/CompanyHoursCard";
+import { CompanyGalleryCard } from "@/components/ambulancier/mon-entreprise/CompanyGalleryCard";
 import { UsersCompany } from "@/components/ambulancier/mon-entreprise/UsersCompany";
-import { UserData } from "@/lib/types";
-import { PageHeader, Card, CardHeader, CardContent } from "@/components/ui";
 
 export default function MonEntreprisePage() {
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "Ambulances Dupont",
-    address: "15 Rue de la Santé",
-    city: "Paris",
-    postalCode: "75013",
-    phone: "01 23 45 67 89",
-    email: "contact@ambulances-dupont.fr",
-    siret: "123 456 789 00012",
-  });
-
+  const [company, setCompany] = useState<CompanyFull | null>(null);
   const [employees, setEmployees] = useState<UserData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const response = await fetch("/api/companies/users");
-        if (response.ok) {
-          const data = await response.json();
-          setEmployees(data);
-        }
-      } catch (error) {
-        console.error("Erreur lors de la récupération des employés:", error);
+  const fetchCompany = useCallback(async () => {
+    try {
+      const response = await fetch("/api/companies/me");
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Erreur lors du chargement");
       }
-    };
-
-    fetchEmployees();
+      const data = await response.json();
+      setCompany(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    }
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Sauvegarder les modifications
-    setIsEditing(false);
+  const fetchEmployees = useCallback(async () => {
+    try {
+      const response = await fetch("/api/companies/users");
+      if (response.ok) {
+        const data = await response.json();
+        setEmployees(data);
+      }
+    } catch (err) {
+      console.error("Erreur lors de la récupération des employés:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([fetchCompany(), fetchEmployees()]);
+      setLoading(false);
+    };
+    loadData();
+  }, [fetchCompany, fetchEmployees]);
+
+  const handleUpdateCompany = async (data: Partial<CompanyFull>) => {
+    if (!company) return;
+
+    const response = await fetch("/api/companies/me", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const result = await response.json();
+      throw new Error(result.error || "Erreur lors de la mise à jour");
+    }
+
+    // Rafraîchir les données
+    await fetchCompany();
   };
+
+  const handleUpdateHours = async (hours: CompanyHour[]) => {
+    const response = await fetch("/api/companies/me/hours", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(hours),
+    });
+
+    if (!response.ok) {
+      const result = await response.json();
+      throw new Error(result.error || "Erreur lors de la mise à jour des horaires");
+    }
+
+    // Rafraîchir les données
+    await fetchCompany();
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+      </div>
+    );
+  }
+
+  if (error || !company) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Mon entreprise"
+          subtitle="Gérez les informations de votre société d'ambulances"
+        />
+        <div className="bg-danger-50 text-danger-600 p-6 rounded-xl text-center">
+          {error || "Entreprise non trouvée"}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Mon entreprise"
-        subtitle="Gérez les informations de votre société d'ambulances"
-        actions={
-          !isEditing && (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-            >
-              Modifier
-            </button>
-          )
+        subtitle={
+          company.isOwner
+            ? "Vous êtes le gérant de cette entreprise"
+            : "Vous êtes membre de cette entreprise (lecture seule)"
         }
       />
 
-      {/* Informations de l'entreprise */}
-      <form onSubmit={handleSubmit}>
-        <Card>
-          <CardHeader icon={Building2} title="Informations générales" />
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  Nom de l&apos;entreprise
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  disabled={!isEditing}
-                  className="w-full px-4 py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-neutral-50 disabled:text-neutral-500"
-                />
-              </div>
+      {/* Header avec Cover + Logo */}
+      <CompanyHeader
+        company={company}
+        isOwner={company.isOwner}
+        onUpdate={fetchCompany}
+      />
 
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  SIRET
-                </label>
-                <div className="flex items-center gap-3">
-                  <FileText className="h-5 w-5 text-neutral-400" />
-                  <input
-                    type="text"
-                    value={formData.siret}
-                    onChange={(e) => setFormData({ ...formData, siret: e.target.value })}
-                    disabled={!isEditing}
-                    className="flex-1 px-4 py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-neutral-50 disabled:text-neutral-500"
-                  />
-                </div>
-              </div>
+      {/* Grid 2 colonnes */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Colonne gauche */}
+        <div className="space-y-6">
+          <CompanyInfoCard
+            company={company}
+            isOwner={company.isOwner}
+            onUpdate={handleUpdateCompany}
+          />
+          <CompanyServicesCard
+            company={company}
+            isOwner={company.isOwner}
+            onUpdate={handleUpdateCompany}
+          />
+          <CompanyHoursCard
+            hours={company.hours}
+            isOwner={company.isOwner}
+            onUpdate={handleUpdateHours}
+          />
+        </div>
 
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  Adresse
-                </label>
-                <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-neutral-400" />
-                  <input
-                    type="text"
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    disabled={!isEditing}
-                    className="flex-1 px-4 py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-neutral-50 disabled:text-neutral-500"
-                  />
-                </div>
-              </div>
+        {/* Colonne droite */}
+        <div className="space-y-6">
+          <CompanyDescriptionCard
+            company={company}
+            isOwner={company.isOwner}
+            onUpdate={handleUpdateCompany}
+          />
+          <CompanyGalleryCard
+            photos={company.photos}
+            isOwner={company.isOwner}
+            onUpdate={fetchCompany}
+          />
+        </div>
+      </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
-                    Ville
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-neutral-50 disabled:text-neutral-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
-                    Code postal
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.postalCode}
-                    onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-neutral-50 disabled:text-neutral-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  Téléphone
-                </label>
-                <div className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 text-neutral-400" />
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    disabled={!isEditing}
-                    className="flex-1 px-4 py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-neutral-50 disabled:text-neutral-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  Email
-                </label>
-                <div className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 text-neutral-400" />
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    disabled={!isEditing}
-                    className="flex-1 px-4 py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-neutral-50 disabled:text-neutral-500"
-                  />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-
-          {isEditing && (
-            <div className="px-6 py-4 border-t border-card-border flex items-center justify-end gap-4">
-              <button
-                type="button"
-                onClick={() => setIsEditing(false)}
-                className="px-4 py-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
-              >
-                Annuler
-              </button>
-              <button
-                type="submit"
-                className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-              >
-                <Save className="h-4 w-4" />
-                Enregistrer
-              </button>
-            </div>
-          )}
-        </Card>
-      </form>
-
-      {/* Équipe */}
+      {/* Équipe (pleine largeur) */}
       <UsersCompany employees={employees} />
     </div>
   );

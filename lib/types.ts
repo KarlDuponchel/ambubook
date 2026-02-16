@@ -100,6 +100,56 @@ export interface Company {
   longitude: number | null;
 }
 
+// Photo d'entreprise
+export interface CompanyPhoto {
+  id: string;
+  fileKey: string;
+  url: string;
+  caption: string | null;
+  order: number;
+  createdAt: string;
+}
+
+// Horaires d'ouverture
+export interface CompanyHour {
+  id: string;
+  dayOfWeek: number; // 0=Dimanche ... 6=Samedi
+  openTime: string | null;
+  closeTime: string | null;
+  isClosed: boolean;
+}
+
+// Company enrichie avec toutes les infos
+export interface CompanyFull extends Company {
+  slug: string;
+  siret: string | null;
+  description: string | null;
+  logoUrl: string | null;
+  coverImageUrl: string | null;
+  hasAmbulance: boolean;
+  hasVSL: boolean;
+  acceptsOnlineBooking: boolean;
+  foundedYear: number | null;
+  fleetSize: number | null;
+  coverageRadius: number | null;
+  licenseNumber: string | null;
+  photos: CompanyPhoto[];
+  hours: CompanyHour[];
+  isOwner: boolean;
+  ownerId: string | null;
+}
+
+// Labels des jours de la semaine (français)
+export const DAY_LABELS: Record<number, string> = {
+  0: "Dimanche",
+  1: "Lundi",
+  2: "Mardi",
+  3: "Mercredi",
+  4: "Jeudi",
+  5: "Vendredi",
+  6: "Samedi",
+};
+
 // Version pour l'affichage dans les résultats de recherche
 export interface CompanySearchResult {
   id: string;
@@ -113,6 +163,8 @@ export interface CompanySearchResult {
   latitude?: number | null;
   longitude?: number | null;
   distance?: number; // en km (optionnel, seulement pour recherche géo)
+  logoUrl?: string | null;
+  acceptsOnlineBooking?: boolean;
 }
 
 // Version minimale pour les adresses
@@ -210,7 +262,30 @@ export interface TextSearchResponse {
   results: CompanySearchResult[];
 }
 
-export type SearchResponse = GeoSearchResponse | TextSearchResponse;
+export interface RegionSearchResponse {
+  type: "region";
+  query: string;
+  results: CompanySearchResult[];
+}
+
+export interface CitySearchResponse {
+  type: "city";
+  query: string;
+  results: CompanySearchResult[];
+}
+
+export interface NoResultsSearchResponse {
+  type: "none";
+  query: string;
+  results: [];
+}
+
+export type SearchResponse =
+  | GeoSearchResponse
+  | TextSearchResponse
+  | RegionSearchResponse
+  | CitySearchResponse
+  | NoResultsSearchResponse;
 
 // ============================================
 // Booking Form

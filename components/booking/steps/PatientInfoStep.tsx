@@ -25,7 +25,7 @@ export function PatientInfoStep({
         <div className="bg-primary-50 border border-primary-200 rounded-lg p-3 text-sm">
           <p className="text-primary-800">
             <Link
-              href={`/login?redirect=${encodeURIComponent(loginRedirect)}`}
+              href={`/connexion?redirect=${encodeURIComponent(loginRedirect)}`}
               className="font-medium underline underline-offset-2 hover:text-primary-900"
             >
               Connectez-vous

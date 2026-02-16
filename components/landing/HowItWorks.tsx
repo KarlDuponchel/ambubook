@@ -53,7 +53,7 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section id="comment-ca-marche" className="py-20 lg:py-28 bg-neutral-50">
+    <section id="comment-ca-marche" className="bg-neutral-50">
       <Container>
         <div className="text-center max-w-2xl mx-auto mb-16">
           <span className="inline-block px-4 py-1.5 bg-primary-100 text-primary-700 text-sm font-medium rounded-full mb-4">

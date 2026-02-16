@@ -20,7 +20,7 @@ export default function AdminLayout({
 
   const handleSignOut = async () => {
     await signOut();
-    router.push("/dashboard/login");
+    router.push("/dashboard/connexion");
   };
 
   if (isPending) {
@@ -32,7 +32,7 @@ export default function AdminLayout({
   }
 
   if (!session) {
-    router.push("/login");
+    router.push("/connexion");
     return null;
   }
 

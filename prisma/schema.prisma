@@ -170,6 +170,18 @@ model Company {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Enrichissement page entreprise
+  description          String?   @db.Text
+  logoUrl              String?
+  coverImageUrl        String?
+  hasAmbulance         Boolean   @default(true)
+  hasVSL               Boolean   @default(true)
+  acceptsOnlineBooking Boolean   @default(true)
+  foundedYear          Int?
+  fleetSize            Int?
+  coverageRadius       Int?      // Rayon de couverture en km
+  licenseNumber        String?   // N° agrément ARS
+
   // Gérant de l'entreprise
   owner   User?   @relation("CompanyOwner", fields: [ownerId], references: [id])
   ownerId String?
@@ -178,6 +190,8 @@ model Company {
   users             User[] @relation("CompanyEmployees")
   transportRequests TransportRequest[]
   invitations       Invitation[]
+  photos            CompanyPhoto[]
+  hours             CompanyHours[]
 
   @@map("companies")
 }
@@ -373,4 +387,41 @@ model RequestAttachment {
   @@index([requestId])
   @@index([uploadedById])
   @@map("request_attachments")
+}
+
+// ============================================
+// PHOTOS D'ENTREPRISE
+// ============================================
+
+model CompanyPhoto {
+  id        String   @id @default(cuid())
+  fileKey   String   // Clé S3 du fichier
+  url       String   // URL signée ou publique
+  caption   String?  // Légende optionnelle
+  order     Int      @default(0) // Ordre d'affichage
+  createdAt DateTime @default(now())
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String
+
+  @@index([companyId])
+  @@map("company_photos")
+}
+
+// ============================================
+// HORAIRES D'OUVERTURE
+// ============================================
+
+model CompanyHours {
+  id        String  @id @default(cuid())
+  dayOfWeek Int     // 0=Dimanche, 1=Lundi ... 6=Samedi
+  openTime  String? // Format HH:mm
+  closeTime String? // Format HH:mm
+  isClosed  Boolean @default(false)
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String
+
+  @@unique([companyId, dayOfWeek])
+  @@map("company_hours")
 }

@@ -129,7 +129,7 @@ function LoginForm() {
         <div className="mt-6 text-center text-sm text-neutral-600">
           <p>
             Pas encore de compte ?{" "}
-            <Link href="/dashboard/signup" className="text-primary-600 hover:underline font-medium">
+            <Link href="/dashboard/inscription" className="text-primary-600 hover:underline font-medium">
               Créer un compte
             </Link>
           </p>

@@ -1,9 +1,63 @@
 import { Suspense } from "react";
+import { Metadata } from "next";
 import Link from "next/link";
+import Script from "next/script";
 import { Container } from "@/components/ui";
 import { Header, Footer } from "@/components/landing";
 import { SearchBar } from "./SearchBar";
 import { SearchResults } from "./SearchResults";
+
+export const metadata: Metadata = {
+  title: "Trouver un ambulancier près de chez vous | Ambubook",
+  description:
+    "Recherchez et réservez un transport sanitaire (ambulance, VSL) près de chez vous. Trouvez un ambulancier par ville, région ou nom d'entreprise. Service gratuit et disponible 24h/24.",
+  keywords: [
+    "recherche ambulance",
+    "trouver ambulancier",
+    "ambulance près de moi",
+    "VSL proche",
+    "transport sanitaire",
+    "réservation ambulance",
+  ],
+  openGraph: {
+    title: "Trouver un ambulancier près de chez vous | Ambubook",
+    description:
+      "Recherchez et réservez un transport sanitaire près de chez vous. Service gratuit.",
+    url: "https://ambubook.fr/recherche",
+    siteName: "Ambubook",
+    type: "website",
+    locale: "fr_FR",
+  },
+  twitter: {
+    card: "summary",
+    title: "Trouver un ambulancier | Ambubook",
+    description: "Recherchez un ambulancier par ville ou région.",
+  },
+  alternates: {
+    canonical: "https://ambubook.fr/recherche",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
+// Schema.org SearchAction
+const searchActionSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: "Recherche d'ambulanciers",
+  description: "Trouvez un ambulancier près de chez vous",
+  url: "https://ambubook.fr/recherche",
+  mainEntity: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: "https://ambubook.fr/recherche?q={search_term_string}",
+    },
+    "query-input": "required name=search_term_string",
+  },
+};
 
 interface SearchPageProps {
   searchParams: Promise<{ q?: string }>;
@@ -14,10 +68,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const query = params.q?.trim() || "";
 
   return (
-    <div className="min-h-screen flex flex-col bg-neutral-50">
-      <Header />
+    <>
+      <Script
+        id="search-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(searchActionSchema) }}
+      />
 
-      <main className="flex-1 py-8">
+      <div className="min-h-screen flex flex-col bg-neutral-50">
+        <Header />
+
+        <main className="flex-1 pt-24 lg:pt-28 pb-8">
         <Container>
           {/* Fil d'ariane */}
           <nav className="mb-6">
@@ -69,8 +130,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         </Container>
       </main>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </>
   );
 }
 

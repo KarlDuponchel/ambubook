@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Sidebar } from "@/components/ambulancier/Sidebar";
 import { LoadingSpinner } from "@/components/ui";
+
+// Pages qui ne nécessitent pas d'authentification
+const PUBLIC_PATHS = ["/dashboard/connexion", "/dashboard/inscription"];
 
 interface SidebarUserData {
   id: string;
@@ -23,16 +26,25 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<SidebarUserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const isPublicPath = PUBLIC_PATHS.includes(pathname);
+
   useEffect(() => {
+    // Ne pas vérifier l'authentification sur les pages publiques
+    if (isPublicPath) {
+      setIsLoading(false);
+      return;
+    }
+
     const fetchUser = async () => {
       try {
         const response = await fetch("/api/ambulancier/me");
 
         if (response.status === 401) {
-          router.push("/dashboard/login");
+          router.push("/dashboard/connexion");
           return;
         }
 
@@ -49,14 +61,19 @@ export default function DashboardLayout({
         setUser(data);
       } catch (error) {
         console.error("Erreur de récupération utilisateur:", error);
-        router.push("/dashboard/login");
+        router.push("/dashboard/connexion");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchUser();
-  }, [router]);
+  }, [router, isPublicPath]);
+
+  // Pages publiques : afficher directement le contenu (le layout (auth) s'en charge)
+  if (isPublicPath) {
+    return <>{children}</>;
+  }
 
   if (isLoading) {
     return (
