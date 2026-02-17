@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, useTransition } from "react";
 import UserCard from "./UserCard";
 import UserModal from "./UserModal";
 import DeleteModal from "./DeleteModal";
@@ -9,6 +9,7 @@ interface Company {
   id: string;
   name: string;
   slug: string;
+  ownerId: string | null;
 }
 
 export interface User {
@@ -21,6 +22,25 @@ export interface User {
   createdAt: string;
   company: Company | null;
   companyId: string | null;
+  isCompanyOwner?: boolean;
+}
+
+async function loadUsers(search: string): Promise<User[]> {
+  const params = new URLSearchParams();
+  if (search) params.set("search", search);
+  const response = await fetch(`/api/admin/users?${params}`);
+  if (response.ok) {
+    return response.json();
+  }
+  return [];
+}
+
+async function loadCompanies(): Promise<Company[]> {
+  const response = await fetch("/api/admin/companies");
+  if (response.ok) {
+    return response.json();
+  }
+  return [];
 }
 
 export default function UsersPage() {
@@ -30,32 +50,44 @@ export default function UsersPage() {
   const [search, setSearch] = useState("");
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [deletingUser, setDeletingUser] = useState<User | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const isMounted = useRef(false);
 
-  const fetchUsers = useCallback(async () => {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (search) params.set("search", search);
-
-    const response = await fetch(`/api/admin/users?${params}`);
-    if (response.ok) {
-      const data = await response.json();
-      setUsers(data);
+  // Chargement initial
+  useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      Promise.all([loadUsers(""), loadCompanies()]).then(([usersData, companiesData]) => {
+        setUsers(usersData);
+        setCompanies(companiesData);
+        setLoading(false);
+      });
     }
-    setLoading(false);
+  }, []);
+
+  // Mise à jour lors du changement de recherche (avec debounce)
+  useEffect(() => {
+    if (!isMounted.current) return;
+
+    const debounce = setTimeout(() => {
+      startTransition(() => {
+        loadUsers(search).then(setUsers);
+      });
+    }, 300);
+
+    return () => clearTimeout(debounce);
   }, [search]);
 
-  const fetchCompanies = async () => {
-    const response = await fetch("/api/admin/companies");
-    if (response.ok) {
-      const data = await response.json();
-      setCompanies(data);
-    }
-  };
 
-  useEffect(() => {
-    fetchUsers();
-    fetchCompanies();
-  }, []);
+
+  const refreshData = useCallback(async () => {
+    const [usersData, companiesData] = await Promise.all([
+      loadUsers(search),
+      loadCompanies(),
+    ]);
+    setUsers(usersData);
+    setCompanies(companiesData);
+  }, [search]);
 
   const handleToggleActive = async (user: User) => {
     const response = await fetch(`/api/admin/users/${user.id}`, {
@@ -65,7 +97,7 @@ export default function UsersPage() {
     });
 
     if (response.ok) {
-      fetchUsers();
+      refreshData();
     }
   };
 
@@ -80,7 +112,7 @@ export default function UsersPage() {
 
     if (response.ok) {
       setEditingUser(null);
-      fetchUsers();
+      refreshData();
     }
   };
 
@@ -93,7 +125,21 @@ export default function UsersPage() {
 
     if (response.ok) {
       setDeletingUser(null);
-      fetchUsers();
+      refreshData();
+    }
+  };
+
+  const handleSetOwner = async (user: User) => {
+    if (!user.companyId) return;
+
+    const response = await fetch(`/api/admin/companies/${user.companyId}/owner`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ownerId: user.id }),
+    });
+
+    if (response.ok) {
+      refreshData();
     }
   };
 
@@ -144,6 +190,7 @@ export default function UsersPage() {
               onEdit={() => setEditingUser(user)}
               onDelete={() => setDeletingUser(user)}
               onToggleActive={() => handleToggleActive(user)}
+              onSetOwner={() => handleSetOwner(user)}
             />
           ))}
         </div>

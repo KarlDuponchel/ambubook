@@ -5,6 +5,7 @@ interface UserCardProps {
   onEdit: () => void;
   onDelete: () => void;
   onToggleActive: () => void;
+  onSetOwner: () => void;
 }
 
 export default function UserCard({
@@ -12,8 +13,11 @@ export default function UserCard({
   onEdit,
   onDelete,
   onToggleActive,
+  onSetOwner,
 }: UserCardProps) {
   const isAdmin = user.role === "ADMIN";
+  const isOwner = user.isCompanyOwner;
+  const canBeOwner = user.companyId && !isOwner && user.role === "AMBULANCIER";
 
   return (
     <div
@@ -26,7 +30,7 @@ export default function UserCard({
       }`}
     >
       {/* Header */}
-      <div className="flex justify-between items-start mb-3">
+      <div className="flex flex-wrap justify-between items-start mb-3">
         <div className="flex items-center gap-2">
           <div
             className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${
@@ -56,6 +60,11 @@ export default function UserCard({
         <div className="flex items-center gap-2 text-gray-600">
           <span>🏢</span>
           <span>{user.company?.name || "Aucune société"}</span>
+          {isOwner && (
+            <span className="px-1.5 py-0.5 text-xs font-medium bg-indigo-100 text-indigo-700 rounded">
+              Gérant
+            </span>
+          )}
         </div>
         {user.phone && (
           <div className="flex items-center gap-2 text-gray-600">
@@ -70,7 +79,7 @@ export default function UserCard({
       </div>
 
       {/* Actions */}
-      <div className="flex gap-2 pt-3 border-t border-gray-100">
+      <div className="flex flex-wrap gap-2 pt-3 border-t border-gray-100">
         <button
           onClick={onToggleActive}
           className={`flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
@@ -93,6 +102,14 @@ export default function UserCard({
         >
           🗑️
         </button>
+        {canBeOwner && (
+          <button
+            onClick={onSetOwner}
+            className="w-full px-3 py-1.5 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-md hover:bg-indigo-100 transition-colors"
+          >
+            👑 Définir comme gérant
+          </button>
+        )}
       </div>
     </div>
   );

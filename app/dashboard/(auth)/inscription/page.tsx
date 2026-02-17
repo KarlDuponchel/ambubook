@@ -87,7 +87,7 @@ function SignUpForm() {
     };
 
     try {
-      const response = await fetch("/api/inscription", {
+      const response = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submitData),

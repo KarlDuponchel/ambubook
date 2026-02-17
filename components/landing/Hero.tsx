@@ -113,7 +113,7 @@ export function Hero() {
 
   return (
     <>
-      <section className="relative bg-linear-to-b from-primary-50 to-white">
+      <section className="relative bg-linear-to-b from-primary-50 to-white pt-24">
         {/* Background decoration */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary-100 rounded-full opacity-50 blur-3xl" />

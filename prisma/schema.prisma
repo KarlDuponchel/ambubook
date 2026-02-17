@@ -44,6 +44,9 @@ model User {
   historyActions RequestHistory[]    @relation("UserHistoryActions")
   attachments    RequestAttachment[] @relation("UserAttachments")
 
+  // Logs de notifications
+  notificationLogs NotificationLog[]
+
   @@map("users")
 }
 
@@ -424,4 +427,44 @@ model CompanyHours {
 
   @@unique([companyId, dayOfWeek])
   @@map("company_hours")
+}
+
+// ============================================
+// LOGS DE NOTIFICATIONS
+// ============================================
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  BOUNCED
+}
+
+model NotificationLog {
+  id        String              @id @default(cuid())
+  channel   NotificationChannel // EMAIL ou SMS
+  type      String              // Type de notification (TRANSPORT_ACCEPTED, etc.)
+  recipient String              // Email ou téléphone
+  subject   String?             // Sujet (pour emails)
+  content   String?             @db.Text // Contenu du message
+  status    NotificationStatus  @default(PENDING)
+  errorMsg  String?             // Message d'erreur si échec
+  metadata  Json?               // Données additionnelles (transportId, etc.)
+  sentAt    DateTime            @default(now())
+
+  // Relation optionnelle avec l'utilisateur
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId String?
+
+  @@index([userId])
+  @@index([channel])
+  @@index([type])
+  @@index([status])
+  @@index([sentAt])
+  @@map("notification_logs")
 }

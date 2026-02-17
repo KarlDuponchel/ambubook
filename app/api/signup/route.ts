@@ -149,6 +149,15 @@ async function handleInviteSignup(params: {
       },
     });
 
+    // Si la société n'a pas encore d'owner, ce premier utilisateur devient owner
+    let updatedCompany = invitation.company;
+    if (!invitation.company.ownerId) {
+      updatedCompany = await tx.company.update({
+        where: { id: invitation.companyId },
+        data: { ownerId: user.id },
+      });
+    }
+
     // Marquer l'invitation comme utilisée
     await tx.invitation.update({
       where: { id: invitation.id },
@@ -158,7 +167,7 @@ async function handleInviteSignup(params: {
       },
     });
 
-    return { user, company: invitation.company };
+    return { user, company: updatedCompany };
   });
 
   return NextResponse.json(
@@ -217,15 +226,7 @@ async function handleNewCompanySignup(params: {
 
   // Créer la Company et le User
   const result = await prisma.$transaction(async (tx) => {
-    const company = await tx.company.create({
-      data: {
-        name: companyName,
-        slug,
-        siret: companySiret || null,
-        licenseNumber: companyLicenseNumber || null,
-      },
-    });
-
+    // Créer l'utilisateur d'abord via Better Auth
     const signUpResponse = await auth.api.signUpEmail({
       body: { name, email, password },
     });
@@ -234,6 +235,18 @@ async function handleNewCompanySignup(params: {
       throw new Error("Échec de la création du compte");
     }
 
+    // Créer la société avec cet utilisateur comme owner (premier utilisateur = gérant)
+    const company = await tx.company.create({
+      data: {
+        name: companyName,
+        slug,
+        siret: companySiret || null,
+        licenseNumber: companyLicenseNumber || null,
+        ownerId: signUpResponse.user.id, // Premier utilisateur = owner
+      },
+    });
+
+    // Mettre à jour l'utilisateur avec companyId, phone, role
     const user = await tx.user.update({
       where: { id: signUpResponse.user.id },
       data: {

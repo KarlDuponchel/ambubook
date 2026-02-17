@@ -30,11 +30,18 @@ export async function GET(request: NextRequest) {
           id: true,
           name: true,
           slug: true,
+          ownerId: true,
         },
       },
     },
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(users);
+  // Ajouter le champ isCompanyOwner pour chaque utilisateur
+  const usersWithOwnerFlag = users.map((user) => ({
+    ...user,
+    isCompanyOwner: user.company?.ownerId === user.id,
+  }));
+
+  return NextResponse.json(usersWithOwnerFlag);
 }

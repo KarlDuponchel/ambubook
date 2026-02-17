@@ -155,102 +155,75 @@
 Système de notifications multi-canal (email + SMS) pour informer les utilisateurs des événements importants.
 
 **Stack :**
-- **Email** : Resend (déjà configuré dans le projet)
-- **SMS** : À choisir (Twilio, OVH SMS, Vonage, ou autre)
+- **Email** : Resend ✅
+- **SMS** : Twilio ✅
 
 ---
 
-## Phase 1 : Configuration et Infrastructure
+## Phase 1 : Configuration et Infrastructure ✅
 
-### 1.1 Configuration Email (Resend)
-- [ ] Vérifier la configuration Resend existante (`lib/resend.ts` ou similaire)
-- [ ] Créer `lib/email.ts` - Service d'envoi d'emails
-- [ ] Configurer le domaine d'envoi (noreply@ambubook.fr)
-- [ ] Variables d'environnement : `RESEND_API_KEY`, `EMAIL_FROM`
+### 1.1 Configuration Email (Resend) ✅
+- [x] `lib/email.ts` - Service d'envoi d'emails (déjà existant)
+- [x] Variables d'environnement : `RESEND_API_KEY`, `FROM_EMAIL`, `ADMIN_EMAIL`
 
-### 1.2 Configuration SMS
-- [ ] Choisir le provider SMS (Twilio recommandé pour la fiabilité)
-- [ ] Créer `lib/sms.ts` - Service d'envoi de SMS
-- [ ] Variables d'environnement : `SMS_PROVIDER`, `SMS_API_KEY`, `SMS_FROM`
-- [ ] Gestion des erreurs et retry
+### 1.2 Configuration SMS ✅
+- [x] Choisir le provider SMS (Twilio)
+- [x] Créer `lib/sms.ts` - Service d'envoi de SMS
+- [x] Variables d'environnement : `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER`
+- [x] Gestion des erreurs et retry (exponential backoff, 3 tentatives)
 
-### 1.3 Service de notifications unifié
-- [ ] Créer `lib/notifications.ts` - Orchestrateur
-  ```typescript
-  interface NotificationPayload {
-    type: NotificationType;
-    recipient: { email?: string; phone?: string; userId?: string };
-    data: Record<string, unknown>;
-    channels: ('email' | 'sms')[];
-  }
-
-  async function sendNotification(payload: NotificationPayload): Promise<void>
-  ```
-- [ ] Créer `lib/notifications/types.ts` - Types des notifications
+### 1.3 Service de notifications unifié ✅
+- [x] Créer `lib/notifications/index.ts` - Orchestrateur avec logging
+- [x] Créer `lib/notifications/types.ts` - Types des notifications
+- [x] Créer `lib/notifications/templates.ts` - Templates email/SMS
+- [x] Créer table `NotificationLog` dans Prisma (avec migration)
+- [x] Créer `app/api/admin/notifications/route.ts` - API admin pour voir les logs
 
 ---
 
-## Phase 2 : Templates Email
+## Phase 2 : Templates Email/SMS ✅
 
-### 2.1 Layout de base
-- [ ] Créer `lib/emails/templates/layout.tsx` - Template React Email
-  - Logo AmbuBook
-  - Footer avec liens (mentions légales, désinscription)
-  - Styles cohérents avec la charte graphique
+> Templates intégrés dans `lib/notifications/templates.ts`
 
-### 2.2 Templates par événement
-- [ ] `transport-request-created.tsx` - Confirmation création demande (client)
-- [ ] `transport-request-new.tsx` - Nouvelle demande (ambulancier)
-- [ ] `transport-request-accepted.tsx` - Demande acceptée (client)
-- [ ] `transport-request-refused.tsx` - Demande refusée (client)
-- [ ] `transport-request-counter-proposal.tsx` - Contre-proposition (client)
-- [ ] `transport-request-updated.tsx` - Mise à jour par client (ambulancier)
-- [ ] `transport-reminder.tsx` - Rappel J-1 ou H-2 (client + ambulancier)
-- [ ] `welcome-ambulancier.tsx` - Bienvenue nouvel ambulancier
-- [ ] `welcome-customer.tsx` - Bienvenue nouveau client
+### 2.1 Templates implémentés
+- [x] `TRANSPORT_REQUEST_CREATED` - Confirmation création demande (client)
+- [x] `TRANSPORT_NEW_REQUEST` - Nouvelle demande (ambulancier)
+- [x] `TRANSPORT_ACCEPTED` - Demande acceptée (client)
+- [x] `TRANSPORT_REFUSED` - Demande refusée (client)
+- [x] `TRANSPORT_COUNTER_PROPOSAL` - Contre-proposition (client)
+- [x] `TRANSPORT_CUSTOMER_RESPONSE` - Réponse client (ambulancier)
+- [x] `TRANSPORT_REMINDER` - Rappel J-1 (client)
+- [x] `WELCOME_AMBULANCIER` - Bienvenue nouvel ambulancier
+- [x] `WELCOME_CUSTOMER` - Bienvenue nouveau client
+- [x] `ACCOUNT_ACTIVATED` - Compte activé
+- [x] `VERIFICATION_CODE` - Code de vérification
 
----
-
-## Phase 3 : Templates SMS
-
-### 3.1 Messages courts
-- [ ] Créer `lib/sms/templates.ts`
-  ```typescript
-  const SMS_TEMPLATES = {
-    TRANSPORT_ACCEPTED: "AmbuBook: Votre transport du {date} à {time} est confirmé. Suivi: {trackingUrl}",
-    TRANSPORT_REMINDER: "AmbuBook: Rappel - Transport demain {date} à {time}. {companyPhone}",
-    COUNTER_PROPOSAL: "AmbuBook: Nouvelle proposition pour votre transport. Voir: {trackingUrl}",
-  };
-  ```
+### 2.2 Améliorations futures (optionnel)
+- [ ] Créer templates React Email pour un meilleur design
+- [ ] Ajouter logo AmbuBook dans les emails
+- [ ] Footer avec liens (mentions légales, désinscription)
 
 ---
 
-## Phase 4 : Triggers de notifications
+## Phase 3 : Triggers de notifications
 
-### 4.1 Événements Transport
-- [ ] `POST /api/customer/transports` → Notifier ambulancier (email + SMS)
-- [ ] `PATCH /api/ambulancier/demandes/[id]` (accepter) → Notifier client
-- [ ] `PATCH /api/ambulancier/demandes/[id]` (refuser) → Notifier client
-- [ ] `PATCH /api/ambulancier/demandes/[id]` (contre-proposition) → Notifier client
-- [ ] `PATCH /api/customer/transports/[trackingId]` (réponse client) → Notifier ambulancier
+> Helpers disponibles dans `lib/notifications/index.ts`
 
-### 4.2 Cron Jobs / Rappels automatiques
-- [ ] Créer `app/api/cron/reminders/route.ts`
+### 3.1 Événements Transport (à intégrer)
+- [ ] `POST /api/customer/transports` → `notifyTransportRequestCreated()` + `notifyNewTransportRequest()`
+- [ ] `PATCH /api/ambulancier/demandes/[id]` (accepter) → `notifyTransportAccepted()`
+- [ ] `PATCH /api/ambulancier/demandes/[id]` (refuser) → `notifyTransportRefused()`
+- [ ] `PATCH /api/ambulancier/demandes/[id]` (contre-proposition) → `notifyTransportCounterProposal()`
+- [ ] `PATCH /api/customer/transports/[trackingId]` (réponse client) → `sendNotification()` type TRANSPORT_CUSTOMER_RESPONSE
+
+### 3.2 Cron Jobs / Rappels automatiques
+- [ ] Créer `app/api/cron/reminders/route.ts` → `notifyTransportReminder()`
   - Rappel J-1 (veille du transport)
   - Rappel H-2 (2h avant le transport)
 - [ ] Configurer Vercel Cron ou autre scheduler
-  ```json
-  // vercel.json
-  {
-    "crons": [
-      { "path": "/api/cron/reminders", "schedule": "0 8 * * *" },
-      { "path": "/api/cron/reminders", "schedule": "0 * * * *" }
-    ]
-  }
-  ```
 
-### 4.3 Événements Admin
-- [ ] Inscription nouvel ambulancier → Notifier admin
+### 3.3 Événements Admin
+- [x] Inscription nouvel ambulancier → `notifyAdminNewSignup()` (dans lib/email.ts, déjà utilisé)
 
 ---
 
@@ -290,24 +263,11 @@ Système de notifications multi-canal (email + SMS) pour informer les utilisateu
 
 ## Phase 6 : Logs et monitoring
 
-### 6.1 Historique des notifications
-- [ ] Créer table `NotificationLog` :
-  ```prisma
-  model NotificationLog {
-    id          String   @id @default(cuid())
-    userId      String?
-    channel     String   // 'email' | 'sms'
-    type        String   // type de notification
-    recipient   String   // email ou téléphone
-    status      String   // 'sent' | 'failed' | 'bounced'
-    metadata    Json?    // données supplémentaires
-    sentAt      DateTime @default(now())
+### 6.1 Historique des notifications ✅
+- [x] Créer table `NotificationLog` (avec enums NotificationChannel, NotificationStatus)
+- [x] Créer API `GET /api/admin/notifications` avec filtres et statistiques
 
-    user User? @relation(fields: [userId], references: [id])
-  }
-  ```
-
-### 6.2 Dashboard admin (optionnel)
+### 6.2 Dashboard admin
 - [ ] Page admin pour voir les notifications envoyées
 - [ ] Statistiques (taux d'envoi, erreurs)
 
@@ -344,27 +304,44 @@ await resend.emails.send({
 });
 ```
 
-### Twilio SMS - Exemple
+### Service unifié - Exemple d'utilisation ✅
 ```typescript
-import twilio from 'twilio';
+import {
+  notifyTransportAccepted,
+  notifyTransportRefused,
+  notifyTransportCounterProposal,
+  sendNotification
+} from "@/lib/notifications";
 
-const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
+// Helpers prêts à l'emploi
+await notifyTransportAccepted({
+  patientName: "Jean Dupont",
+  patientEmail: "jean@email.fr",
+  patientPhone: "0612345678",
+  companyName: "Ambulances Dupont",
+  date: "15/03/2026",
+  time: "09:30",
+});
+// → Envoie email + SMS avec logging automatique
 
-await client.messages.create({
-  body: `AmbuBook: Votre transport du ${date} est confirmé.`,
-  from: process.env.TWILIO_PHONE_NUMBER,
-  to: customer.phone,
+// Ou envoi générique
+await sendNotification({
+  type: "TRANSPORT_REMINDER",
+  recipient: { email: "jean@email.fr", phone: "0612345678" },
+  channels: ["email", "sms"],
+  data: { patientName: "Jean", date: "15/03", time: "09:30", ... },
 });
 ```
 
-### Variables d'environnement à ajouter
+### Variables d'environnement ✅
 ```env
 # Email (Resend)
 RESEND_API_KEY=re_xxx
-EMAIL_FROM=AmbuBook <noreply@ambubook.fr>
+FROM_EMAIL=AmbuBook <noreply@ambubook.fr>
+ADMIN_EMAIL=admin@ambubook.fr
 
 # SMS (Twilio)
-TWILIO_SID=xxx
+TWILIO_ACCOUNT_SID=ACxxx
 TWILIO_AUTH_TOKEN=xxx
 TWILIO_PHONE_NUMBER=+33xxxxxxxxx
 
