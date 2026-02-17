@@ -1,21 +1,97 @@
 "use client";
 
-import { useState } from "react";
-import { Bell, Shield, Globe, Moon, Mail, MessageSquare } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Bell, Shield, Globe, Moon, Mail, MessageSquare, Calendar, Megaphone, Loader2 } from "lucide-react";
 import { PageHeader, Card, CardHeader, CardContent } from "@/components/ui";
+import { useToast } from "@/components/ui/Toast";
+
+interface NotificationPreferences {
+  emailEnabled: boolean;
+  smsEnabled: boolean;
+  transportUpdates: boolean;
+  transportReminders: boolean;
+  marketing: boolean;
+}
 
 export default function ParametresPage() {
-  const [notifications, setNotifications] = useState({
-    email: true,
-    push: true,
-    sms: false,
+  const toast = useToast();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const [notifications, setNotifications] = useState<NotificationPreferences>({
+    emailEnabled: true,
+    smsEnabled: true,
+    transportUpdates: true,
+    transportReminders: true,
+    marketing: false,
   });
 
   const [preferences, setPreferences] = useState({
-    autoAccept: false,
     darkMode: false,
     language: "fr",
   });
+
+  // Charger les préférences au montage
+  useEffect(() => {
+    const fetchPreferences = async () => {
+      try {
+        const res = await fetch("/api/user/notifications");
+        if (res.ok) {
+          const data = await res.json();
+          setNotifications({
+            emailEnabled: data.emailEnabled,
+            smsEnabled: data.smsEnabled,
+            transportUpdates: data.transportUpdates,
+            transportReminders: data.transportReminders,
+            marketing: data.marketing,
+          });
+        }
+      } catch (error) {
+        console.error("Erreur chargement préférences:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPreferences();
+  }, []);
+
+  // Sauvegarder une préférence
+  const updateNotification = async (key: keyof NotificationPreferences, value: boolean) => {
+    const previousValue = notifications[key];
+
+    // Optimistic update
+    setNotifications((prev) => ({ ...prev, [key]: value }));
+    setSaving(true);
+
+    try {
+      const res = await fetch("/api/user/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [key]: value }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Erreur lors de la sauvegarde");
+      }
+
+      toast.success("Préférences mises à jour");
+    } catch {
+      // Rollback
+      setNotifications((prev) => ({ ...prev, [key]: previousValue }));
+      toast.error("Erreur lors de la sauvegarde");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-100">
+        <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -24,9 +100,9 @@ export default function ParametresPage() {
         subtitle="Configurez vos préférences et notifications"
       />
 
-      {/* Notifications */}
+      {/* Canaux de notification */}
       <Card>
-        <CardHeader icon={Bell} title="Notifications" />
+        <CardHeader icon={Bell} title="Canaux de notification" />
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -35,43 +111,19 @@ export default function ParametresPage() {
                 <div>
                   <p className="font-medium text-neutral-900">Notifications par email</p>
                   <p className="text-sm text-neutral-500">
-                    Recevez les nouvelles demandes par email
+                    Recevez les notifications par email
                   </p>
                 </div>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={notifications.email}
-                  onChange={(e) =>
-                    setNotifications({ ...notifications, email: e.target.checked })
-                  }
+                  checked={notifications.emailEnabled}
+                  onChange={(e) => updateNotification("emailEnabled", e.target.checked)}
+                  disabled={saving}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600" />
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Bell className="h-5 w-5 text-neutral-400" />
-                <div>
-                  <p className="font-medium text-neutral-900">Notifications push</p>
-                  <p className="text-sm text-neutral-500">
-                    Recevez des alertes en temps réel
-                  </p>
-                </div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={notifications.push}
-                  onChange={(e) =>
-                    setNotifications({ ...notifications, push: e.target.checked })
-                  }
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600" />
+                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600 peer-disabled:opacity-50" />
               </label>
             </div>
 
@@ -81,20 +133,93 @@ export default function ParametresPage() {
                 <div>
                   <p className="font-medium text-neutral-900">Notifications SMS</p>
                   <p className="text-sm text-neutral-500">
-                    Recevez des SMS pour les urgences
+                    Recevez les notifications par SMS
                   </p>
                 </div>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={notifications.sms}
-                  onChange={(e) =>
-                    setNotifications({ ...notifications, sms: e.target.checked })
-                  }
+                  checked={notifications.smsEnabled}
+                  onChange={(e) => updateNotification("smsEnabled", e.target.checked)}
+                  disabled={saving}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600" />
+                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600 peer-disabled:opacity-50" />
+              </label>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Types de notifications */}
+      <Card>
+        <CardHeader icon={Bell} title="Types de notifications" />
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Bell className="h-5 w-5 text-neutral-400" />
+                <div>
+                  <p className="font-medium text-neutral-900">Mises à jour des transports</p>
+                  <p className="text-sm text-neutral-500">
+                    Nouvelles demandes, réponses des clients, etc.
+                  </p>
+                </div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={notifications.transportUpdates}
+                  onChange={(e) => updateNotification("transportUpdates", e.target.checked)}
+                  disabled={saving}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600 peer-disabled:opacity-50" />
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Calendar className="h-5 w-5 text-neutral-400" />
+                <div>
+                  <p className="font-medium text-neutral-900">Rappels de transport</p>
+                  <p className="text-sm text-neutral-500">
+                    Rappels la veille des transports
+                  </p>
+                </div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={notifications.transportReminders}
+                  onChange={(e) => updateNotification("transportReminders", e.target.checked)}
+                  disabled={saving}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600 peer-disabled:opacity-50" />
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Megaphone className="h-5 w-5 text-neutral-400" />
+                <div>
+                  <p className="font-medium text-neutral-900">Communications marketing</p>
+                  <p className="text-sm text-neutral-500">
+                    Actualités, conseils et offres AmbuBook
+                  </p>
+                </div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={notifications.marketing}
+                  onChange={(e) => updateNotification("marketing", e.target.checked)}
+                  disabled={saving}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600 peer-disabled:opacity-50" />
               </label>
             </div>
           </div>
@@ -145,7 +270,7 @@ export default function ParametresPage() {
                   disabled
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-neutral-200 rounded-full peer peer-checked:bg-primary-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5" />
+                <div className="w-11 h-6 bg-neutral-200 rounded-full peer peer-checked:bg-primary-600 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5" />
               </label>
             </div>
           </div>

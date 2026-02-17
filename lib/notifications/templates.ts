@@ -43,6 +43,10 @@ export function getNotificationTemplates(
       return accountActivatedTemplates(data);
     case "VERIFICATION_CODE":
       return verificationCodeTemplates(data);
+    case "TRANSPORT_ATTACHMENT_ADDED":
+      return transportAttachmentAddedTemplates(data);
+    case "ADMIN_NEW_SIGNUP":
+      return adminNewSignupTemplates(data);
     default:
       return defaultTemplates(data);
   }
@@ -338,6 +342,67 @@ function verificationCodeTemplates(data: Record<string, unknown>): NotificationT
     `,
     emailText: `Votre code de vérification AmbuBook : ${code}\n\nCe code expire dans 10 minutes.\n\nL'équipe AmbuBook`,
     smsMessage: `AmbuBook: Votre code de vérification est ${code}. Il expire dans 10 minutes.`,
+  };
+}
+
+// ============================================
+// TRANSPORT - PIÈCES JOINTES
+// ============================================
+
+function transportAttachmentAddedTemplates(data: Record<string, unknown>): NotificationTemplates {
+  const { recipientName, uploaderName, fileName, trackingId } = data as {
+    recipientName: string;
+    uploaderName: string;
+    fileName: string;
+    trackingId: string;
+  };
+
+  const trackingUrl = `${BASE_URL}/mes-transports/${trackingId}`;
+
+  return {
+    emailSubject: `Nouvelle pièce jointe ajoutée - AmbuBook`,
+    emailHtml: `
+      <h2>Bonjour ${recipientName},</h2>
+      <p><strong>${uploaderName}</strong> a ajouté une nouvelle pièce jointe à votre demande de transport.</p>
+      <p><strong>Fichier :</strong> ${fileName}</p>
+      <p><a href="${trackingUrl}" style="display:inline-block;padding:12px 24px;background:#2563eb;color:white;text-decoration:none;border-radius:6px;">Voir la demande</a></p>
+      <br>
+      <p>L'équipe AmbuBook</p>
+    `,
+    emailText: `Bonjour ${recipientName},\n\n${uploaderName} a ajouté une nouvelle pièce jointe à votre demande de transport.\n\nFichier: ${fileName}\n\nVoir: ${trackingUrl}\n\nL'équipe AmbuBook`,
+    smsMessage: `AmbuBook: ${uploaderName} a ajouté un fichier (${fileName}) à votre demande de transport.`,
+  };
+}
+
+// ============================================
+// ADMIN
+// ============================================
+
+function adminNewSignupTemplates(data: Record<string, unknown>): NotificationTemplates {
+  const { userName, userEmail, companyName } = data as {
+    userName: string;
+    userEmail: string;
+    companyName: string;
+  };
+
+  const adminUrl = `${BASE_URL}/admin/utilisateurs`;
+
+  return {
+    emailSubject: `🚑 Nouveau compte ambulancier en attente - ${companyName}`,
+    emailHtml: `
+      <h2>Nouvelle inscription sur AmbuBook</h2>
+      <p>Un nouveau compte ambulancier a été créé et attend votre validation :</p>
+      <ul>
+        <li><strong>Nom :</strong> ${userName}</li>
+        <li><strong>Email :</strong> ${userEmail}</li>
+        <li><strong>Société :</strong> ${companyName}</li>
+      </ul>
+      <p><a href="${adminUrl}" style="display:inline-block;padding:12px 24px;background:#2563eb;color:white;text-decoration:none;border-radius:6px;">Valider le compte</a></p>
+      <br>
+      <p>AmbuBook</p>
+    `,
+    emailText: `Nouvelle inscription AmbuBook\n\nNom: ${userName}\nEmail: ${userEmail}\nSociété: ${companyName}\n\nValidez le compte: ${adminUrl}`,
+    smsMessage: `AmbuBook Admin: Nouveau compte en attente - ${userName} (${companyName})`,
   };
 }
 

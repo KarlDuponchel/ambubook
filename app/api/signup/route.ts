@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { generateSlug } from "@/lib/utils";
 import { notifyAdminNewSignup, notifyUserSignupPending } from "@/lib/email";
+import { notifyWelcomeAmbulancier } from "@/lib/notifications";
 
 /**
  * Schéma de validation pour l'inscription
@@ -168,6 +169,17 @@ async function handleInviteSignup(params: {
     });
 
     return { user, company: updatedCompany };
+  });
+
+  // Envoyer la notification de bienvenue (compte actif via invitation)
+  notifyWelcomeAmbulancier({
+    userName: name,
+    userEmail: email,
+    userPhone: phone || undefined,
+    companyName: result.company.name,
+    userId: result.user.id,
+  }).catch((err) => {
+    console.error("Erreur notification bienvenue ambulancier:", err);
   });
 
   return NextResponse.json(

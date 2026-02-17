@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, isAuthError } from "@/lib/auth-guard";
-import { notifyUserAccountActivated } from "@/lib/email";
+import { notifyAccountActivated } from "@/lib/notifications";
 
 const updateUserSchema = z.object({
   name: z.string().min(2).optional(),
@@ -73,7 +73,7 @@ export async function PATCH(
   // Récupérer l'utilisateur avant modification pour comparer isActive
   const existingUser = await prisma.user.findUnique({
     where: { id },
-    select: { isActive: true, name: true, email: true },
+    select: { isActive: true, name: true, email: true, phone: true },
   });
 
   if (!existingUser) {
@@ -94,13 +94,15 @@ export async function PATCH(
     },
   });
 
-  // Si le compte vient d'être activé, envoyer un email
+  // Si le compte vient d'être activé, envoyer un email et SMS
   if (!existingUser.isActive && validation.data.isActive === true) {
-    notifyUserAccountActivated({
+    notifyAccountActivated({
       userName: existingUser.name,
       userEmail: existingUser.email,
+      userPhone: existingUser.phone || undefined,
+      userId: id,
     }).catch((err) => {
-      console.error("Erreur envoi email activation:", err);
+      console.error("Erreur notification activation compte:", err);
     });
   }
 

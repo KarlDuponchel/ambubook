@@ -733,7 +733,7 @@ export default function TransportDetailPage({
                   <div className="space-y-3">
                     <div>
                       <Link
-                        href={`/ambulanciers/${transport.company.slug}`}
+                        href={`/${transport.company.slug}`}
                         className="text-lg font-semibold text-primary-600 hover:text-primary-700 hover:underline"
                       >
                         {transport.company.name}

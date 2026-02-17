@@ -16,6 +16,9 @@ function SignUpForm() {
     phone: "",
     password: "",
     confirmPassword: "",
+    emailNotifications: true,
+    smsNotifications: true,
+    newsletter: false,
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,6 +54,9 @@ function SignUpForm() {
           email: formData.email,
           password: formData.password,
           phone: formData.phone,
+          emailEnabled: formData.emailNotifications,
+          smsEnabled: formData.smsNotifications,
+          marketing: formData.newsletter,
         }),
       });
 
@@ -64,15 +70,14 @@ function SignUpForm() {
 
       // Redirection vers login avec message de succès
       const loginUrl = redirect
-        ? `/login?registered=true&redirect=${encodeURIComponent(redirect)}`
-        : "/login?registered=true";
+        ? `/connexion?registered=true&redirect=${encodeURIComponent(redirect)}`
+        : "/connexion?registered=true";
       router.push(loginUrl);
     } catch {
       setError("Une erreur est survenue. Veuillez réessayer.");
       setLoading(false);
     }
   };
-
   return (
     <div className="bg-white rounded-lg shadow-md p-8">
       <div className="text-center mb-6">
@@ -206,6 +211,68 @@ function SignUpForm() {
             placeholder="Répétez le mot de passe"
           />
         </div>
+        {/* Section Notifications */}
+        <div className="border-t border-gray-200 pt-5">
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-gray-900">Préférences de notification</h3>
+            <p className="text-xs text-gray-500 mt-1">
+              Restez informé de l&apos;avancement de vos transports : confirmations, rappels la veille, et mises à jour importantes.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-700">Notifications par email</p>
+                <p className="text-xs text-gray-500">Confirmations et rappels par email</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={formData.emailNotifications}
+                  disabled={loading}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, emailNotifications: e.target.checked }))}
+                />
+                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600 peer-disabled:opacity-50" />
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-700">Notifications par SMS</p>
+                <p className="text-xs text-gray-500">Rappels et alertes urgentes par SMS</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.smsNotifications}
+                  disabled={loading}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, smsNotifications: e.target.checked }))}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600 peer-disabled:opacity-50" />
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-700">Newsletter AmbuBook</p>
+                <p className="text-xs text-gray-500">Actualités et conseils santé (facultatif)</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.newsletter}
+                  disabled={loading}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, newsletter: e.target.checked }))}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600 peer-disabled:opacity-50" />
+              </label>
+            </div>
+          </div>
+        </div>
 
         <button
           type="submit"
@@ -220,7 +287,7 @@ function SignUpForm() {
         <p>
           Déjà un compte ?{" "}
           <Link
-            href={redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : "/login"}
+            href={redirect ? `/connexion?redirect=${encodeURIComponent(redirect)}` : "/connexion"}
             className="text-primary-600 hover:underline"
           >
             Se connecter

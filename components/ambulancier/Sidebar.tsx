@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
+import { NotificationBell } from "@/components/notifications";
 
 interface SidebarProps {
   user: {
@@ -140,25 +141,29 @@ export function Sidebar({ user }: SidebarProps) {
             </div>
             {!isCollapsed && <span className="text-lg tracking-tight">AmbuBook</span>}
           </Link>
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="relative z-10 hidden lg:flex p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-500"
-            aria-label={isCollapsed ? "Agrandir" : "RÃ©duire"}
-          >
-            <ChevronLeft
-              className={cn(
-                "h-5 w-5 transition-transform",
-                isCollapsed && "rotate-180"
-              )}
-            />
-          </button>
-          <button
-            onClick={() => setIsMobileOpen(false)}
-            className="relative z-10 lg:hidden p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-500"
-            aria-label="Fermer le menu"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
+          <div className="relative z-10 flex items-center gap-1">
+            {/* Notifications */}
+            {!isCollapsed && <NotificationBell variant="dashboard" />}
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="hidden lg:flex p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-500"
+              aria-label={isCollapsed ? "Agrandir" : "Réduire"}
+            >
+              <ChevronLeft
+                className={cn(
+                  "h-5 w-5 transition-transform",
+                  isCollapsed && "rotate-180"
+                )}
+              />
+            </button>
+            <button
+              onClick={() => setIsMobileOpen(false)}
+              className="lg:hidden p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-500"
+              aria-label="Fermer le menu"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Navigation */}

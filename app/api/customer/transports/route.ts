@@ -5,6 +5,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma, RequestStatus, HistoryEventType } from "@/generated/prisma/client";
 import { transportRequestSchema } from "@/lib/validations/transport-request";
 import { ZodError } from "zod";
+import {
+  notifyTransportRequestCreated,
+  notifyNewTransportRequest,
+} from "@/lib/notifications";
 
 // POST - Créer une nouvelle demande de transport
 export async function POST(request: NextRequest) {
@@ -107,6 +111,62 @@ export async function POST(request: NextRequest) {
 
       return request;
     });
+
+    // Récupérer les infos de la company pour les notifications
+    const companyInfo = await prisma.company.findUnique({
+      where: { id: validatedData.companyId },
+      select: {
+        name: true,
+        phone: true,
+        users: {
+          where: { role: "AMBULANCIER", isActive: true },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+          take: 5, // Limiter aux 5 premiers ambulanciers actifs
+        },
+      },
+    });
+
+    if (companyInfo) {
+      const patientName = `${validatedData.patientFirstName} ${validatedData.patientLastName}`;
+      const formattedDate = new Date(validatedData.requestedDate).toLocaleDateString("fr-FR");
+
+      // Notifier le client
+      notifyTransportRequestCreated({
+        patientName,
+        patientEmail: validatedData.patientEmail || undefined,
+        patientPhone: validatedData.patientPhone,
+        companyName: companyInfo.name,
+        date: formattedDate,
+        time: validatedData.requestedTime,
+        trackingId: transportRequest.trackingId,
+        userId: userId || undefined,
+      }).catch((err) => {
+        console.error("Erreur notification client création demande:", err);
+      });
+
+      // Notifier les ambulanciers de la société
+      for (const ambulancier of companyInfo.users) {
+        notifyNewTransportRequest({
+          ambulancierEmail: ambulancier.email,
+          ambulancierPhone: ambulancier.phone || undefined,
+          ambulancierName: ambulancier.name,
+          patientName,
+          companyName: companyInfo.name,
+          date: formattedDate,
+          time: validatedData.requestedTime,
+          pickupCity: validatedData.pickupCity,
+          destinationCity: validatedData.destinationCity,
+          userId: ambulancier.id,
+        }).catch((err) => {
+          console.error("Erreur notification ambulancier nouvelle demande:", err);
+        });
+      }
+    }
 
     return NextResponse.json({
       success: true,

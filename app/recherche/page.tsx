@@ -6,6 +6,7 @@ import { Container } from "@/components/ui";
 import { Header, Footer } from "@/components/landing";
 import { SearchBar } from "./SearchBar";
 import { SearchResults } from "./SearchResults";
+import { NearbyResults } from "./NearbyResults";
 
 export const metadata: Metadata = {
   title: "Trouver un ambulancier près de chez vous | Ambubook",
@@ -125,7 +126,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               <SearchResults query={query} />
             </Suspense>
           ) : (
-            <EmptyState />
+            <NearbyResults />
           )}
         </Container>
       </main>
@@ -165,31 +166,3 @@ function ResultsSkeleton() {
   );
 }
 
-function EmptyState() {
-  return (
-    <div className="text-center py-12">
-      <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary-50 flex items-center justify-center">
-        <svg
-          className="w-10 h-10 text-primary-500"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
-      </div>
-      <h2 className="text-xl font-semibold text-neutral-900 mb-2">
-        Recherchez un ambulancier
-      </h2>
-      <p className="text-neutral-600 max-w-md mx-auto">
-        Entrez une ville pour trouver les ambulanciers à proximité, ou recherchez
-        directement par nom d&apos;entreprise.
-      </p>
-    </div>
-  );
-}

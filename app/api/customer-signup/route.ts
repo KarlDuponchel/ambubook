@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { notifyWelcomeCustomer } from "@/lib/notifications";
 
 /**
  * Schéma de validation pour l'inscription customer
@@ -11,6 +12,10 @@ const signUpSchema = z.object({
   email: z.string().email("Email invalide"),
   password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
   phone: z.string().optional(),
+  // Préférences de notification
+  emailEnabled: z.boolean().optional().default(true),
+  smsEnabled: z.boolean().optional().default(true),
+  marketing: z.boolean().optional().default(false),
 });
 
 /**
@@ -30,7 +35,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, email, password, phone } = validation.data;
+    const { name, email, password, phone, emailEnabled, smsEnabled, marketing } = validation.data;
 
     // 2. Vérifier que l'email n'existe pas déjà
     const existingUser = await prisma.user.findUnique({
@@ -56,13 +61,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. S'assurer que le rôle est CUSTOMER (Better Auth ne le set pas automatiquement)
-    await prisma.user.update({
-      where: { id: signUpResponse.user.id },
-      data: {
-        role: "CUSTOMER",
-        isActive: true,
-      },
+    // 4. S'assurer que le rôle est CUSTOMER et créer les préférences de notification
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: signUpResponse.user.id },
+        data: {
+          role: "CUSTOMER",
+          isActive: true,
+        },
+      }),
+      prisma.notificationPreferences.create({
+        data: {
+          userId: signUpResponse.user.id,
+          emailEnabled,
+          smsEnabled,
+          transportUpdates: true,
+          transportReminders: true,
+          marketing,
+        },
+      }),
+    ]);
+
+    // 5. Envoyer l'email/SMS de bienvenue (seulement si activé)
+    notifyWelcomeCustomer({
+      userName: name,
+      userEmail: email,
+      userPhone: phone || undefined,
+      userId: signUpResponse.user.id,
+    }).catch((err) => {
+      console.error("Erreur notification bienvenue client:", err);
     });
 
     return NextResponse.json(

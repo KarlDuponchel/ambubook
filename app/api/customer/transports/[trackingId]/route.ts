@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { getSignedDownloadUrl, isS3Configured } from "@/lib/s3";
 import { Prisma, RequestStatus, HistoryEventType } from "@/generated/prisma/client";
+import { notifyTransportCustomerResponse } from "@/lib/notifications";
 
 export async function GET(
   request: NextRequest,
@@ -126,6 +127,23 @@ export async function PATCH(
         trackingId,
         userId: session.user.id,
       },
+      include: {
+        company: {
+          select: {
+            name: true,
+            users: {
+              where: { role: "AMBULANCIER", isActive: true },
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+              },
+              take: 5,
+            },
+          },
+        },
+      },
     });
 
     if (!existingTransport) {
@@ -237,6 +255,25 @@ export async function PATCH(
         data: historyData,
       }),
     ]);
+
+    // Notifier les ambulanciers de la réponse du client
+    const patientName = `${existingTransport.patientFirstName} ${existingTransport.patientLastName}`;
+    const responseType: "accepted" | "refused" | "new_proposal" =
+      action === "accept" ? "accepted" : action === "cancel" ? "refused" : "new_proposal";
+
+    for (const ambulancier of existingTransport.company.users) {
+      notifyTransportCustomerResponse({
+        ambulancierEmail: ambulancier.email,
+        ambulancierPhone: ambulancier.phone || undefined,
+        ambulancierName: ambulancier.name,
+        patientName,
+        companyName: existingTransport.company.name,
+        response: responseType,
+        userId: ambulancier.id,
+      }).catch((err) => {
+        console.error("Erreur notification réponse client:", err);
+      });
+    }
 
     return NextResponse.json(updatedTransport);
   } catch (error) {

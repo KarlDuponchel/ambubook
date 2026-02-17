@@ -4,6 +4,11 @@ import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma, RequestStatus, HistoryEventType } from "@/generated/prisma/client";
 import { getSignedDownloadUrl, isS3Configured } from "@/lib/s3";
+import {
+  notifyTransportAccepted,
+  notifyTransportRefused,
+  notifyTransportCounterProposal,
+} from "@/lib/notifications";
 
 // GET - Récupérer les détails d'une demande
 export async function GET(
@@ -137,6 +142,14 @@ export async function PATCH(
         id,
         companyId: user.companyId,
       },
+      include: {
+        company: {
+          select: {
+            name: true,
+            phone: true,
+          },
+        },
+      },
     });
 
     if (!existingDemande) {
@@ -238,6 +251,51 @@ export async function PATCH(
         data: historyData,
       }),
     ]);
+
+    // Envoyer les notifications au client
+    const patientName = `${existingDemande.patientFirstName} ${existingDemande.patientLastName}`;
+    const formattedDate = existingDemande.requestedDate.toLocaleDateString("fr-FR");
+
+    if (action === "accept") {
+      notifyTransportAccepted({
+        patientName,
+        patientEmail: existingDemande.patientEmail || undefined,
+        patientPhone: existingDemande.patientPhone,
+        companyName: existingDemande.company.name,
+        companyPhone: existingDemande.company.phone || undefined,
+        date: formattedDate,
+        time: existingDemande.requestedTime,
+        userId: existingDemande.userId || undefined,
+      }).catch((err) => {
+        console.error("Erreur notification transport accepté:", err);
+      });
+    } else if (action === "refuse") {
+      notifyTransportRefused({
+        patientName,
+        patientEmail: existingDemande.patientEmail || undefined,
+        patientPhone: existingDemande.patientPhone,
+        companyName: existingDemande.company.name,
+        reason: responseNote || undefined,
+        userId: existingDemande.userId || undefined,
+      }).catch((err) => {
+        console.error("Erreur notification transport refusé:", err);
+      });
+    } else if (action === "counter_proposal") {
+      notifyTransportCounterProposal({
+        patientName,
+        patientEmail: existingDemande.patientEmail || undefined,
+        patientPhone: existingDemande.patientPhone,
+        companyName: existingDemande.company.name,
+        originalDate: formattedDate,
+        originalTime: existingDemande.requestedTime,
+        proposedDate: new Date(proposedDate).toLocaleDateString("fr-FR"),
+        proposedTime,
+        trackingId: existingDemande.trackingId,
+        userId: existingDemande.userId || undefined,
+      }).catch((err) => {
+        console.error("Erreur notification contre-proposition:", err);
+      });
+    }
 
     return NextResponse.json(updatedDemande);
   } catch (error) {

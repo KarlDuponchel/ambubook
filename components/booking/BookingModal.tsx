@@ -16,6 +16,7 @@ import {
   BookingStep,
   STEP_TITLES,
 } from "./types";
+import Link from "next/link";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -361,9 +362,14 @@ function SuccessView({ trackingId, onClose }: { trackingId: string; onClose: () 
         </p>
       </div>
 
-      <Button type="button" onClick={onClose}>
-        Fermer
-      </Button>
+      <div className="flex justify-center gap-2">
+        <Link href={`/mes-transports/${trackingId}`}>
+          <Button variant="primary">Voir la demande</Button>
+        </Link>
+        <Button type="button" variant="outline" onClick={onClose}>
+          Fermer
+        </Button>
+      </div>
     </div>
   );
 }

@@ -28,7 +28,7 @@ export type NotificationType =
   | "VERIFICATION_CODE"; // Code de vérification
 
 // Canaux de notification
-export type NotificationChannel = "email" | "sms";
+export type NotificationChannel = "email" | "sms" | "inapp";
 
 // Destinataire d'une notification
 export interface NotificationRecipient {
@@ -94,6 +94,7 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
 export const CHANNEL_LABELS: Record<NotificationChannel, string> = {
   email: "Email",
   sms: "SMS",
+  inapp: "In-app",
 };
 
 // Labels français pour les statuts

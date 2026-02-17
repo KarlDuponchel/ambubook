@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
-import { LogOut, Truck, ChevronDown, Calendar, User, LayoutDashboard, Building2, Search } from "lucide-react";
+import { LogOut, Truck, ChevronDown, Calendar, User, LayoutDashboard, Building2, Search, Settings } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
+import { NotificationBell } from "@/components/notifications";
 
 function UserAvatar({ name, size = "md" }: { name: string; size?: "sm" | "md" }) {
   const initials = name
@@ -123,7 +124,11 @@ export function Header() {
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-3">
             {session?.user ? (
-              <div className="relative" ref={userMenuRef}>
+              <>
+                {/* Notifications Bell */}
+                <NotificationBell variant="landing" />
+
+                <div className="relative" ref={userMenuRef}>
                 <button
                   type="button"
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -206,15 +211,23 @@ export function Header() {
                           <Search className="w-4 h-4 text-neutral-400" />
                           <span>Trouver un ambulancier</span>
                         </Link>
+                        <Link
+                          href="/mon-compte"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-50 transition-colors"
+                        >
+                          <User className="w-4 h-4 text-neutral-400" />
+                          <span>Mon compte</span>
+                        </Link>
                       </>
                     )}
                     <Link
-                      href={isAmbulancier ? "/dashboard/profil" : "/profil"}
+                      href={isAmbulancier ? "/dashboard/parametres" : "/mon-compte/parametres"}
                       onClick={() => setUserMenuOpen(false)}
                       className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-50 transition-colors"
                     >
-                      <User className="w-4 h-4 text-neutral-400" />
-                      <span>Mon profil</span>
+                      <Settings className="w-4 h-4 text-neutral-400" />
+                      <span>Paramètres</span>
                     </Link>
                   </div>
 
@@ -231,6 +244,7 @@ export function Header() {
                   </div>
                 </div>
               </div>
+              </>
             ) : (
               <>
                 <Link
@@ -273,6 +287,9 @@ export function Header() {
             >
               <Search className="w-5 h-5" />
             </Link>
+
+            {/* Notifications mobile */}
+            {session?.user && <NotificationBell variant="landing" />}
 
             {/* Menu button */}
             <button
@@ -409,6 +426,14 @@ export function Header() {
                     >
                       <Search className="w-5 h-5 text-neutral-400" />
                       Trouver un ambulancier
+                    </Link>
+                    <Link
+                      href="/mon-compte"
+                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Settings className="w-5 h-5 text-neutral-400" />
+                      Mon compte
                     </Link>
                   </>
                 )}

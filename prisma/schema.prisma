@@ -47,6 +47,12 @@ model User {
   // Logs de notifications
   notificationLogs NotificationLog[]
 
+  // Notifications in-app
+  inAppNotifications InAppNotification[]
+
+  // Préférences de notifications
+  notificationPreferences NotificationPreferences?
+
   @@map("users")
 }
 
@@ -436,6 +442,13 @@ model CompanyHours {
 enum NotificationChannel {
   EMAIL
   SMS
+  INAPP
+}
+
+enum InAppStatus {
+  UNREAD
+  READ
+  ARCHIVED
 }
 
 enum NotificationStatus {
@@ -467,4 +480,53 @@ model NotificationLog {
   @@index([status])
   @@index([sentAt])
   @@map("notification_logs")
+}
+
+// ============================================
+// NOTIFICATIONS IN-APP
+// ============================================
+
+model InAppNotification {
+  id        String      @id @default(cuid())
+  type      String      // NotificationType
+  title     String
+  message   String
+  link      String?     // URL de redirection
+  status    InAppStatus @default(UNREAD)
+  metadata  Json?
+  createdAt DateTime    @default(now())
+  readAt    DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("in_app_notifications")
+}
+
+// ============================================
+// PRÉFÉRENCES DE NOTIFICATIONS
+// ============================================
+
+model NotificationPreferences {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Canaux activés
+  emailEnabled Boolean @default(true)
+  smsEnabled   Boolean @default(true)
+  inappEnabled Boolean @default(true)
+
+  // Types de notifications
+  transportUpdates   Boolean @default(true) // Mises à jour des transports (accepté, refusé, etc.)
+  transportReminders Boolean @default(true) // Rappels J-1
+  marketing          Boolean @default(false) // Emails marketing / newsletter
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notification_preferences")
 }

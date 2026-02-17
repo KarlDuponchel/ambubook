@@ -205,59 +205,48 @@ Système de notifications multi-canal (email + SMS) pour informer les utilisateu
 
 ---
 
-## Phase 3 : Triggers de notifications
+## Phase 3 : Triggers de notifications ✅
 
 > Helpers disponibles dans `lib/notifications/index.ts`
 
-### 3.1 Événements Transport (à intégrer)
-- [ ] `POST /api/customer/transports` → `notifyTransportRequestCreated()` + `notifyNewTransportRequest()`
-- [ ] `PATCH /api/ambulancier/demandes/[id]` (accepter) → `notifyTransportAccepted()`
-- [ ] `PATCH /api/ambulancier/demandes/[id]` (refuser) → `notifyTransportRefused()`
-- [ ] `PATCH /api/ambulancier/demandes/[id]` (contre-proposition) → `notifyTransportCounterProposal()`
-- [ ] `PATCH /api/customer/transports/[trackingId]` (réponse client) → `sendNotification()` type TRANSPORT_CUSTOMER_RESPONSE
+### 3.1 Événements Transport ✅
+- [x] `POST /api/customer/transports` → `notifyTransportRequestCreated()` + `notifyNewTransportRequest()`
+- [x] `PATCH /api/ambulancier/demandes/[id]` (accepter) → `notifyTransportAccepted()`
+- [x] `PATCH /api/ambulancier/demandes/[id]` (refuser) → `notifyTransportRefused()`
+- [x] `PATCH /api/ambulancier/demandes/[id]` (contre-proposition) → `notifyTransportCounterProposal()`
+- [x] `PATCH /api/customer/transports/[trackingId]` (réponse client) → `notifyTransportCustomerResponse()`
 
-### 3.2 Cron Jobs / Rappels automatiques
-- [ ] Créer `app/api/cron/reminders/route.ts` → `notifyTransportReminder()`
-  - Rappel J-1 (veille du transport)
-  - Rappel H-2 (2h avant le transport)
-- [ ] Configurer Vercel Cron ou autre scheduler
+### 3.2 Cron Jobs / Rappels automatiques ✅
+- [x] Créer `app/api/cron/reminders/route.ts` → `notifyTransportReminder()`
+  - Rappel J-1 (veille du transport à 18h)
+- [x] Configurer Vercel Cron (`vercel.json`)
 
-### 3.3 Événements Admin
-- [x] Inscription nouvel ambulancier → `notifyAdminNewSignup()` (dans lib/email.ts, déjà utilisé)
+### 3.3 Événements Compte ✅
+- [x] Inscription client → `notifyWelcomeCustomer()` (`/api/customer-signup`)
+- [x] Inscription ambulancier (invitation) → `notifyWelcomeAmbulancier()` (`/api/signup`)
+- [x] Activation compte → `notifyAccountActivated()` (`/api/admin/users/[id]`)
+- [x] Inscription nouvel ambulancier → `notifyAdminNewSignup()` (dans lib/email.ts)
 
 ---
 
-## Phase 5 : Préférences utilisateur
+## Phase 5 : Préférences utilisateur ✅
 
-### 5.1 Modèle de données
-- [ ] Ajouter dans Prisma :
-  ```prisma
-  model NotificationPreferences {
-    id        String   @id @default(cuid())
-    userId    String   @unique
-    user      User     @relation(fields: [userId], references: [id])
+### 5.1 Modèle de données ✅
+- [x] Modèle `NotificationPreferences` ajouté dans Prisma
+- [x] Migration effectuée
 
-    // Canaux
-    emailEnabled    Boolean @default(true)
-    smsEnabled      Boolean @default(true)
+### 5.2 API Préférences ✅
+- [x] `GET /api/user/notifications` - Récupérer préférences
+- [x] `PATCH /api/user/notifications` - Mettre à jour préférences
 
-    // Types de notifications
-    transportUpdates    Boolean @default(true)
-    transportReminders  Boolean @default(true)
-    marketing           Boolean @default(false)
+### 5.3 UI Préférences ✅
+- [x] `app/dashboard/parametres/page.tsx` - Page ambulancier refaite avec persistance
+- [x] `app/mon-compte/parametres/page.tsx` - Nouvelle page paramètres client
+- [x] Lien "Paramètres" ajouté dans le Header pour les clients
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-  }
-  ```
-
-### 5.2 API Préférences
-- [ ] `GET /api/user/notifications` - Récupérer préférences
-- [ ] `PATCH /api/user/notifications` - Mettre à jour préférences
-
-### 5.3 UI Préférences
-- [ ] Ajouter section dans `app/dashboard/parametres/page.tsx`
-- [ ] Ajouter section dans profil client (à créer ou dans /mes-transports)
+### 5.4 Respect des préférences dans les notifications ✅
+- [x] `lib/notifications/index.ts` - Vérifie les préférences avant envoi
+- [x] Support du flag `force` pour les notifications critiques (VERIFICATION_CODE)
 
 ---
 
@@ -369,7 +358,7 @@ Système de notifications intégré à l'application avec icône cloche, badge d
 ## Phase 1 : Modèle de données
 
 ### 1.1 Schema Prisma
-- [ ] Ajouter le modèle `Notification` :
+- [x] Ajouter le modèle `InAppNotification` :
   ```prisma
   model Notification {
     id          String   @id @default(cuid())
@@ -393,7 +382,7 @@ Système de notifications intégré à l'application avec icône cloche, badge d
   ```
 
 ### 1.2 Types TypeScript
-- [ ] Créer `lib/types/notifications.ts` :
+- [x] Utiliser les types existants dans `lib/notifications/types.ts` + inapp.ts :
   ```typescript
   export type NotificationType =
     | 'TRANSPORT_NEW'           // Nouvelle demande (ambulancier)
@@ -423,22 +412,21 @@ Système de notifications intégré à l'application avec icône cloche, badge d
 ## Phase 2 : API Backend
 
 ### 2.1 Endpoints
-- [ ] `GET /api/notifications` - Liste des notifications de l'utilisateur
-  - Query params : `limit`, `offset`, `unreadOnly`
-  - Retourne : `{ notifications: [], unreadCount: number, total: number }`
+- [x] `GET /api/notifications` - Liste des notifications de l'utilisateur
+  - Query params : `limit`, `offset`, `status`
+  - Retourne : `{ notifications: [], unreadCount: number, total: number, hasMore: boolean }`
 
-- [ ] `GET /api/notifications/count` - Compteur non-lues uniquement
-  - Retourne : `{ unreadCount: number }`
+- [x] `GET /api/notifications/count` - Compteur non-lues uniquement
+  - Retourne : `{ count: number }`
 
-- [ ] `PATCH /api/notifications/[id]` - Marquer comme lue
-  - Body : `{ isRead: true }`
+- [x] `PATCH /api/notifications/[id]` - Marquer comme lue
 
-- [ ] `POST /api/notifications/mark-all-read` - Tout marquer comme lu
+- [x] `POST /api/notifications/read-all` - Tout marquer comme lu
 
-- [ ] `DELETE /api/notifications/[id]` - Supprimer une notification
+- [x] `DELETE /api/notifications/[id]` - Archiver une notification
 
 ### 2.2 Service de création
-- [ ] Créer `lib/notifications/in-app.ts` :
+- [x] Créer `lib/notifications/inapp.ts` :
   ```typescript
   export async function createInAppNotification({
     userId,
@@ -461,63 +449,58 @@ Système de notifications intégré à l'application avec icône cloche, badge d
 ## Phase 3 : Composants UI
 
 ### 3.1 Composant NotificationBell
-- [ ] Créer `components/notifications/NotificationBell.tsx` :
-  ```typescript
-  // Icône cloche avec badge
-  // - Badge rouge avec compteur si > 0
-  // - Animation pulse sur nouvelle notification
-  // - Ouvre le dropdown au clic
-  ```
+- [x] Créer `components/notifications/NotificationBell.tsx` :
+  - Icône cloche avec badge rouge compteur
+  - Props : variant "landing" | "dashboard"
+  - Polling 30s du compteur
+  - Toggle dropdown au clic
 
 ### 3.2 Composant NotificationDropdown
-- [ ] Créer `components/notifications/NotificationDropdown.tsx` :
-  ```typescript
-  // Panel déroulant avec :
-  // - Header "Notifications" + bouton "Tout marquer comme lu"
-  // - Liste scrollable des notifications
-  // - Chaque item : icône type + titre + message + temps relatif
-  // - Indicateur visuel lu/non-lu
-  // - Lien "Voir toutes les notifications"
-  // - Empty state si aucune notification
-  ```
+- [x] Créer `components/notifications/NotificationDropdown.tsx` :
+  - Header avec "Tout marquer comme lu"
+  - Liste scrollable (max-h-400px)
+  - Empty state si aucune notification
+  - Bouton "Charger plus" si hasMore
+  - Click outside + Escape pour fermer
 
 ### 3.3 Composant NotificationItem
-- [ ] Créer `components/notifications/NotificationItem.tsx` :
-  ```typescript
-  // Item individuel :
-  // - Icône selon le type (check vert, x rouge, clock, etc.)
-  // - Titre en gras si non-lu
-  // - Message tronqué
-  // - Temps relatif (il y a 5 min, hier, etc.)
-  // - Hover : bouton supprimer
-  // - Clic : navigation vers link + marquer comme lu
-  ```
+- [x] Créer `components/notifications/NotificationItem.tsx` :
+  - Icône/couleur selon le type
+  - Indicateur non-lu (barre bleue gauche)
+  - Temps relatif
+  - Bouton supprimer au hover
+  - Clic → navigation + marquer comme lu
 
-### 3.4 Page Centre de notifications (optionnel)
-- [ ] Créer `app/notifications/page.tsx` - Page complète avec :
-  - Toutes les notifications paginées
-  - Filtres (toutes, non-lues, par type)
-  - Actions groupées
+### 3.4 Hook useNotifications
+- [x] Créer `hooks/useNotifications.ts` :
+  - State : notifications, unreadCount, isLoading, error, hasMore
+  - Actions : fetchNotifications, markAsRead, markAllAsRead, archiveNotification, fetchMore
+  - Polling automatique du compteur (30s)
+
+### 3.5 Page Centre de notifications (optionnel)
+- [ ] Créer `app/notifications/page.tsx` - Page complète (à faire plus tard)
 
 ---
 
 ## Phase 4 : Intégration Header
 
 ### 4.1 Header Landing (clients)
-- [ ] Ajouter `NotificationBell` dans `components/landing/Header.tsx`
+- [x] Ajouter `NotificationBell` dans `components/landing/Header.tsx`
   - Visible uniquement si connecté
-  - Position : à gauche de l'avatar
+  - Desktop : avant le dropdown utilisateur
+  - Mobile : avant le bouton menu
 
 ### 4.2 Header Dashboard (ambulanciers)
-- [ ] Ajouter `NotificationBell` dans `components/ambulancier/Sidebar.tsx` ou header dashboard
-  - Toujours visible
+- [x] Ajouter `NotificationBell` dans `components/ambulancier/Sidebar.tsx`
+  - Dans le header (quand non collapsed)
+  - Variant "dashboard"
 
 ---
 
 ## Phase 5 : Polling / Temps réel
 
-### 5.1 Option A : Polling simple (recommandé pour commencer)
-- [ ] Hook `useNotifications()` avec polling :
+### 5.1 Option A : Polling simple (implémenté)
+- [x] Hook `useNotifications()` avec polling :
   ```typescript
   export function useNotifications(pollInterval = 30000) {
     const [unreadCount, setUnreadCount] = useState(0);
@@ -550,24 +533,19 @@ Système de notifications intégré à l'application avec icône cloche, badge d
 
 ## Phase 6 : Triggers (création des notifications)
 
-### 6.1 Intégration dans les APIs existantes
-- [ ] `POST /api/customer/transports` :
-  - Créer notif "Nouvelle demande" pour l'ambulancier
-
-- [ ] `PATCH /api/ambulancier/demandes/[id]` (accepter) :
-  - Créer notif "Transport accepté" pour le client
-
-- [ ] `PATCH /api/ambulancier/demandes/[id]` (refuser) :
-  - Créer notif "Transport refusé" pour le client
-
-- [ ] `PATCH /api/ambulancier/demandes/[id]` (contre-proposition) :
-  - Créer notif "Contre-proposition reçue" pour le client
-
-- [ ] `PATCH /api/customer/transports/[trackingId]` (réponse) :
-  - Créer notif "Réponse du client" pour l'ambulancier
-
-- [ ] Upload PJ :
-  - Créer notif "Nouvelle pièce jointe" pour l'ambulancier
+### 6.1 Intégration automatique via lib/notifications/index.ts
+Les notifications in-app sont automatiquement créées via le canal "inapp" ajouté à tous les helpers :
+- [x] `notifyTransportRequestCreated()` → notif client
+- [x] `notifyNewTransportRequest()` → notif ambulancier
+- [x] `notifyTransportAccepted()` → notif client
+- [x] `notifyTransportRefused()` → notif client
+- [x] `notifyTransportCounterProposal()` → notif client
+- [x] `notifyTransportCustomerResponse()` → notif ambulancier
+- [x] `notifyTransportReminder()` → notif client
+- [x] `notifyTransportAttachmentAdded()` → notif destinataire
+- [x] `notifyWelcomeCustomer()` → notif client
+- [x] `notifyWelcomeAmbulancier()` → notif ambulancier
+- [x] `notifyAccountActivated()` → notif utilisateur
 
 ---
 
@@ -582,11 +560,11 @@ Système de notifications intégré à l'application avec icône cloche, badge d
 
 ## Checklist finale
 
-- [ ] Notifications créées à chaque événement
-- [ ] Badge mis à jour en temps réel (ou polling)
-- [ ] Clic sur notification → navigation + marquage lu
-- [ ] Design cohérent mobile/desktop
-- [ ] Performance : index DB, pagination
+- [x] Notifications créées à chaque événement (via canal "inapp" intégré)
+- [x] Badge mis à jour en polling (30s)
+- [x] Clic sur notification → navigation + marquage lu
+- [x] Design cohérent mobile/desktop
+- [x] Performance : index DB (userId, status, createdAt), pagination
 - [ ] Tests manuels complets
 
 ---

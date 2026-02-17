@@ -18,6 +18,23 @@ export function PatientInfoStep({
   // Construire l'URL de redirection pour le login
   const loginRedirect = companySlug ? `/?company=${companySlug}` : "/";
 
+  // Retire tous les espaces (pour stocker la valeur brute)
+  const unformatSSN = (value: string) => value.replace(/\s/g, "");
+
+  // Formate selon le masque : 1 85 12 75 108 123 45
+  const formatSSN = (value: string) => {
+    const v = value.replace(/\s/g, "").slice(0, 15);
+    const parts = [
+      v.slice(0, 1),   // 1
+      v.slice(1, 3),   // 85
+      v.slice(3, 5),   // 12
+      v.slice(5, 7),   // 75
+      v.slice(7, 10),  // 108
+      v.slice(10, 13), // 123
+    ];
+    return parts.filter(Boolean).join(" ");
+  };
+
   return (
     <div className="space-y-4">
       {/* Lien vers connexion si pas connecté */}
@@ -111,8 +128,8 @@ export function PatientInfoStep({
       <Input
         label="N° Sécurité sociale"
         name="patientSocialSecurityNumber"
-        value={formData.patientSocialSecurityNumber}
-        onChange={(e) => handleChange("patientSocialSecurityNumber", e.target.value)}
+        value={formatSSN(formData.patientSocialSecurityNumber)}
+        onChange={(e) => handleChange("patientSocialSecurityNumber", unformatSSN(e.target.value))}
         placeholder="1 85 12 75 108 123 45"
         error={errors.patientSocialSecurityNumber}
       />
