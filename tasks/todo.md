@@ -666,3 +666,834 @@ export function NotificationBell() {
 - [x] `RequestHistory.tsx` - Ajout prop `readOnly` pour clients
 - [x] `RequestAttachments.tsx` - Support `trackingId` pour clients
 - [x] `BookingModal.tsx` - Utilise `/api/customer/transports` avec userId
+
+---
+
+# Dashboard Admin
+
+## Vue d'ensemble
+
+Interface d'administration complète pour gérer la plateforme AmbuBook : utilisateurs, entreprises, transports, notifications, feedback et monitoring.
+
+---
+
+## Phase 1 : Layout et navigation admin
+
+### 1.1 Structure
+- [ ] Créer layout `app/admin/layout.tsx` avec sidebar admin
+- [ ] Composant `AdminSidebar.tsx` avec navigation :
+  - Dashboard (vue d'ensemble)
+  - Utilisateurs
+  - Entreprises
+  - Transports
+  - Notifications
+  - Feedback
+  - Logs système
+  - Configuration
+- [ ] Protection : middleware vérifiant `role === ADMIN`
+- [ ] Breadcrumbs pour navigation
+
+### 1.2 Dashboard principal
+- [ ] `app/admin/page.tsx` - Vue d'ensemble avec :
+  - KPIs temps réel (users, entreprises, transports actifs)
+  - Graphiques d'activité (inscriptions, réservations)
+  - Alertes (comptes en attente, erreurs notifs, feedback urgent)
+  - Activité récente (dernières actions)
+
+---
+
+## Phase 2 : Gestion des utilisateurs
+
+### 2.1 Liste utilisateurs
+- [ ] `app/admin/utilisateurs/page.tsx`
+  - Tableau paginé avec recherche
+  - Filtres : rôle (ADMIN/AMBULANCIER/CUSTOMER), statut (actif/inactif), date inscription
+  - Colonnes : nom, email, rôle, entreprise, statut, date inscription, dernière connexion
+  - Actions rapides : activer/désactiver, voir détail
+
+### 2.2 Détail utilisateur
+- [ ] `app/admin/utilisateurs/[id]/page.tsx`
+  - Informations complètes
+  - Historique des connexions
+  - Transports associés (si client)
+  - Entreprise associée (si ambulancier)
+  - Notifications envoyées
+  - Actions : modifier rôle, activer/désactiver, supprimer, réinitialiser MDP
+
+### 2.3 Ambulanciers en attente
+- [ ] Section ou filtre dédié aux comptes AMBULANCIER `isActive=false`
+  - Liste avec infos entreprise
+  - Actions : valider, refuser avec motif
+  - Notification automatique à la validation
+
+### 2.4 API utilisateurs
+- [ ] `GET /api/admin/users` - Liste paginée avec filtres
+- [ ] `GET /api/admin/users/[id]` - Détail complet
+- [ ] `PATCH /api/admin/users/[id]` - Modifier (rôle, statut)
+- [ ] `DELETE /api/admin/users/[id]` - Supprimer (soft delete)
+- [ ] `POST /api/admin/users/[id]/reset-password` - Envoyer lien reset
+
+---
+
+## Phase 3 : Gestion des entreprises
+
+### 3.1 Liste entreprises
+- [ ] `app/admin/entreprises/page.tsx`
+  - Tableau paginé avec recherche (nom, ville, SIRET)
+  - Filtres : statut (active/inactive), services (ambulance/VSL), région
+  - Colonnes : nom, ville, gérant, nb employés, nb transports, statut
+  - Actions rapides : activer/désactiver, voir page publique
+
+### 3.2 Détail entreprise
+- [ ] `app/admin/entreprises/[id]/page.tsx`
+  - Toutes les infos (contact, services, horaires, description)
+  - Liste des employés avec rôles
+  - Statistiques transports (acceptés, refusés, taux)
+  - Galerie photos
+  - Actions : modifier, activer/désactiver, supprimer
+
+### 3.3 API entreprises
+- [ ] `GET /api/admin/companies` - Liste paginée
+- [ ] `GET /api/admin/companies/[id]` - Détail complet
+- [ ] `PATCH /api/admin/companies/[id]` - Modifier
+- [ ] `DELETE /api/admin/companies/[id]` - Supprimer (soft delete)
+
+---
+
+## Phase 4 : Gestion des transports
+
+### 4.1 Liste transports
+- [ ] `app/admin/transports/page.tsx`
+  - Tableau paginé avec recherche (patient, trackingId)
+  - Filtres : statut, entreprise, date, type (ambulance/VSL)
+  - Colonnes : ID, patient, entreprise, date, trajet, statut, créé le
+  - Actions : voir détail
+
+### 4.2 Détail transport
+- [ ] `app/admin/transports/[id]/page.tsx`
+  - Infos complètes (patient, adresses, horaires, options)
+  - Historique complet des événements
+  - Pièces jointes
+  - Notifications envoyées pour ce transport
+  - Actions : modifier statut (cas exceptionnel), ajouter note admin
+
+### 4.3 Statistiques transports
+- [ ] Dashboard stats transports :
+  - Volume par jour/semaine/mois
+  - Répartition par statut
+  - Taux d'acceptation/refus
+  - Top entreprises par volume
+  - Temps moyen de réponse
+
+### 4.4 API transports
+- [ ] `GET /api/admin/transports` - Liste paginée
+- [ ] `GET /api/admin/transports/[id]` - Détail complet
+- [ ] `GET /api/admin/transports/stats` - Statistiques
+
+---
+
+## Phase 5 : Notifications (logs et monitoring)
+
+### 5.1 Logs notifications
+- [ ] `app/admin/notifications/page.tsx`
+  - Liste paginée des notifications envoyées
+  - Filtres : canal (email/sms/inapp), type, statut, date
+  - Recherche par destinataire
+  - Colonnes : date, canal, type, destinataire, statut, actions
+
+### 5.2 Détail notification
+- [ ] Modal ou page détail :
+  - Contenu complet (sujet, body)
+  - Métadonnées (transportId, etc.)
+  - Erreur si échec
+
+### 5.3 Statistiques notifications
+- [ ] Dashboard stats :
+  - Compteurs : envoyées, échouées, taux succès
+  - Graphique évolution 7/30 jours
+  - Répartition par canal et par type
+
+### 5.4 Actions
+- [ ] Retry notifications FAILED
+- [ ] Export CSV des logs
+
+### 5.5 API notifications
+- [ ] `GET /api/admin/notifications` - Liste paginée
+- [ ] `GET /api/admin/notifications/stats` - Statistiques
+- [ ] `POST /api/admin/notifications/[id]/retry` - Renvoyer
+- [ ] `GET /api/admin/notifications/export` - Export CSV
+
+---
+
+## Phase 6 : Feedback et support
+
+### 6.1 Liste feedback
+- [ ] `app/admin/feedback/page.tsx`
+  - Liste paginée des retours utilisateurs
+  - Filtres : type (bug/amélioration/autre), statut (nouveau/en cours/résolu), priorité
+  - Colonnes : date, utilisateur, type, sujet, statut, priorité
+
+### 6.2 Détail feedback
+- [ ] `app/admin/feedback/[id]/page.tsx`
+  - Message complet
+  - Infos utilisateur (rôle, entreprise)
+  - Captures d'écran si jointes
+  - Métadonnées (URL, navigateur, OS)
+  - Historique des réponses/actions
+  - Actions : changer statut, assigner, répondre, archiver
+
+### 6.3 API feedback
+- [ ] `GET /api/admin/feedback` - Liste paginée
+- [ ] `GET /api/admin/feedback/[id]` - Détail
+- [ ] `PATCH /api/admin/feedback/[id]` - Modifier statut/priorité
+- [ ] `POST /api/admin/feedback/[id]/reply` - Répondre (notifie l'utilisateur)
+
+---
+
+## Phase 7 : Logs système
+
+### 7.1 Logs d'activité
+- [ ] `app/admin/logs/page.tsx`
+  - Actions importantes : connexions, modifications, suppressions
+  - Filtres : type d'action, utilisateur, date
+  - Recherche
+
+### 7.2 Logs d'erreurs
+- [ ] Section erreurs applicatives
+  - Intégration Sentry ou logs custom
+  - Erreurs API, erreurs client
+  - Stack traces
+
+---
+
+## Phase 8 : Configuration plateforme
+
+### 8.1 Paramètres généraux
+- [ ] `app/admin/configuration/page.tsx`
+  - Nom de la plateforme, logo
+  - Emails de contact/support
+  - Maintenance mode (toggle)
+
+### 8.2 Templates notifications
+- [ ] Édition des templates email/SMS (optionnel, avancé)
+  - Prévisualisation
+  - Variables disponibles
+
+### 8.3 Feature flags
+- [ ] Activer/désactiver des fonctionnalités
+  - Inscriptions ouvertes
+  - Réservations en ligne
+  - Notifications SMS
+
+---
+
+## Checklist Admin
+
+- [ ] Toutes les pages protégées (ADMIN only)
+- [ ] Design cohérent (sidebar, tables, filtres)
+- [ ] Pagination performante
+- [ ] Filtres persistés dans URL
+- [ ] Export CSV sur les listes principales
+- [ ] Actions confirmées (suppression, etc.)
+- [ ] Logs des actions admin
+- [ ] Tests manuels complets
+
+---
+
+# Widget Feedback (Bug Report / Suggestions)
+
+## Vue d'ensemble
+
+Widget flottant (infobulle) présent sur toutes les pages client et dashboard permettant aux utilisateurs de remonter des bugs ou suggestions à l'admin.
+
+---
+
+## Phase 1 : Modèle de données
+
+### 1.1 Schema Prisma
+- [ ] Créer modèle `Feedback` :
+  ```prisma
+  enum FeedbackType {
+    BUG
+    IMPROVEMENT
+    QUESTION
+    OTHER
+  }
+
+  enum FeedbackStatus {
+    NEW
+    IN_PROGRESS
+    RESOLVED
+    WONT_FIX
+  }
+
+  enum FeedbackPriority {
+    LOW
+    MEDIUM
+    HIGH
+    CRITICAL
+  }
+
+  model Feedback {
+    id          String           @id @default(cuid())
+    type        FeedbackType
+    subject     String
+    message     String           @db.Text
+    screenshot  String?          // URL image uploadée
+    pageUrl     String           // URL où le feedback a été soumis
+    userAgent   String?          // Navigateur/OS
+    status      FeedbackStatus   @default(NEW)
+    priority    FeedbackPriority @default(MEDIUM)
+    adminNotes  String?          @db.Text
+    resolvedAt  DateTime?
+    createdAt   DateTime         @default(now())
+    updatedAt   DateTime         @updatedAt
+
+    user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+    userId String?
+
+    @@index([status])
+    @@index([type])
+    @@index([createdAt])
+    @@map("feedbacks")
+  }
+  ```
+- [ ] Migration Prisma
+- [ ] Ajouter relation sur User
+
+---
+
+## Phase 2 : API Feedback
+
+### 2.1 Endpoints utilisateur
+- [ ] `POST /api/feedback` - Soumettre un feedback
+  - Body : type, subject, message, screenshot (base64 optionnel), pageUrl
+  - Récupérer userAgent automatiquement
+  - Upload screenshot vers S3 si fourni
+
+### 2.2 Notification admin
+- [ ] Envoyer email à l'admin lors d'un nouveau feedback
+- [ ] Notification in-app si implémenté côté admin
+
+---
+
+## Phase 3 : Widget UI
+
+### 3.1 Composant FeedbackWidget
+- [ ] `components/feedback/FeedbackWidget.tsx`
+  - Bouton flottant (coin bas-droite) avec icône (MessageSquare ou Bug)
+  - Badge si feedback précédent non résolu (optionnel)
+  - Hover : tooltip "Signaler un bug / Suggestion"
+
+### 3.2 Modal FeedbackForm
+- [ ] `components/feedback/FeedbackModal.tsx`
+  - Select type : Bug, Amélioration, Question, Autre
+  - Input sujet (obligatoire)
+  - Textarea message (obligatoire)
+  - Bouton capture d'écran (optionnel) - utiliser html2canvas ou upload manuel
+  - Checkbox "Inclure les infos de debug" (URL, navigateur)
+  - Bouton Envoyer
+
+### 3.3 États du widget
+- [ ] État fermé : juste le bouton flottant
+- [ ] État ouvert : modal par-dessus
+- [ ] État envoyé : message de confirmation + fermeture auto
+
+---
+
+## Phase 4 : Intégration
+
+### 4.1 Ajout global
+- [ ] Ajouter `<FeedbackWidget />` dans :
+  - `app/layout.tsx` (pages publiques) - si connecté
+  - `app/dashboard/layout.tsx` (ambulanciers)
+  - `app/admin/layout.tsx` (admins - optionnel)
+
+### 4.2 Contexte automatique
+- [ ] Capturer automatiquement :
+  - URL courante (`usePathname`)
+  - User-Agent
+  - Timestamp
+  - User ID si connecté
+
+---
+
+## Phase 5 : Capture d'écran (optionnel avancé)
+
+### 5.1 Capture automatique
+- [ ] Intégrer `html2canvas` pour capture d'écran en un clic
+- [ ] Prévisualisation avant envoi
+- [ ] Compression image avant upload
+
+### 5.2 Annotation (optionnel++)
+- [ ] Permettre d'annoter la capture (cercles, flèches)
+- [ ] Lib : `react-image-annotation` ou custom canvas
+
+---
+
+## Checklist Widget Feedback
+
+- [ ] Widget non intrusif (petit, coin de l'écran)
+- [ ] Accessible au clavier
+- [ ] Responsive (adaptation mobile)
+- [ ] Validation formulaire
+- [ ] Feedback visuel à l'envoi (toast succès)
+- [ ] Rate limiting (éviter spam)
+- [ ] Tests manuels
+
+---
+
+# Onboarding Ambulancier (Owner)
+
+## Vue d'ensemble
+
+Lors de la première connexion d'un ambulancier Owner (gérant), afficher un wizard d'onboarding pour l'accompagner dans la configuration de sa page entreprise.
+
+---
+
+## Phase 1 : Détection et stockage
+
+### 1.1 Modèle de données
+- [ ] Ajouter champ `onboardingCompleted Boolean @default(false)` sur `User` ou `Company`
+- [ ] Migration Prisma
+
+### 1.2 Logique de détection
+- [ ] Vérifier si `user.isOwner && !company.onboardingCompleted` à la connexion
+- [ ] Rediriger vers `/dashboard/onboarding` ou afficher modal
+
+---
+
+## Phase 2 : Wizard d'onboarding
+
+### 2.1 Structure du wizard
+- [ ] Créer `app/dashboard/onboarding/page.tsx`
+- [ ] Composant `OnboardingWizard.tsx` avec étapes :
+
+### 2.2 Étape 1 : Informations de base
+- [ ] Nom de l'entreprise (pré-rempli)
+- [ ] Adresse complète
+- [ ] Téléphone de contact
+- [ ] Email de contact
+- [ ] N° SIRET (vérification)
+- [ ] N° agrément ARS
+
+### 2.3 Étape 2 : Services proposés
+- [ ] Types de véhicules : Ambulance, VSL (checkboxes)
+- [ ] Rayon de couverture (km)
+- [ ] Accepte réservations en ligne (toggle)
+
+### 2.4 Étape 3 : Identité visuelle
+- [ ] Upload logo entreprise
+- [ ] Upload photo de couverture
+- [ ] Aperçu en temps réel
+
+### 2.5 Étape 4 : Description
+- [ ] Textarea description entreprise
+- [ ] Conseils/exemples pour une bonne description
+- [ ] Compteur de caractères
+
+### 2.6 Étape 5 : Horaires d'ouverture
+- [ ] Grille horaires par jour
+- [ ] Option "Fermé" par jour
+- [ ] Copier horaires d'un jour à l'autre
+
+### 2.7 Étape 6 : Galerie photos (optionnel)
+- [ ] Upload multiple photos
+- [ ] Drag & drop pour réorganiser
+- [ ] Possibilité de skip cette étape
+
+### 2.8 Étape finale : Récapitulatif
+- [ ] Aperçu de la page entreprise
+- [ ] Bouton "Terminer la configuration"
+- [ ] Marquer `onboardingCompleted = true`
+
+---
+
+## Phase 3 : Composants UI
+
+### 3.1 Composants wizard
+- [ ] `OnboardingProgress.tsx` - Barre de progression avec étapes
+- [ ] `OnboardingStep.tsx` - Container générique pour chaque étape
+- [ ] `OnboardingNavigation.tsx` - Boutons Précédent/Suivant/Passer
+
+### 3.2 Composants spécifiques
+- [ ] `LogoUploader.tsx` - Upload avec crop/preview
+- [ ] `HoursEditor.tsx` - Éditeur d'horaires (réutiliser existant si possible)
+- [ ] `CompanyPreview.tsx` - Aperçu carte entreprise
+
+---
+
+## Phase 4 : API
+
+### 4.1 Endpoints
+- [ ] `GET /api/onboarding/status` - Vérifier si onboarding nécessaire
+- [ ] `PATCH /api/onboarding/step/[step]` - Sauvegarder une étape
+- [ ] `POST /api/onboarding/complete` - Marquer comme terminé
+
+### 4.2 Sauvegarde progressive
+- [ ] Sauvegarder chaque étape au clic "Suivant"
+- [ ] Permettre de reprendre où on s'est arrêté
+
+---
+
+## Phase 5 : Intégration
+
+### 5.1 Redirection automatique
+- [ ] Middleware ou check dans layout dashboard
+- [ ] Si onboarding non complété → redirect `/dashboard/onboarding`
+- [ ] Permettre d'accéder aux autres pages après skip explicite
+
+### 5.2 Rappel si non terminé
+- [ ] Banner dans le dashboard "Terminez la configuration de votre entreprise"
+- [ ] Lien vers `/dashboard/onboarding`
+
+### 5.3 Accès ultérieur
+- [ ] Permettre de relancer l'onboarding depuis Paramètres
+- [ ] Ou simplement éditer via "Mon entreprise"
+
+---
+
+## Checklist Onboarding
+
+- [ ] Wizard responsive (mobile-friendly)
+- [ ] Validation à chaque étape
+- [ ] Sauvegarde progressive (pas de perte de données)
+- [ ] Skip possible pour étapes optionnelles
+- [ ] Animations fluides entre étapes
+- [ ] Message de bienvenue personnalisé
+- [ ] Confettis ou animation à la fin
+- [ ] Tests manuels du flow complet
+
+# Sécurité
+
+## Vue d'ensemble
+
+Audit et renforcement de la sécurité de la plateforme AmbuBook : authentification, autorisation, protection des données, conformité RGPD.
+
+---
+
+## Phase 1 : Authentification et sessions
+
+### 1.1 Audit Better Auth
+- [ ] Vérifier la configuration des sessions (durée, refresh)
+- [ ] Vérifier le hashage des mots de passe (bcrypt/argon2)
+- [ ] Forcer HTTPS en production
+- [ ] Configurer les cookies sécurisés (HttpOnly, Secure, SameSite)
+
+### 1.2 Renforcement connexion
+- [ ] Rate limiting sur /api/auth/login (ex: 5 tentatives/15min)
+- [ ] Détection de connexions suspectes (nouvel appareil, nouvelle IP)
+- [ ] Option 2FA pour les admins (TOTP avec authenticator)
+- [ ] Logs des connexions (IP, user-agent, timestamp)
+
+### 1.3 Mots de passe
+- [ ] Politique de mot de passe (min 8 chars, complexité)
+- [ ] Vérification contre liste de mots de passe compromis (haveibeenpwned API)
+- [ ] Expiration des liens de reset password (1h max)
+- [ ] Mise en place du "forgot password"
+
+---
+
+## Phase 2 : Autorisation et contrôle d'accès
+
+### 2.1 Audit des routes API
+- [ ] Vérifier que toutes les routes protégées vérifient la session
+- [ ] Vérifier les contrôles de rôle (ADMIN, AMBULANCIER, CUSTOMER)
+- [ ] Vérifier l'ownership (un user ne peut modifier que ses propres données)
+- [ ] Documenter les permissions par route
+
+### 2.2 Middleware de sécurité
+- [ ] Middleware centralisé pour vérification auth + rôle
+- [ ] Logs des accès refusés (403)
+- [ ] Protection CSRF sur les mutations
+
+### 2.3 Isolation des données
+- [ ] Un ambulancier ne voit que les demandes de son entreprise
+- [ ] Un client ne voit que ses propres transports
+- [ ] Les admins voient tout (avec logs)
+
+---
+
+## Phase 3 : Protection des données
+
+### 3.1 Données sensibles
+- [ ] Chiffrement des données sensibles en base (N° sécu, etc.) - optionnel
+- [ ] Masquage des données sensibles dans les logs
+- [ ] Ne jamais exposer les IDs internes dans les URLs publiques (utiliser trackingId)
+
+### 3.2 Upload de fichiers
+- [ ] Validation des types MIME (images, PDF uniquement)
+- [ ] Limite de taille (ex: 10MB max)
+- [ ] Scan antivirus (optionnel, via ClamAV ou service cloud)
+- [ ] Stockage sur S3 avec URLs signées (expiration)
+
+### 3.3 Sanitization
+- [ ] Sanitizer les inputs HTML (éviter XSS)
+- [ ] Échapper les données dans les emails/SMS
+- [ ] Validation Zod sur toutes les entrées API
+
+---
+
+## Phase 4 : Protection contre les attaques
+
+### 4.1 Rate limiting global
+- [ ] Configurer rate limiting sur l'API (ex: Vercel Edge, Upstash)
+- [ ] Rate limiting spécifique sur :
+  - Création de compte
+  - Envoi de notifications
+  - Upload de fichiers
+  - Soumission de feedback
+
+### 4.2 Headers de sécurité
+- [ ] Content-Security-Policy (CSP)
+- [ ] X-Frame-Options (DENY)
+- [ ] X-Content-Type-Options (nosniff)
+- [ ] Referrer-Policy
+- [ ] Permissions-Policy
+- [ ] Configurer dans `next.config.js` ou middleware
+
+### 4.3 Protection DDOS
+- [ ] Cloudflare ou équivalent en frontal
+- [ ] Challenge sur les requêtes suspectes
+
+---
+
+## Phase 5 : Conformité RGPD
+
+### 5.1 Consentement
+- [ ] Banner cookies avec choix (nécessaires, analytics, marketing)
+- [ ] Stockage du consentement
+- [ ] Respect du choix (pas de tracking sans consentement)
+
+### 5.2 Droits des utilisateurs
+- [ ] Page "Mes données" pour les utilisateurs
+- [ ] Export des données personnelles (JSON/PDF)
+- [ ] Suppression du compte (avec confirmation)
+- [ ] Anonymisation plutôt que suppression pour l'historique
+
+### 5.3 Documentation légale
+- [ ] Politique de confidentialité complète
+- [ ] Mentions légales
+- [ ] CGU / CGV
+- [ ] Registre des traitements (interne)
+
+### 5.4 Rétention des données
+- [ ] Définir durées de conservation :
+  - Comptes inactifs : 3 ans
+  - Transports terminés : 5 ans (obligations légales)
+  - Logs : 1 an
+  - Notifications : 30-90 jours ✅ (cron créé)
+- [ ] Cron de purge automatique
+
+---
+
+## Phase 6 : Monitoring et alertes
+
+### 6.1 Logs de sécurité
+- [ ] Logger les événements de sécurité :
+  - Connexions réussies/échouées
+  - Changements de mot de passe
+  - Modifications de rôle
+  - Accès admin
+  - Suppressions de données
+
+### 6.2 Alertes
+- [ ] Alerte sur connexions multiples échouées
+- [ ] Alerte sur activité admin inhabituelle
+- [ ] Intégration Sentry pour les erreurs
+
+### 6.3 Audit trail
+- [ ] Table `AuditLog` pour tracer les actions sensibles
+- [ ] Qui, quoi, quand, IP, user-agent
+
+---
+
+## Checklist Sécurité
+
+- [ ] Audit des dépendances (npm audit, Snyk)
+- [ ] Variables d'environnement sécurisées (pas de secrets dans le code)
+- [ ] Backup base de données automatisé
+- [ ] Plan de réponse aux incidents
+- [ ] Tests de pénétration (pentest) - optionnel
+- [ ] Revue de code sécurité
+
+---
+
+# SEO et Référencement
+
+## Vue d'ensemble
+
+Optimisation du référencement naturel (SEO) pour maximiser la visibilité d'AmbuBook sur les moteurs de recherche.
+
+---
+
+## Phase 1 : Fondations SEO (déjà fait)
+
+### 1.1 Structure technique ✅
+- [x] Sitemap XML dynamique (`app/sitemap.ts`)
+- [x] Robots.txt (`app/robots.ts`)
+- [x] Plan du site HTML (`app/plan-du-site/page.tsx`)
+- [x] Métadonnées dynamiques par page
+
+### 1.2 Schemas JSON-LD ✅
+- [x] Organization (page d'accueil)
+- [x] LocalBusiness (pages entreprises)
+- [x] Service (services ambulance/VSL)
+- [x] FAQPage (FAQ)
+- [x] BreadcrumbList
+
+---
+
+## Phase 2 : Optimisation des pages existantes
+
+### 2.1 Page d'accueil
+- [ ] Audit du contenu (densité mots-clés, H1/H2)
+- [ ] Optimiser le Hero (texte accrocheur avec mots-clés)
+- [ ] Ajouter plus de contenu textuel (éviter page trop "design")
+- [ ] Section témoignages/avis (preuve sociale)
+
+### 2.2 Pages entreprises /[slug]
+- [ ] Title optimisé : "Ambulances [Nom] à [Ville] - Réservation en ligne"
+- [ ] Meta description unique et attractive
+- [ ] Contenu structuré (H2 pour services, horaires, etc.)
+- [ ] Ajouter section FAQ spécifique à l'entreprise
+- [ ] Images avec alt text descriptif
+
+### 2.3 Page recherche /recherche
+- [ ] URLs propres avec query params lisibles
+- [ ] Contenu dynamique selon la recherche
+- [ ] Pages de résultats indexables (si pertinent)
+
+---
+
+## Phase 3 : Pages de contenu SEO
+
+### 3.1 Pages villes/régions
+- [ ] Créer pages dédiées : `/ambulances-[ville]`
+  - Ex: `/ambulances-paris`, `/ambulances-lyon`
+  - Contenu unique par ville
+  - Liste des entreprises de la zone
+  - Infos pratiques locales
+- [ ] Créer pages régions : `/ambulances-[region]`
+  - Ex: `/ambulances-ile-de-france`
+
+### 3.2 Pages services
+- [ ] `/services/ambulance` - Page dédiée ambulance
+- [ ] `/services/vsl` - Page dédiée VSL
+- [ ] `/services/transport-medical` - Page générique
+- [ ] Contenu détaillé, FAQ, tarifs indicatifs
+
+### 3.3 Blog / Articles (optionnel)
+- [ ] Section blog `/blog`
+- [ ] Articles informatifs :
+  - "Comment réserver un transport médical ?"
+  - "Ambulance ou VSL : comment choisir ?"
+  - "Remboursement transport sanitaire : guide complet"
+  - "Bon de transport : tout savoir"
+- [ ] Optimisation SEO de chaque article
+
+---
+
+## Phase 4 : SEO technique avancé
+
+### 4.1 Performance (Core Web Vitals)
+- [ ] Audit Lighthouse (viser score > 90)
+- [ ] Optimisation images (WebP, lazy loading, srcset)
+- [ ] Minification CSS/JS
+- [ ] Preload fonts critiques
+- [ ] Réduire le JavaScript non essentiel
+
+### 4.2 Mobile-first
+- [ ] Vérifier le rendu mobile sur toutes les pages
+- [ ] Test Mobile-Friendly de Google
+- [ ] Optimiser les interactions tactiles
+
+### 4.3 Indexation
+- [ ] Vérifier l'indexation dans Google Search Console
+- [ ] Corriger les erreurs d'exploration
+- [ ] Soumettre le sitemap
+- [ ] Surveiller les pages exclues
+
+### 4.4 Liens internes
+- [ ] Maillage interne cohérent
+- [ ] Breadcrumbs sur toutes les pages
+- [ ] Liens contextuels dans le contenu
+- [ ] Footer avec liens vers pages importantes
+
+---
+
+## Phase 5 : SEO off-page
+
+### 5.1 Google Business Profile
+- [ ] Créer/revendiquer la fiche AmbuBook
+- [ ] Infos complètes (horaires, contact, description)
+- [ ] Photos de qualité
+- [ ] Répondre aux avis
+
+### 5.2 Backlinks
+- [ ] Annuaires professionnels santé/transport
+- [ ] Partenariats avec sites médicaux
+- [ ] Articles invités (guest posting)
+- [ ] Relations presse locale
+
+### 5.3 Réseaux sociaux
+- [ ] Présence sur LinkedIn (B2B ambulanciers)
+- [ ] Page Facebook (B2C patients)
+- [ ] Partage des articles de blog
+
+### 5.4 Newsletter
+- [ ] Formulaire d'inscription
+
+---
+
+## Phase 6 : Monitoring SEO
+
+### 6.1 Outils
+- [ ] Google Search Console configuré
+- [ ] Google Analytics 4 configuré
+- [ ] Suivi des positions (SEMrush, Ahrefs, ou gratuit)
+
+### 6.2 KPIs à suivre
+- [ ] Impressions et clics organiques
+- [ ] Positions sur mots-clés cibles
+- [ ] Pages les plus visitées
+- [ ] Taux de rebond par page
+- [ ] Conversions (réservations) depuis organique
+
+### 6.3 Rapports
+- [ ] Rapport mensuel SEO
+- [ ] Alertes sur chutes de trafic
+- [ ] Suivi des Core Web Vitals
+
+---
+
+## Mots-clés cibles
+
+### Principaux
+- ambulance [ville]
+- VSL [ville]
+- transport médical [ville]
+- réserver ambulance
+- ambulance en ligne
+
+### Longue traîne
+- réserver une ambulance pour rendez-vous médical
+- transport médical assis [ville]
+- ambulance pour dialyse
+- comment obtenir un bon de transport
+- remboursement transport sanitaire
+
+---
+
+## Checklist SEO
+
+- [ ] Toutes les pages ont un title unique (< 60 chars)
+- [ ] Toutes les pages ont une meta description (< 160 chars)
+- [ ] Toutes les images ont un alt text
+- [ ] URLs propres et descriptives
+- [ ] Pas de contenu dupliqué
+- [ ] Sitemap à jour et soumis
+- [ ] Robots.txt correct
+- [ ] HTTPS partout
+- [ ] Temps de chargement < 3s
+- [ ] Mobile-friendly validé

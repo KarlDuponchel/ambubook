@@ -7,7 +7,7 @@ import { notifyTransportReminder } from "@/lib/notifications";
  *
  * - Rappel J-1 : Envoie un rappel la veille du transport
  *
- * Configuration Vercel Cron (vercel.json) :
+ * Configuration Cron Dokploy :
  * {
  *   "crons": [{
  *     "path": "/api/cron/reminders",
