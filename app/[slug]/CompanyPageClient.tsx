@@ -35,6 +35,8 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
     name: company.name,
     slug: company.slug,
     city: company.city,
+    hasAmbulance: company.hasAmbulance,
+    hasVSL: company.hasVSL,
   };
 
   // Trier les horaires (Lundi en premier)

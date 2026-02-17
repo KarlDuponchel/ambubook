@@ -11,13 +11,16 @@ import {
   Loader2,
   ExternalLink,
 } from "lucide-react";
-import { Card, CardHeader, CardContent } from "@/components/ui";
+import { Card, CardHeader, CardContent, useToast } from "@/components/ui";
 import type { RequestAttachment, AttachmentType } from "@/lib/types";
 
 type UserContext = "ambulancier" | "customer";
 
 interface RequestAttachmentsProps {
-  requestId: string;
+  /** ID interne de la demande (pour ambulanciers) */
+  requestId?: string;
+  /** TrackingId public de la demande (pour clients) */
+  trackingId?: string;
   attachments: RequestAttachment[];
   context?: UserContext;
   onAttachmentAdded?: (attachment: RequestAttachment) => void;
@@ -80,14 +83,15 @@ function getFileIcon(mimeType: string) {
   return FileText;
 }
 
-function getApiBasePath(context: UserContext): string {
+function getApiPath(context: UserContext, identifier: string): string {
   return context === "customer"
-    ? "/api/customer/demandes"
-    : "/api/ambulancier/demandes";
+    ? `/api/customer/transports/${identifier}/attachments`
+    : `/api/ambulancier/demandes/${identifier}/attachments`;
 }
 
 export function RequestAttachments({
   requestId,
+  trackingId,
   attachments,
   context = "ambulancier",
   onAttachmentAdded,
@@ -95,6 +99,7 @@ export function RequestAttachments({
   canDelete = true,
   currentUserId,
 }: RequestAttachmentsProps) {
+  const toast = useToast();
   const [showUpload, setShowUpload] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileType, setFileType] = useState<AttachmentType>(
@@ -105,7 +110,9 @@ export function RequestAttachments({
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const apiBasePath = getApiBasePath(context);
+  // Utiliser trackingId pour les clients, requestId pour les ambulanciers
+  const identifier = context === "customer" ? trackingId : requestId;
+  const apiPath = identifier ? getApiPath(context, identifier) : "";
   const typeOptions = context === "customer" ? CUSTOMER_TYPE_OPTIONS : AMBULANCIER_TYPE_OPTIONS;
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,7 +124,7 @@ export function RequestAttachments({
   };
 
   const handleUpload = async () => {
-    if (!selectedFile || isUploading) return;
+    if (!selectedFile || isUploading || !apiPath) return;
 
     setIsUploading(true);
     setError(null);
@@ -127,7 +134,7 @@ export function RequestAttachments({
       formData.append("file", selectedFile);
       formData.append("fileType", fileType);
 
-      const response = await fetch(`${apiBasePath}/${requestId}/attachments`, {
+      const response = await fetch(apiPath, {
         method: "POST",
         body: formData,
       });
@@ -140,33 +147,39 @@ export function RequestAttachments({
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
+        toast.success("Fichier envoyé avec succès");
       } else {
         const data = await response.json();
-        setError(data.error || "Erreur lors de l'upload");
+        const errorMsg = data.error || "Erreur lors de l'upload";
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
-    } catch (err) {
+    } catch {
       setError("Erreur lors de l'upload");
-      console.error("Erreur upload:", err);
+      toast.error("Erreur lors de l'upload du fichier");
     } finally {
       setIsUploading(false);
     }
   };
 
   const handleDelete = async (attachmentId: string) => {
-    if (deletingId) return;
+    if (deletingId || !apiPath) return;
 
     setDeletingId(attachmentId);
     try {
       const response = await fetch(
-        `${apiBasePath}/${requestId}/attachments?attachmentId=${attachmentId}`,
+        `${apiPath}?attachmentId=${attachmentId}`,
         { method: "DELETE" }
       );
 
       if (response.ok) {
         onAttachmentDeleted?.(attachmentId);
+        toast.success("Fichier supprimé");
+      } else {
+        toast.error("Erreur lors de la suppression");
       }
-    } catch (error) {
-      console.error("Erreur suppression:", error);
+    } catch {
+      toast.error("Erreur lors de la suppression du fichier");
     } finally {
       setDeletingId(null);
     }

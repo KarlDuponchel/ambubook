@@ -1,6 +1,41 @@
 # Sprint Planning - AmbuBook
 
-## Session Actuelle - Modal de Réservation (14/02/2026)
+## Session Actuelle - Toasts & Page Mes Transports (17/02/2026)
+
+### Système de Toasts ✅
+- [x] Composant `Toast.tsx` avec 4 variantes (success, error, warning, info)
+- [x] `ToastProvider` intégré dans `app/layout.tsx`
+- [x] Hook `useToast()` pour déclencher les notifications
+- [x] Animations CSS (slide-in à l'entrée, slide-out à la sortie)
+- [x] Auto-dismiss configurable (5s par défaut)
+- [x] Remplacement des `console.error` et `alert()` par des toasts dans tout le projet
+
+### Page /mes-transports (Espace Client) ✅
+- [x] API `GET/POST /api/customer/transports` - Liste et création
+- [x] API `GET/PATCH /api/customer/transports/[trackingId]` - Détail et réponses
+- [x] API attachments pour clients (upload/download/delete)
+- [x] Page liste avec filtres par statut (boutons flex cliquables)
+- [x] Page détail avec historique, pièces jointes, infos entreprise
+- [x] Système de réponse aux contre-propositions (accepter/proposer/annuler)
+- [x] Composants `RequestHistory` et `RequestAttachments` adaptés pour clients
+
+### Corrections
+- [x] Fix boucle infinie sur `/dashboard/demandes` (useCallback + dépendances)
+- [x] Rationalisation des routes API (`/api/customer/transports` unifié)
+
+### Fichiers créés/modifiés
+- `components/ui/Toast.tsx` - Nouveau composant
+- `app/api/customer/transports/route.ts` - GET + POST
+- `app/api/customer/transports/[trackingId]/route.ts` - GET + PATCH
+- `app/api/customer/transports/[trackingId]/attachments/route.ts`
+- `app/mes-transports/page.tsx` - Liste transports client
+- `app/mes-transports/[trackingId]/page.tsx` - Détail transport
+- `app/mes-transports/layout.tsx` - Metadata noindex
+- Intégration toasts dans 10+ fichiers existants
+
+---
+
+## Session Précédente - Modal de Réservation (14/02/2026)
 
 ### Modal de Prise de Rendez-vous - ✅ Implémenté
 - [x] Composants UI : `Select`, `Checkbox`, `Textarea`

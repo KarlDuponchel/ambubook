@@ -165,6 +165,8 @@ export interface CompanySearchResult {
   distance?: number; // en km (optionnel, seulement pour recherche géo)
   logoUrl?: string | null;
   acceptsOnlineBooking?: boolean;
+  hasAmbulance?: boolean;
+  hasVSL?: boolean;
 }
 
 // Version minimale pour les adresses

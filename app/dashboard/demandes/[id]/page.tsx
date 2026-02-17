@@ -21,7 +21,7 @@ import {
   Route,
   Building2,
 } from "lucide-react";
-import { PageHeader, Card, CardHeader, CardContent, LoadingSpinner, StatusBadge } from "@/components/ui";
+import { PageHeader, Card, CardHeader, CardContent, LoadingSpinner, StatusBadge, useToast } from "@/components/ui";
 import { RequestHistory, RequestAttachments } from "@/components/demandes";
 import type {
   RequestStatus,
@@ -66,6 +66,7 @@ const mobilityLabels: Record<MobilityType, string> = {
 export default function DemandeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
+  const toast = useToast();
   const [demande, setDemande] = useState<TransportRequestWithRelations | null>(null);
   const [company, setCompany] = useState<CompanyAddress | null>(null);
   const [distances, setDistances] = useState<DistanceResult | null>(null);
@@ -86,10 +87,11 @@ export default function DemandeDetailPage({ params }: { params: Promise<{ id: st
           setDemande(data.demande);
           setCompany(data.company);
         } else if (response.status === 404) {
+          toast.error("Demande non trouvée");
           router.push("/dashboard/demandes");
         }
-      } catch (error) {
-        console.error("Erreur:", error);
+      } catch {
+        toast.error("Erreur lors du chargement de la demande");
       } finally {
         setLoading(false);
       }
@@ -130,8 +132,8 @@ export default function DemandeDetailPage({ params }: { params: Promise<{ id: st
           const data = await response.json();
           setDistances(data);
         }
-      } catch (error) {
-        console.error("Erreur calcul distances:", error);
+      } catch {
+        // Silencieux - les distances sont optionnelles
       }
     };
 
@@ -162,9 +164,19 @@ export default function DemandeDetailPage({ params }: { params: Promise<{ id: st
         setShowRefuseModal(false);
         setShowCounterModal(false);
         setResponseNote("");
+        // Toast de succès selon l'action
+        if (action === "accept") {
+          toast.success("Demande acceptée");
+        } else if (action === "refuse") {
+          toast.info("Demande refusée");
+        } else if (action === "counter_proposal") {
+          toast.success("Contre-proposition envoyée");
+        }
+      } else {
+        toast.error("Erreur lors du traitement de la demande");
       }
-    } catch (error) {
-      console.error("Erreur:", error);
+    } catch {
+      toast.error("Une erreur est survenue");
     } finally {
       setActionLoading(false);
     }

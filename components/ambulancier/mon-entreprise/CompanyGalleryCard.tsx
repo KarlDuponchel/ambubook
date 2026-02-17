@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { Images, Plus, Trash2, Loader2, X } from "lucide-react";
 import Image from "next/image";
 import { CompanyPhoto } from "@/lib/types";
-import { Card, CardHeader, CardContent } from "@/components/ui";
+import { Card, CardHeader, CardContent, useToast } from "@/components/ui";
 
 interface CompanyGalleryCardProps {
   photos: CompanyPhoto[];
@@ -13,6 +13,7 @@ interface CompanyGalleryCardProps {
 }
 
 export function CompanyGalleryCard({ photos, isOwner, onUpdate }: CompanyGalleryCardProps) {
+  const toast = useToast();
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<CompanyPhoto | null>(null);
@@ -35,9 +36,9 @@ export function CompanyGalleryCard({ photos, isOwner, onUpdate }: CompanyGallery
       }
 
       onUpdate();
+      toast.success("Photo ajoutée");
     } catch (error) {
-      console.error("Erreur upload:", error);
-      alert(error instanceof Error ? error.message : "Erreur lors de l'upload");
+      toast.error(error instanceof Error ? error.message : "Erreur lors de l'upload");
     } finally {
       setUploading(false);
     }
@@ -58,9 +59,9 @@ export function CompanyGalleryCard({ photos, isOwner, onUpdate }: CompanyGallery
       }
 
       onUpdate();
+      toast.success("Photo supprimée");
     } catch (error) {
-      console.error("Erreur suppression:", error);
-      alert(error instanceof Error ? error.message : "Erreur lors de la suppression");
+      toast.error(error instanceof Error ? error.message : "Erreur lors de la suppression");
     } finally {
       setDeleting(null);
     }

@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { Camera, Building2, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { CompanyFull } from "@/lib/types";
+import { useToast } from "@/components/ui";
 
 interface CompanyHeaderProps {
   company: CompanyFull;
@@ -12,6 +13,7 @@ interface CompanyHeaderProps {
 }
 
 export function CompanyHeader({ company, isOwner, onUpdate }: CompanyHeaderProps) {
+  const toast = useToast();
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -37,9 +39,9 @@ export function CompanyHeader({ company, isOwner, onUpdate }: CompanyHeaderProps
       }
 
       onUpdate();
+      toast.success(type === "logo" ? "Logo mis à jour" : "Image de couverture mise à jour");
     } catch (error) {
-      console.error("Erreur upload:", error);
-      alert(error instanceof Error ? error.message : "Erreur lors de l'upload");
+      toast.error(error instanceof Error ? error.message : "Erreur lors de l'upload");
     } finally {
       setUploading(false);
     }

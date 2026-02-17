@@ -34,6 +34,8 @@ export function Hero() {
             name: company.name,
             slug: company.slug,
             city: company.city,
+            hasAmbulance: company.hasAmbulance,
+            hasVSL: company.hasVSL,
           });
           setIsBookingModalOpen(true);
         })
@@ -53,12 +55,14 @@ export function Hero() {
     }
   };
 
-  const handleBookClick = (company: { id: string; name: string; slug: string; city: string | null }) => {
+  const handleBookClick = (company: { id: string; name: string; slug: string; city: string | null; hasAmbulance?: boolean; hasVSL?: boolean }) => {
     setSelectedCompany({
       id: company.id,
       name: company.name,
       slug: company.slug,
       city: company.city,
+      hasAmbulance: company.hasAmbulance,
+      hasVSL: company.hasVSL,
     });
     setIsBookingModalOpen(true);
   };
@@ -256,14 +260,5 @@ export function Hero() {
         </form>
       </Modal>
     </>
-  );
-}
-
-function Stat({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="text-center">
-      <div className="text-2xl sm:text-3xl font-bold text-neutral-900">{value}</div>
-      <div className="mt-1 text-sm text-neutral-500">{label}</div>
-    </div>
   );
 }

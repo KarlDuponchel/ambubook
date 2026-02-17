@@ -25,11 +25,11 @@ const CUSTOMER_ALLOWED_TYPES: AttachmentType[] = [
   "OTHER",
 ];
 
-// Vérifier que le client a accès à cette demande
-async function verifyCustomerAccess(requestId: string, userId: string) {
+// Vérifier que le client a accès à cette demande via trackingId
+async function verifyCustomerAccess(trackingId: string, userId: string) {
   const demande = await prisma.transportRequest.findFirst({
     where: {
-      id: requestId,
+      trackingId,
       userId,
     },
   });
@@ -39,10 +39,10 @@ async function verifyCustomerAccess(requestId: string, userId: string) {
 // GET - Liste des pièces jointes d'une demande (pour le client)
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ trackingId: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { trackingId } = await params;
 
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -52,23 +52,14 @@ export async function GET(
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { id: true, role: true },
-    });
-
-    if (!user || user.role !== "CUSTOMER") {
-      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
-    }
-
     // Vérifier que le client a accès à cette demande
-    const demande = await verifyCustomerAccess(id, user.id);
+    const demande = await verifyCustomerAccess(trackingId, session.user.id);
     if (!demande) {
       return NextResponse.json({ error: "Demande non trouvée" }, { status: 404 });
     }
 
     const attachments = await prisma.requestAttachment.findMany({
-      where: { requestId: id },
+      where: { requestId: demande.id },
       orderBy: { createdAt: "desc" },
       include: {
         uploadedBy: {
@@ -97,7 +88,7 @@ export async function GET(
 
     return NextResponse.json(attachmentsWithSignedUrls);
   } catch (error) {
-    console.error("Erreur API GET /api/customer/demandes/[id]/attachments:", error);
+    console.error("Erreur API GET /api/customer/transports/[trackingId]/attachments:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }
@@ -105,10 +96,10 @@ export async function GET(
 // POST - Ajouter une pièce jointe (pour le client)
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ trackingId: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { trackingId } = await params;
 
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -118,17 +109,8 @@ export async function POST(
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { id: true, role: true },
-    });
-
-    if (!user || user.role !== "CUSTOMER") {
-      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
-    }
-
     // Vérifier que le client a accès à cette demande
-    const demande = await verifyCustomerAccess(id, user.id);
+    const demande = await verifyCustomerAccess(trackingId, session.user.id);
     if (!demande) {
       return NextResponse.json({ error: "Demande non trouvée" }, { status: 404 });
     }
@@ -171,7 +153,7 @@ export async function POST(
 
     // Upload vers S3 si configuré, sinon fallback base64
     if (isS3Configured()) {
-      fileKey = generateFileKey(id, file.name);
+      fileKey = generateFileKey(demande.id, file.name);
       await uploadToS3(fileKey, buffer, file.type);
       // URL sera générée à la volée via getSignedDownloadUrl
       fileUrl = "";
@@ -191,8 +173,8 @@ export async function POST(
           fileKey,
           fileSizeKb,
           mimeType: file.type,
-          request: { connect: { id } },
-          uploadedBy: { connect: { id: user.id } },
+          request: { connect: { id: demande.id } },
+          uploadedBy: { connect: { id: session.user.id } },
         },
         include: {
           uploadedBy: {
@@ -207,15 +189,15 @@ export async function POST(
         data: {
           eventType: HistoryEventType.ATTACHMENT_ADDED,
           comment: `Document ajouté par le client : ${file.name}`,
-          request: { connect: { id } },
-          user: { connect: { id: user.id } },
+          request: { connect: { id: demande.id } },
+          user: { connect: { id: session.user.id } },
         },
       }),
     ]);
 
     return NextResponse.json(attachment, { status: 201 });
   } catch (error) {
-    console.error("Erreur API POST /api/customer/demandes/[id]/attachments:", error);
+    console.error("Erreur API POST /api/customer/transports/[trackingId]/attachments:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }
@@ -223,10 +205,10 @@ export async function POST(
 // DELETE - Supprimer une pièce jointe (uniquement ses propres pièces jointes)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ trackingId: string }> }
 ) {
   try {
-    const { id: requestId } = await params;
+    const { trackingId } = await params;
     const { searchParams } = new URL(request.url);
     const attachmentId = searchParams.get("attachmentId");
 
@@ -242,24 +224,18 @@ export async function DELETE(
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { id: true, role: true },
-    });
-
-    if (!user || user.role !== "CUSTOMER") {
-      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+    // Vérifier que le client a accès à cette demande
+    const demande = await verifyCustomerAccess(trackingId, session.user.id);
+    if (!demande) {
+      return NextResponse.json({ error: "Demande non trouvée" }, { status: 404 });
     }
 
-    // Vérifier que la pièce jointe existe, appartient à la demande du client, et a été uploadée par ce client
+    // Vérifier que la pièce jointe existe et a été uploadée par ce client
     const attachment = await prisma.requestAttachment.findFirst({
       where: {
         id: attachmentId,
-        requestId,
-        request: {
-          userId: user.id,
-        },
-        uploadedById: user.id, // Le client ne peut supprimer que ses propres fichiers
+        requestId: demande.id,
+        uploadedById: session.user.id, // Le client ne peut supprimer que ses propres fichiers
       },
     });
 
@@ -282,7 +258,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Erreur API DELETE /api/customer/demandes/[id]/attachments:", error);
+    console.error("Erreur API DELETE /api/customer/transports/[trackingId]/attachments:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }

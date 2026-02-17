@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { CompanyFull, CompanyHour, UserData } from "@/lib/types";
-import { PageHeader } from "@/components/ui";
+import { PageHeader, useToast } from "@/components/ui";
 import { CompanyHeader } from "@/components/ambulancier/mon-entreprise/CompanyHeader";
 import { CompanyInfoCard } from "@/components/ambulancier/mon-entreprise/CompanyInfoCard";
 import { CompanyDescriptionCard } from "@/components/ambulancier/mon-entreprise/CompanyDescriptionCard";
@@ -13,6 +13,7 @@ import { CompanyGalleryCard } from "@/components/ambulancier/mon-entreprise/Comp
 import { UsersCompany } from "@/components/ambulancier/mon-entreprise/UsersCompany";
 
 export default function MonEntreprisePage() {
+  const toast = useToast();
   const [company, setCompany] = useState<CompanyFull | null>(null);
   const [employees, setEmployees] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,8 +40,8 @@ export default function MonEntreprisePage() {
         const data = await response.json();
         setEmployees(data);
       }
-    } catch (err) {
-      console.error("Erreur lors de la récupération des employés:", err);
+    } catch {
+      // Silencieux - liste des employés optionnelle
     }
   }, []);
 
@@ -64,11 +65,13 @@ export default function MonEntreprisePage() {
 
     if (!response.ok) {
       const result = await response.json();
+      toast.error(result.error || "Erreur lors de la mise à jour");
       throw new Error(result.error || "Erreur lors de la mise à jour");
     }
 
     // Rafraîchir les données
     await fetchCompany();
+    toast.success("Informations mises à jour");
   };
 
   const handleUpdateHours = async (hours: CompanyHour[]) => {
@@ -80,11 +83,13 @@ export default function MonEntreprisePage() {
 
     if (!response.ok) {
       const result = await response.json();
+      toast.error(result.error || "Erreur lors de la mise à jour des horaires");
       throw new Error(result.error || "Erreur lors de la mise à jour des horaires");
     }
 
     // Rafraîchir les données
     await fetchCompany();
+    toast.success("Horaires mis à jour");
   };
 
   if (loading) {

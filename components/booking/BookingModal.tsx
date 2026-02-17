@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Button } from "@/components/ui";
+import { Button, useToast } from "@/components/ui";
 import { BookingProgress } from "./BookingProgress";
 import { PatientInfoStep } from "./steps/PatientInfoStep";
 import { TransportStep } from "./steps/TransportStep";
@@ -25,6 +25,7 @@ interface BookingModalProps {
 
 export function BookingModal({ isOpen, onClose, company }: BookingModalProps) {
   const { data: session } = useSession();
+  const toast = useToast();
   const [currentStep, setCurrentStep] = useState<BookingStep>(1);
   const [formData, setFormData] = useState<BookingFormData>(initialFormData);
   const [errors, setErrors] = useState<Partial<Record<keyof BookingFormData, string>>>({});
@@ -47,6 +48,7 @@ export function BookingModal({ isOpen, onClose, company }: BookingModalProps) {
         patientFirstName: firstName || prev.patientFirstName,
         patientLastName: lastName || prev.patientLastName,
         patientEmail: user.email || prev.patientEmail,
+        patientPhone: user.phone || prev.patientPhone,
       }));
       setHasPrefilledFromSession(true);
     }
@@ -69,6 +71,9 @@ export function BookingModal({ isOpen, onClose, company }: BookingModalProps) {
       }
       if (formData.patientEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.patientEmail)) {
         newErrors.patientEmail = "Format d'email invalide";
+      }
+      if (formData.patientSocialSecurityNumber && !/^\d{13}$/.test(formData.patientSocialSecurityNumber)) {
+        newErrors.patientSocialSecurityNumber = "Le numéro de sécurité sociale doit contenir exactement 13 chiffres";
       }
     }
 
@@ -139,7 +144,7 @@ export function BookingModal({ isOpen, onClose, company }: BookingModalProps) {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/transport-requests", {
+      const response = await fetch("/api/customer/transports", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -152,10 +157,14 @@ export function BookingModal({ isOpen, onClose, company }: BookingModalProps) {
 
       if (response.ok && data.trackingId) {
         setTrackingId(data.trackingId);
+        toast.success("Demande de transport envoyée !");
       } else {
-        setErrors({ notes: data.error || "Une erreur est survenue" });
+        const errorMsg = data.error || "Une erreur est survenue";
+        setErrors({ notes: errorMsg });
+        toast.error(errorMsg);
       }
     } catch {
+      toast.error("Une erreur est survenue lors de l'envoi");
       setErrors({ notes: "Une erreur est survenue lors de l'envoi" });
     } finally {
       setIsSubmitting(false);
@@ -181,7 +190,7 @@ export function BookingModal({ isOpen, onClose, company }: BookingModalProps) {
     >
       <div className="w-full max-w-2xl max-h-[90vh] bg-white rounded-2xl shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-neutral-200 flex-shrink-0">
+        <div className="px-6 py-4 border-b border-neutral-200 shrink-0">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-lg font-semibold text-neutral-900">
@@ -244,6 +253,7 @@ export function BookingModal({ isOpen, onClose, company }: BookingModalProps) {
                   formData={formData}
                   setFormData={setFormData}
                   errors={errors}
+                  company={company}
                 />
               )}
               {currentStep === 3 && (
@@ -267,7 +277,7 @@ export function BookingModal({ isOpen, onClose, company }: BookingModalProps) {
 
         {/* Footer */}
         {!trackingId && (
-          <div className="px-6 py-4 border-t border-neutral-200 flex-shrink-0">
+          <div className="px-6 py-4 border-t border-neutral-200 shrink-0">
             <div className="flex justify-between gap-3">
               {currentStep > 1 ? (
                 <Button
@@ -339,7 +349,7 @@ function SuccessView({ trackingId, onClose }: { trackingId: string; onClose: () 
         Demande envoyée avec succès !
       </h3>
       <p className="text-neutral-600 mb-6">
-        Votre demande de transport a été transmise à l'ambulancier.
+        Votre demande de transport a été transmise à l&apos;ambulancier.
         <br />
         Vous serez contacté prochainement pour confirmation.
       </p>

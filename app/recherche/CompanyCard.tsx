@@ -19,6 +19,8 @@ export function CompanyCard({ company }: CompanyCardProps) {
     name: company.name,
     slug: company.slug,
     city: company.city,
+    hasAmbulance: company.hasAmbulance,
+    hasVSL: company.hasVSL,
   };
 
   const handleCardClick = () => {
@@ -38,7 +40,7 @@ export function CompanyCard({ company }: CompanyCardProps) {
     <>
       <div
         onClick={handleCardClick}
-        className="block h-full flex flex-col p-6 bg-white rounded-xl border border-neutral-200 shadow-sm hover:shadow-md hover:border-primary-300 transition-all group cursor-pointer"
+        className="block h-full flex-col p-6 bg-white rounded-xl border border-neutral-200 shadow-sm hover:shadow-md hover:border-primary-300 transition-all group cursor-pointer"
       >
         {/* Header avec distance */}
         <div className="flex items-start justify-between gap-4 mb-2">

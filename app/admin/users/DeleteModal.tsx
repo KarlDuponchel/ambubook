@@ -30,7 +30,7 @@ export default function DeleteModal({
             <span className="text-2xl">⚠️</span>
           </div>
           <h2 className="text-lg font-semibold text-gray-900 mb-2">
-            Supprimer l'utilisateur
+            Supprimer l&apos;utilisateur
           </h2>
           <p className="text-gray-500 mb-6">
             Êtes-vous sûr de vouloir supprimer{" "}

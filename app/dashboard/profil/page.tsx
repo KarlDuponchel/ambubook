@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import { User, Mail, Phone, Lock, Save, Camera } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-import { PageHeader, Card, CardHeader, CardContent, LoadingSpinner } from "@/components/ui";
+import { PageHeader, Card, CardHeader, CardContent, LoadingSpinner, useToast } from "@/components/ui";
 
 export default function ProfilPage() {
+  const toast = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState({
@@ -30,8 +31,8 @@ export default function ProfilPage() {
             phone: user.phone || "",
           });
         }
-      } catch (error) {
-        console.error("Erreur lors du chargement du profil:", error);
+      } catch {
+        toast.error("Erreur lors du chargement du profil");
       } finally {
         setIsLoading(false);
       }

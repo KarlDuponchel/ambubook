@@ -1,5 +1,3 @@
-import { ReactNode } from "react";
-
 type StatusVariant =
   | "pending"
   | "accepted"

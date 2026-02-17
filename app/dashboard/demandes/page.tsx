@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Search,
@@ -14,7 +14,7 @@ import {
   ChevronRight,
   RefreshCw,
 } from "lucide-react";
-import { PageHeader, Card, CardContent, EmptyState, LoadingSpinner, StatusBadge } from "@/components/ui";
+import { PageHeader, Card, CardContent, EmptyState, LoadingSpinner, StatusBadge, useToast } from "@/components/ui";
 import type { RequestStatus, TransportRequestSummary, StatusConfig } from "@/lib/types";
 
 const statusConfig: Record<RequestStatus, Required<StatusConfig>> = {
@@ -72,13 +72,14 @@ const mobilityLabels: Record<string, string> = {
 };
 
 export default function DemandesPage() {
+  const toast = useToast();
   const [demandes, setDemandes] = useState<TransportRequestSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<RequestStatus | "ALL">("ALL");
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchDemandes = async () => {
+  const fetchDemandes = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (statusFilter !== "ALL") params.set("status", statusFilter);
@@ -89,18 +90,19 @@ export default function DemandesPage() {
         const data = await response.json();
         setDemandes(data);
       }
-    } catch (error) {
-      console.error("Erreur lors du chargement des demandes:", error);
+    } catch {
+      toast.error("Erreur lors du chargement des demandes");
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter, searchQuery]);
 
   useEffect(() => {
     const debounce = setTimeout(fetchDemandes, 500);
     return () => clearTimeout(debounce);
-  }, [statusFilter, searchQuery]);
+  }, [fetchDemandes]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

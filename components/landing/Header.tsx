@@ -34,7 +34,6 @@ export function Header() {
   // Vérifier le rôle de l'utilisateur
   const userRole = (session?.user as { role?: string })?.role;
   const isAmbulancier = userRole === "AMBULANCIER" || userRole === "ADMIN";
-  const isCustomer = userRole === "CUSTOMER" || !userRole;
 
   // Fermer les menus si on clique en dehors
   useEffect(() => {

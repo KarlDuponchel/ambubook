@@ -3,6 +3,8 @@ export interface Company {
   name: string;
   slug: string;
   city?: string | null;
+  hasAmbulance?: boolean;
+  hasVSL?: boolean;
 }
 
 export interface BookingFormData {
@@ -80,6 +82,10 @@ export interface StepProps {
 export interface PatientInfoStepProps extends StepProps {
   isLoggedIn?: boolean;
   companySlug?: string;
+}
+
+export interface TransportStepProps extends StepProps {
+  company: Company;
 }
 
 export type BookingStep = 1 | 2 | 3 | 4;

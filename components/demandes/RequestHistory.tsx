@@ -4,8 +4,6 @@ import { useState } from "react";
 import {
   History,
   Clock,
-  CheckCircle,
-  XCircle,
   AlertCircle,
   MessageSquare,
   Paperclip,
@@ -14,7 +12,7 @@ import {
   User,
   Building2,
 } from "lucide-react";
-import { Card, CardHeader, CardContent } from "@/components/ui";
+import { Card, CardHeader, CardContent, useToast } from "@/components/ui";
 import type {
   RequestHistoryEntry,
   HistoryEventType,
@@ -23,9 +21,11 @@ import type {
 } from "@/lib/types";
 
 interface RequestHistoryProps {
-  requestId: string;
+  requestId?: string;
   history: RequestHistoryEntry[];
   onNoteAdded?: (entry: RequestHistoryEntry) => void;
+  /** Mode lecture seule (pas d'ajout de notes) */
+  readOnly?: boolean;
 }
 
 const EVENT_ICONS: Record<HistoryEventType, React.ComponentType<{ className?: string }>> = {
@@ -122,7 +122,8 @@ function getEventColor(entry: RequestHistoryEntry): string {
   }
 }
 
-export function RequestHistory({ requestId, history, onNoteAdded }: RequestHistoryProps) {
+export function RequestHistory({ requestId, history, onNoteAdded, readOnly = false }: RequestHistoryProps) {
+  const toast = useToast();
   const [showAddNote, setShowAddNote] = useState(false);
   const [noteText, setNoteText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -143,9 +144,12 @@ export function RequestHistory({ requestId, history, onNoteAdded }: RequestHisto
         onNoteAdded?.(newEntry);
         setNoteText("");
         setShowAddNote(false);
+        toast.success("Note ajoutée");
+      } else {
+        toast.error("Erreur lors de l'ajout de la note");
       }
-    } catch (error) {
-      console.error("Erreur ajout note:", error);
+    } catch {
+      toast.error("Erreur lors de l'ajout de la note");
     } finally {
       setIsSubmitting(false);
     }
@@ -157,18 +161,20 @@ export function RequestHistory({ requestId, history, onNoteAdded }: RequestHisto
         icon={History}
         title="Historique"
         action={
-          <button
-            onClick={() => setShowAddNote(!showAddNote)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-            Note
-          </button>
+          !readOnly ? (
+            <button
+              onClick={() => setShowAddNote(!showAddNote)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              Note
+            </button>
+          ) : undefined
         }
       />
       <CardContent noPadding>
         {/* Formulaire d'ajout de note */}
-        {showAddNote && (
+        {!readOnly && showAddNote && (
           <div className="p-4 border-b border-card-border bg-neutral-50">
             <textarea
               value={noteText}

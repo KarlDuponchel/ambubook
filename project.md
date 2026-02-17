@@ -21,7 +21,12 @@ AmbuBook est une plateforme de prise de rendez-vous en ligne pour services ambul
   2. Type de transport (Ambulance/VSL, aller simple/retour, mobilité)
   3. Adresses (départ/arrivée avec autocomplétion)
   4. Planification (dates et heures)
-- **Suivi de demande** via tracking ID unique
+- **Espace "Mes Transports"** (/mes-transports) :
+  - Liste des demandes avec filtres par statut
+  - Détail complet de chaque transport
+  - Réponse aux contre-propositions (accepter/proposer autre date/annuler)
+  - Upload de pièces jointes (carte vitale, mutuelle, ordonnance...)
+  - Historique des modifications
 - **Page entreprise publique** (/[slug]) avec :
   - Informations complètes (adresse, téléphone, services)
   - Horaires d'ouverture
@@ -44,6 +49,11 @@ AmbuBook est une plateforme de prise de rendez-vous en ligne pour services ambul
 - **Avatar utilisateur** avec initiales dans le header
 - **Responsive mobile** : icône loupe dans header et SearchBar
 - **CompanyCard optimisée** pour mobile (truncate, boutons adaptés)
+- **Système de Toasts** :
+  - 4 variantes (success, error, warning, info)
+  - Animations slide-in/slide-out
+  - Auto-dismiss configurable (5s par défaut)
+  - Intégré dans tout le projet (réservations, uploads, actions...)
 
 ### Côté Ambulancier (Auth)
 - **Dashboard de gestion** des demandes de transport
@@ -87,7 +97,8 @@ ambubook/
 │   ├── api/                # Routes API REST
 │   │   ├── auth/           # Better Auth endpoints
 │   │   ├── search/         # Recherche ambulanciers (geo, region, city, text)
-│   │   ├── transport-requests/  # Gestion demandes
+│   │   ├── customer/transports/ # API transports clients (liste, détail, réponses, PJ)
+│   │   ├── ambulancier/demandes/ # API demandes ambulanciers
 │   │   ├── companies/me/   # API Mon Entreprise (GET, PATCH, photos, hours)
 │   │   ├── customer-signup/     # Inscription patients
 │   │   └── address/autocomplete/
@@ -105,9 +116,10 @@ ambubook/
 │   └── admin/              # Administration
 │
 ├── components/
-│   ├── ui/                 # Composants réutilisables (Button, Input, Modal...)
+│   ├── ui/                 # Composants réutilisables (Button, Input, Modal, Toast...)
 │   ├── landing/            # Page d'accueil (Header, Hero, Footer, FAQ, Cities...)
 │   ├── booking/            # Flux de réservation (BookingModal, steps/)
+│   ├── demandes/           # Composants partagés (RequestHistory, RequestAttachments)
 │   └── ambulancier/        # Composants dashboard
 │       └── mon-entreprise/ # Cards de gestion entreprise
 │
@@ -191,11 +203,13 @@ npx prisma migrate dev  # Migrations
 - [x] Header flottant Apple-like avec menu adapté selon rôle
 - [x] URLs françaises (/connexion, /inscription)
 - [x] Responsive mobile (icône loupe, CompanyCard optimisée)
+- [x] Système de Toasts (success, error, warning, info) avec animations
+- [x] Page "Mes Transports" pour clients (/mes-transports)
+- [x] Contre-propositions de créneau (côté client + ambulancier)
+- [x] PJ sur les demandes (upload/download côté client et ambulancier)
+- [x] Historique des modifications sur les demandes
 
 ### À faire
 - [ ] Dashboard ambulancier complet
 - [ ] Notifications SMS/Email
-- [ ] Contre-propositions de créneau
-- [ ] Page de suivi patient
 - [ ] Admin dashboard
-- [ ] PJ bon de transport sur les demandes

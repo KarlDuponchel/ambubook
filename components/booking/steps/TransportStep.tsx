@@ -1,13 +1,14 @@
 "use client";
 
+import { useEffect, useMemo } from "react";
 import { Input, Checkbox } from "@/components/ui";
-import { StepProps, BookingFormData } from "../types";
+import { TransportStepProps, BookingFormData } from "../types";
 
 type TransportType = BookingFormData["transportType"];
 type TripType = BookingFormData["tripType"];
 type MobilityType = BookingFormData["mobilityType"];
 
-const TRANSPORT_OPTIONS: { value: TransportType; label: string; description: string; icon: string }[] = [
+const ALL_TRANSPORT_OPTIONS: { value: TransportType; label: string; description: string; icon: string }[] = [
   {
     value: "VSL",
     label: "VSL",
@@ -33,13 +34,39 @@ const MOBILITY_OPTIONS: { value: MobilityType; label: string; description: strin
   { value: "STRETCHER", label: "Brancard", description: "Allongé" },
 ];
 
-export function TransportStep({ formData, setFormData, errors }: StepProps) {
+export function TransportStep({ formData, setFormData, errors, company }: TransportStepProps) {
   const handleChange = <K extends keyof BookingFormData>(
     field: K,
     value: BookingFormData[K]
   ) => {
     setFormData({ ...formData, [field]: value });
   };
+
+  // Filtrer les options selon les services de l'entreprise
+  const transportOptions = useMemo(() => {
+    return ALL_TRANSPORT_OPTIONS.filter((option) => {
+      if (option.value === "AMBULANCE") {
+        return company.hasAmbulance !== false; // true par défaut si non défini
+      }
+      if (option.value === "VSL") {
+        return company.hasVSL !== false; // true par défaut si non défini
+      }
+      return true;
+    });
+  }, [company.hasAmbulance, company.hasVSL]);
+
+  // Si le type sélectionné n'est plus disponible, sélectionner le premier disponible
+  useEffect(() => {
+    if (transportOptions.length > 0) {
+      const isCurrentTypeAvailable = transportOptions.some(
+        (opt) => opt.value === formData.transportType
+      );
+      if (!isCurrentTypeAvailable) {
+        handleChange("transportType", transportOptions[0].value);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transportOptions]);
 
   return (
     <div className="space-y-6">
@@ -48,8 +75,8 @@ export function TransportStep({ formData, setFormData, errors }: StepProps) {
         <label className="block text-sm font-medium text-neutral-700 mb-3">
           Type de véhicule
         </label>
-        <div className="grid grid-cols-2 gap-3">
-          {TRANSPORT_OPTIONS.map((option) => (
+        <div className={`grid gap-3 ${transportOptions.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+          {transportOptions.map((option) => (
             <button
               key={option.value}
               type="button"

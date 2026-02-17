@@ -9,6 +9,8 @@ interface Suggestion {
   slug: string;
   city: string | null;
   distance?: number;
+  hasAmbulance?: boolean;
+  hasVSL?: boolean;
 }
 
 interface AutocompleteProps {

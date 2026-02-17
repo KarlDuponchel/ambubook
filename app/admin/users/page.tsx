@@ -55,7 +55,7 @@ export default function UsersPage() {
   useEffect(() => {
     fetchUsers();
     fetchCompanies();
-  }, [fetchUsers]);
+  }, []);
 
   const handleToggleActive = async (user: User) => {
     const response = await fetch(`/api/admin/users/${user.id}`, {

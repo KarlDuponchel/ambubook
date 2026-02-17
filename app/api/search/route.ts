@@ -53,6 +53,8 @@ interface CompanyWithDistance {
   coverageRadius?: number | null;
   logoUrl?: string | null;
   acceptsOnlineBooking?: boolean;
+  hasAmbulance?: boolean;
+  hasVSL?: boolean;
 }
 
 /**
@@ -122,6 +124,8 @@ export async function GET(request: NextRequest) {
       logoUrl: true,
       acceptsOnlineBooking: true,
       coverageRadius: true,
+      hasAmbulance: true,
+      hasVSL: true,
     },
   });
 
@@ -141,6 +145,8 @@ export async function GET(request: NextRequest) {
       logoUrl: company.logoUrl,
       acceptsOnlineBooking: company.acceptsOnlineBooking,
       coverageRadius: company.coverageRadius,
+      hasAmbulance: company.hasAmbulance,
+      hasVSL: company.hasVSL,
     }))
     .sort((a, b) => a.name.localeCompare(b.name, "fr"))
     .slice(0, limit);
@@ -176,6 +182,8 @@ export async function GET(request: NextRequest) {
           logoUrl: company.logoUrl,
           acceptsOnlineBooking: company.acceptsOnlineBooking,
           coverageRadius: company.coverageRadius,
+          hasAmbulance: company.hasAmbulance,
+          hasVSL: company.hasVSL,
         }))
         .sort((a, b) => a.name.localeCompare(b.name, "fr"))
         .slice(0, limit);
@@ -208,6 +216,8 @@ export async function GET(request: NextRequest) {
       logoUrl: company.logoUrl,
       acceptsOnlineBooking: company.acceptsOnlineBooking,
       coverageRadius: company.coverageRadius,
+      hasAmbulance: company.hasAmbulance,
+      hasVSL: company.hasVSL,
     }))
     .sort((a, b) => a.name.localeCompare(b.name, "fr"))
     .slice(0, limit);
@@ -245,6 +255,8 @@ export async function GET(request: NextRequest) {
           logoUrl: company.logoUrl,
           acceptsOnlineBooking: company.acceptsOnlineBooking,
           coverageRadius: company.coverageRadius,
+          hasAmbulance: company.hasAmbulance,
+          hasVSL: company.hasVSL,
         };
       })
       // Utiliser le rayon de couverture de l'entreprise au lieu du rayon fixe

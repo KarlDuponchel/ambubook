@@ -35,7 +35,7 @@ export function Calendar({ defaultView = "month" }: CalendarProps) {
   // Rafraîchir les données quand la plage de dates change
   useEffect(() => {
     refetch();
-  }, [dateRange.from.getTime(), dateRange.to.getTime()]);
+  }, [dateRange.from.getTime(), dateRange.to.getTime(), refetch]);
 
   const handleDayClick = (date: Date) => {
     goToDate(date);

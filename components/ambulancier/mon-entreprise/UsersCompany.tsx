@@ -1,4 +1,4 @@
-import { User, Users, UserPlus } from "lucide-react";
+import { Users, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { UserData } from "@/lib/types";
 

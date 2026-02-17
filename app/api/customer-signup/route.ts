@@ -44,9 +44,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Créer l'utilisateur via Better Auth
+    // 3. Créer l'utilisateur via Better Auth (avec phone dans les champs additionnels)
     const signUpResponse = await auth.api.signUpEmail({
-      body: { name, email, password },
+      body: { name, email, password, phone: phone || undefined },
     });
 
     if (!signUpResponse.user) {
@@ -56,11 +56,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Mettre à jour avec le téléphone et s'assurer que le rôle est CUSTOMER
+    // 4. S'assurer que le rôle est CUSTOMER (Better Auth ne le set pas automatiquement)
     await prisma.user.update({
       where: { id: signUpResponse.user.id },
       data: {
-        phone: phone || null,
         role: "CUSTOMER",
         isActive: true,
       },

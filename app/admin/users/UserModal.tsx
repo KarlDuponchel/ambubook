@@ -51,7 +51,7 @@ export default function UserModal({
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
         <div className="p-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">
-            Modifier l'utilisateur
+            Modifier l&apos;entreprise
           </h2>
         </div>
 
