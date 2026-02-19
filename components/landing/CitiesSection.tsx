@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Container } from "@/components/ui";
 import { MapPin } from "lucide-react";
 
-// Grandes villes françaises pour le maillage SEO
 const popularCities = [
   { name: "Paris", postalCode: "75000" },
   { name: "Marseille", postalCode: "13000" },
@@ -26,7 +25,6 @@ const popularCities = [
   { name: "Clermont-Ferrand", postalCode: "63000" },
 ];
 
-// Régions pour SEO
 const regions = [
   "Île-de-France",
   "Provence-Alpes-Côte d'Azur",
@@ -46,12 +44,13 @@ export function CitiesSection() {
       <Container>
         {/* Header */}
         <div className="text-center mb-12">
-          <span className="inline-flex items-center gap-2 px-4 py-2 bg-secondary-100 text-secondary-700 rounded-full text-sm font-medium mb-4">
-            <MapPin className="h-4 w-4" />
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold mb-4 tracking-wide">
+            <MapPin className="h-3.5 w-3.5" />
             Couverture nationale
           </span>
           <h2 className="text-3xl lg:text-4xl font-bold text-neutral-900 mb-4">
-            Ambulanciers dans toute la France
+            Ambulanciers dans{" "}
+            <span className="text-primary-600">toute la France</span>
           </h2>
           <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
             Trouvez une société d&apos;ambulances près de chez vous. Notre réseau de partenaires
@@ -60,16 +59,16 @@ export function CitiesSection() {
         </div>
 
         {/* Villes populaires */}
-        <div className="mb-12">
-          <h3 className="text-lg font-semibold text-neutral-900 mb-6 text-center">
+        <div className="mb-10">
+          <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest text-center mb-5">
             Villes les plus recherchées
-          </h3>
-          <div className="flex flex-wrap justify-center gap-3">
+          </p>
+          <div className="flex flex-wrap justify-center gap-2.5">
             {popularCities.map((city) => (
               <Link
                 key={city.name}
                 href={`/recherche?q=${encodeURIComponent(city.name)}`}
-                className="px-4 py-2 bg-white border border-neutral-200 rounded-full text-neutral-700 hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50 transition-all text-sm font-medium"
+                className="px-4 py-2 bg-white border border-neutral-200 rounded-full text-neutral-700 hover:border-primary-400 hover:text-primary-700 hover:bg-primary-50 hover:shadow-sm transition-all duration-200 text-sm font-medium"
               >
                 Ambulance {city.name}
               </Link>
@@ -78,18 +77,18 @@ export function CitiesSection() {
         </div>
 
         {/* Régions */}
-        <div className="bg-white rounded-2xl border border-neutral-200 p-8">
-          <h3 className="text-lg font-semibold text-neutral-900 mb-6 text-center">
+        <div className="bg-white rounded-2xl border border-neutral-200 p-6 lg:p-8">
+          <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest text-center mb-6">
             Transport sanitaire par région
-          </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {regions.map((region) => (
               <Link
                 key={region}
                 href={`/recherche?q=${encodeURIComponent(region)}`}
-                className="text-center p-3 rounded-xl hover:bg-primary-50 transition-colors group"
+                className="text-center px-3 py-2.5 rounded-xl border border-neutral-100 hover:border-primary-200 hover:bg-primary-50 transition-all duration-200 group"
               >
-                <span className="text-neutral-600 group-hover:text-primary-600 text-sm">
+                <span className="text-neutral-600 group-hover:text-primary-700 text-sm font-medium leading-snug block">
                   {region}
                 </span>
               </Link>
@@ -98,17 +97,15 @@ export function CitiesSection() {
         </div>
 
         {/* SEO Text */}
-        <div className="mt-12 max-w-4xl mx-auto">
-          <div className="prose prose-neutral prose-sm max-w-none text-center">
-            <p className="text-neutral-500 leading-relaxed">
-              <strong>Ambubook</strong> vous permet de trouver et réserver un transport sanitaire
-              partout en France. Que vous recherchiez une <strong>ambulance à Paris</strong>,
-              un <strong>VSL à Lyon</strong>, ou un transport médical dans n&apos;importe quelle
-              ville française, notre plateforme vous met en relation avec des professionnels
-              agréés près de chez vous. Consultations médicales, hospitalisations, dialyse,
-              radiothérapie : réservez votre transport en ligne en quelques clics.
-            </p>
-          </div>
+        <div className="mt-10 max-w-4xl mx-auto">
+          <p className="text-neutral-500 text-sm leading-relaxed text-center">
+            <strong className="text-neutral-600">Ambubook</strong> vous permet de trouver et réserver un transport sanitaire
+            partout en France. Que vous recherchiez une <strong className="text-neutral-600">ambulance à Paris</strong>,
+            un <strong className="text-neutral-600">VSL à Lyon</strong>, ou un transport médical dans n&apos;importe quelle
+            ville française, notre plateforme vous met en relation avec des professionnels
+            agréés près de chez vous. Consultations médicales, hospitalisations, dialyse,
+            radiothérapie : réservez votre transport en ligne en quelques clics.
+          </p>
         </div>
       </Container>
     </section>

@@ -267,13 +267,13 @@ export function AccordionSection() {
 
       <section
         id="faq"
-        className="py-20 lg:py-28 bg-gradient-to-br from-white via-secondary-50/30 to-primary-50/20 overflow-hidden"
+        className="py-20 lg:py-28 bg-white overflow-hidden"
       >
         <Container>
           {/* Header */}
           <div className="text-center mb-12 lg:mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-100 text-primary-700 rounded-full text-sm font-medium mb-6">
-              <MessageCircleQuestion className="h-4 w-4" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold mb-5 tracking-wide">
+              <MessageCircleQuestion className="h-3.5 w-3.5" />
               Foire aux questions
             </div>
             <h2 className="text-3xl lg:text-4xl font-bold text-neutral-900 mb-4">
@@ -292,11 +292,13 @@ export function AccordionSection() {
 
           {/* CTA sous l'accordéon */}
           <div className="mt-12 text-center">
-            <div className="inline-flex items-center gap-3 px-6 py-4 bg-white rounded-2xl border border-neutral-200 shadow-sm">
-              <HelpCircle className="h-6 w-6 text-primary-500" />
+            <div className="inline-flex items-center gap-4 px-6 py-4 bg-primary-50 rounded-2xl border border-primary-100">
+              <div className="w-10 h-10 rounded-xl bg-primary-600 flex items-center justify-center shrink-0">
+                <HelpCircle className="h-5 w-5 text-white" />
+              </div>
               <div className="text-left">
                 <p className="text-sm text-neutral-500">Vous avez d&apos;autres questions ?</p>
-                <p className="font-medium text-neutral-900">
+                <p className="font-semibold text-neutral-900">
                   Contactez directement l&apos;ambulancier de votre choix
                 </p>
               </div>

@@ -113,78 +113,103 @@ export function Hero() {
 
   return (
     <>
-      <section className="relative bg-linear-to-b from-primary-50 to-white pt-24">
-        {/* Background decoration */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary-100 rounded-full opacity-50 blur-3xl" />
-          <div className="absolute top-20 -left-20 w-60 h-60 bg-secondary-100 rounded-full opacity-40 blur-3xl" />
+      <section className="relative bg-primary-950 overflow-hidden pt-28 pb-20 lg:pt-36 lg:pb-28">
+        {/* Ambient gradient blobs */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary-600/25 rounded-full blur-[120px]" />
+          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-accent-600/15 rounded-full blur-[100px]" />
+          <div className="absolute top-1/2 -right-20 w-72 h-72 bg-secondary-500/10 rounded-full blur-3xl" />
         </div>
 
+        {/* Subtle grid overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
+            backgroundSize: "56px 56px",
+          }}
+        />
+
         <Container className="relative">
-          <div className="py-16 lg:py-24">
-            {/* Main content */}
-            <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-neutral-900 tracking-tight">
-                Réservez votre{" "}
-                <span className="text-primary-600">transport médical</span>
-                <br />
-                en quelques clics
-              </h1>
-
-              <p className="mt-6 text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
-                Besoin d&apos;une ambulance ou d&apos;un VSL ? Trouvez un transporteur disponible
-                près de chez vous et réservez en ligne, sans appel téléphonique.
-              </p>
-
-              {/* Search form */}
-              <div className="mt-10">
-                <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
-                  <Autocomplete
-                    placeholder="Ville ou nom d'ambulancier..."
-                    onSubmit={handleSearch}
-                    onBookClick={handleBookClick}
-                    className="flex-1"
-                    size="large"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const input = document.querySelector<HTMLInputElement>(
-                        'input[placeholder="Ville ou nom d\'ambulancier..."]'
-                      );
-                      if (input?.value.trim()) {
-                        handleSearch(input.value.trim());
-                      }
-                    }}
-                    className="px-8 py-4 bg-primary-600 text-white font-semibold text-lg rounded-xl hover:bg-primary-700 active:bg-primary-800 transition-colors shadow-lg shadow-primary-500/25"
-                  >
-                    Rechercher
-                  </button>
-                </div>
-              </div>
-
-              {/* Alternative link */}
-              <p className="mt-6 text-neutral-500">
-                Vous avez déjà un lien de votre ambulancier ?{" "}
-                <button
-                  type="button"
-                  className="text-primary-600 hover:text-primary-700 font-medium underline underline-offset-2 cursor-pointer"
-                  onClick={openModal}
-                >
-                  Accédez directement
-                </button>
-              </p>
+          <div className="max-w-3xl mx-auto text-center">
+            {/* Status badge */}
+            <div className="inline-flex items-center gap-2.5 px-4 py-2 bg-white/8 backdrop-blur-sm border border-white/12 rounded-full mb-8">
+              <span className="w-2 h-2 bg-primary-400 rounded-full animate-pulse" />
+              <span className="text-primary-300 text-sm font-medium tracking-wide">
+                Réservation 100&nbsp;% en ligne — sans appel téléphonique
+              </span>
             </div>
 
-            {/* Stats */}
-            {/* <div className="mt-16 pt-10 border-t border-neutral-200">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 max-w-4xl mx-auto">
-                <Stat value="500+" label="Ambulanciers" />
-                <Stat value="15 000+" label="Transports réservés" />
-                <Stat value="4.8/5" label="Satisfaction" />
-                <Stat value="24h/24" label="Disponibilité" />
+            {/* H1 */}
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-[1.08] tracking-tight">
+              Votre{" "}
+              <span className="text-primary-400">transport médical</span>
+              <br />
+              réservé en quelques clics
+            </h1>
+
+            <p className="mt-6 text-lg sm:text-xl text-primary-200/80 max-w-2xl mx-auto leading-relaxed">
+              Ambulance ou VSL — trouvez un transporteur agréé près de chez vous
+              et réservez en ligne, 24h/24.
+            </p>
+
+            {/* Search card */}
+            <div className="mt-10 bg-white rounded-2xl p-2 shadow-2xl shadow-primary-950/60 max-w-xl mx-auto">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Autocomplete
+                  placeholder="Ville ou nom d'ambulancier..."
+                  onSubmit={handleSearch}
+                  onBookClick={handleBookClick}
+                  className="flex-1"
+                  size="large"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const input = document.querySelector<HTMLInputElement>(
+                      'input[placeholder="Ville ou nom d\'ambulancier..."]'
+                    );
+                    if (input?.value.trim()) {
+                      handleSearch(input.value.trim());
+                    }
+                  }}
+                  className="px-7 py-3.5 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-500 active:bg-primary-700 transition-all duration-200 shadow-lg shadow-primary-600/30 whitespace-nowrap"
+                >
+                  Rechercher
+                </button>
               </div>
-            </div> */}
+            </div>
+
+            {/* Alternative link */}
+            <p className="mt-5 text-primary-400/70 text-sm">
+              Vous avez déjà un lien de votre ambulancier ?{" "}
+              <button
+                type="button"
+                className="text-primary-300 hover:text-white font-medium underline underline-offset-2 cursor-pointer transition-colors"
+                onClick={openModal}
+              >
+                Accédez directement
+              </button>
+            </p>
+          </div>
+
+          {/* Stats strip */}
+          <div className="mt-16 pt-10 border-t border-white/10 max-w-2xl mx-auto">
+            <div className="grid grid-cols-3 gap-6 text-center">
+              {[
+                { value: "500+", label: "Ambulanciers partenaires" },
+                { value: "15 000+", label: "Transports réservés" },
+                { value: "4.8 / 5", label: "Satisfaction patients" },
+              ].map((stat) => (
+                <div key={stat.label}>
+                  <div className="text-3xl sm:text-4xl font-bold text-white tabular-nums">
+                    {stat.value}
+                  </div>
+                  <div className="mt-1 text-sm text-primary-400/80">{stat.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </Container>
       </section>

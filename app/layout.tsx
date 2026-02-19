@@ -19,9 +19,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className="light">
+    <html lang="fr" className="light" suppressHydrationWarning>
       <body
         className={`${poppins.className} antialiased bg-background text-foreground`}
+        suppressHydrationWarning
       >
         <ToastProvider>{children}</ToastProvider>
       </body>

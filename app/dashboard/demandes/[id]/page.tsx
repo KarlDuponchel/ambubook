@@ -20,6 +20,9 @@ import {
   Users,
   Route,
   Building2,
+  CheckCircle2,
+  CalendarX,
+  HelpCircle,
 } from "lucide-react";
 import { PageHeader, Card, CardHeader, CardContent, LoadingSpinner, StatusBadge, useToast } from "@/components/ui";
 import { RequestHistory, RequestAttachments } from "@/components/demandes";
@@ -74,7 +77,9 @@ export default function DemandeDetailPage({ params }: { params: Promise<{ id: st
   const [actionLoading, setActionLoading] = useState(false);
   const [showRefuseModal, setShowRefuseModal] = useState(false);
   const [showCounterModal, setShowCounterModal] = useState(false);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [responseNote, setResponseNote] = useState("");
+  const [completeNote, setCompleteNote] = useState("");
   const [proposedDate, setProposedDate] = useState("");
   const [proposedTime, setProposedTime] = useState("");
 
@@ -171,6 +176,10 @@ export default function DemandeDetailPage({ params }: { params: Promise<{ id: st
           toast.info("Demande refusée");
         } else if (action === "counter_proposal") {
           toast.success("Contre-proposition envoyée");
+        } else if (action === "complete") {
+          toast.success("Transport clôturé avec succès");
+          setShowCompleteModal(false);
+          setCompleteNote("");
         }
       } else {
         toast.error("Erreur lors du traitement de la demande");
@@ -240,6 +249,16 @@ export default function DemandeDetailPage({ params }: { params: Promise<{ id: st
   const status = statusConfig[demande.status];
   const isPending = demande.status === "PENDING";
 
+  // Calcul des dates pour la logique de clôture
+  const transportDate = new Date(`${demande.requestedDate}T${demande.requestedTime ?? "00:00"}`);
+  const isDatePassed = transportDate < new Date();
+
+  const proposedTransportDate =
+    demande.proposedDate && demande.proposedTime
+      ? new Date(`${demande.proposedDate}T${demande.proposedTime}`)
+      : null;
+  const isProposedDatePassed = proposedTransportDate ? proposedTransportDate < new Date() : false;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -261,8 +280,8 @@ export default function DemandeDetailPage({ params }: { params: Promise<{ id: st
         }
       />
 
-      {/* Actions pour demande en attente */}
-      {isPending && (
+      {/* Cas 1 : En attente de réponse */}
+      {isPending && !isDatePassed && (
         <div className="bg-warning-50 border border-warning-200 rounded-2xl p-4 shadow-sm">
           <p className="text-warning-800 font-medium mb-4">Cette demande est en attente de votre réponse</p>
           <div className="flex flex-wrap gap-3">
@@ -290,6 +309,125 @@ export default function DemandeDetailPage({ params }: { params: Promise<{ id: st
               <XCircle className="h-4 w-4" />
               Refuser
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Cas 2 : PENDING + date passée — demande jamais traitée */}
+      {isPending && isDatePassed && (
+        <div className="bg-danger-50 border border-danger-200 rounded-2xl p-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <CalendarX className="h-5 w-5 text-danger-600 mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-semibold text-danger-900">Date de transport dépassée — demande non traitée</p>
+              <p className="text-sm text-danger-700 mt-1">
+                La date demandée ({formatDate(demande.requestedDate)} à {demande.requestedTime}) est passée
+                sans réponse de votre part.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  onClick={() => setShowCompleteModal(true)}
+                  disabled={actionLoading}
+                  className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 disabled:opacity-50 transition-colors text-sm"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Le transport a eu lieu — clôturer
+                </button>
+                <button
+                  onClick={() => handleAction("refuse", "Date de transport expirée — demande non traitée")}
+                  disabled={actionLoading}
+                  className="flex items-center gap-2 px-4 py-2 bg-danger-600 text-white rounded-xl hover:bg-danger-700 disabled:opacity-50 transition-colors text-sm"
+                >
+                  <XCircle className="h-4 w-4" />
+                  Marquer comme expirée
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cas 3 : ACCEPTED + date passée — clôture normale */}
+      {demande.status === "ACCEPTED" && isDatePassed && (
+        <div className="bg-primary-50 border border-primary-200 rounded-2xl p-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <CheckCircle2 className="h-5 w-5 text-primary-600 mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-semibold text-primary-900">
+                Transport du {formatDate(demande.requestedDate)} à {demande.requestedTime} — date passée
+              </p>
+              <p className="text-sm text-primary-700 mt-1">
+                Si le transport a bien eu lieu, clôturez cette demande pour garder votre tableau de bord à jour.
+              </p>
+              <div className="mt-3">
+                <button
+                  onClick={() => setShowCompleteModal(true)}
+                  disabled={actionLoading}
+                  className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 disabled:opacity-50 transition-colors text-sm font-medium"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Clôturer — transport effectué
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cas 4 : ACCEPTED + date future — clôture anticipée */}
+      {demande.status === "ACCEPTED" && !isDatePassed && (
+        <div className="bg-neutral-50 border border-neutral-200 rounded-2xl px-4 py-3 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm text-neutral-600">
+              <Calendar className="h-4 w-4 text-success-600" />
+              <span>
+                Transport prévu le{" "}
+                <span className="font-medium text-neutral-900">{formatDate(demande.requestedDate)}</span>{" "}
+                à <span className="font-medium text-neutral-900">{demande.requestedTime}</span>
+              </span>
+            </div>
+            <button
+              onClick={() => setShowCompleteModal(true)}
+              disabled={actionLoading}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm text-primary-700 bg-primary-100 hover:bg-primary-200 rounded-lg disabled:opacity-50 transition-colors"
+            >
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Clôturer par anticipation
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Cas 5 : COUNTER_PROPOSAL + date proposée passée */}
+      {demande.status === "COUNTER_PROPOSAL" && isProposedDatePassed && (
+        <div className="bg-accent-50 border border-accent-200 rounded-2xl p-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <HelpCircle className="h-5 w-5 text-accent-600 mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-semibold text-accent-900">Date de votre contre-proposition passée</p>
+              <p className="text-sm text-accent-700 mt-1">
+                La date proposée ({formatDate(demande.proposedDate!)} à {demande.proposedTime}) est passée.
+                Le transport a-t-il finalement eu lieu ?
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  onClick={() => setShowCompleteModal(true)}
+                  disabled={actionLoading}
+                  className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 disabled:opacity-50 transition-colors text-sm"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Oui — clôturer
+                </button>
+                <button
+                  onClick={() => setShowRefuseModal(true)}
+                  disabled={actionLoading}
+                  className="flex items-center gap-2 px-4 py-2 bg-danger-600 text-white rounded-xl hover:bg-danger-700 disabled:opacity-50 transition-colors text-sm"
+                >
+                  <XCircle className="h-4 w-4" />
+                  Non — refuser
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -619,6 +757,81 @@ export default function DemandeDetailPage({ params }: { params: Promise<{ id: st
                 className="px-4 py-2 bg-danger-600 text-white rounded-xl hover:bg-danger-700 disabled:opacity-50 transition-colors"
               >
                 {actionLoading ? "..." : "Refuser"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Clôture */}
+      {showCompleteModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center">
+                <CheckCircle2 className="h-5 w-5 text-primary-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-neutral-900">Clôturer le transport</h3>
+            </div>
+            <p className="text-sm text-neutral-600 mb-4">
+              Cette action marque le transport comme <strong>effectué</strong> et le retire de vos demandes actives.
+              Le patient sera notifié.
+            </p>
+
+            {/* Phrases pré-définies */}
+            <div className="mb-3">
+              <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-2">
+                Réponse rapide
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  "Transport effectué sans incident.",
+                  "Transport annulé à la dernière minute.",
+                  "Patient pris en charge et transporté à destination.",
+                  "Transport effectué, patient en bonne santé.",
+                ].map((phrase) => (
+                  <button
+                    key={phrase}
+                    type="button"
+                    onClick={() => setCompleteNote(phrase)}
+                    className={`px-3 py-1.5 rounded-lg border text-xs transition-all ${
+                      completeNote === phrase
+                        ? "bg-primary-600 text-white border-primary-600"
+                        : "bg-white text-neutral-600 border-neutral-200 hover:border-primary-300 hover:text-primary-700"
+                    }`}
+                  >
+                    {phrase}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">
+                Note personnalisée <span className="text-neutral-400 font-normal">(optionnel)</span>
+              </label>
+              <textarea
+                value={completeNote}
+                onChange={(e) => setCompleteNote(e.target.value)}
+                placeholder="Ex : Transport effectué sans incident, patient pris en charge à 09h15..."
+                className="w-full px-4 py-3 border border-input-border rounded-xl bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none h-24 text-sm"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={() => { setShowCompleteModal(false); setCompleteNote(""); }}
+                className="px-4 py-2 text-neutral-600 hover:bg-neutral-100 rounded-xl transition-colors text-sm"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={() => handleAction("complete", completeNote || undefined)}
+                disabled={actionLoading}
+                className="flex items-center gap-2 px-5 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 disabled:opacity-50 transition-colors text-sm font-medium"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                {actionLoading ? "Clôture en cours..." : "Confirmer la clôture"}
               </button>
             </div>
           </div>

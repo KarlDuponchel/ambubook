@@ -1,4 +1,5 @@
 import { Container } from "@/components/ui";
+import { Search, CalendarCheck, CheckCircle2 } from "lucide-react";
 
 const steps = [
   {
@@ -6,93 +7,68 @@ const steps = [
     title: "Recherchez",
     description:
       "Entrez votre ville ou le nom de votre ambulancier pour trouver un transporteur disponible près de chez vous.",
-    icon: (
-      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={1.5}
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
-      </svg>
-    ),
+    Icon: Search,
   },
   {
     step: "02",
     title: "Réservez",
     description:
       "Remplissez le formulaire avec vos informations : date, heure, adresses de départ et d'arrivée, type de transport.",
-    icon: (
-      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={1.5}
-          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-        />
-      </svg>
-    ),
+    Icon: CalendarCheck,
   },
   {
     step: "03",
-    title: "Confirmez",
+    title: "Confirmé",
     description:
       "Recevez la confirmation par SMS et email. Suivez l'état de votre demande en temps réel jusqu'au jour J.",
-    icon: (
-      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={1.5}
-          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-    ),
+    Icon: CheckCircle2,
   },
 ];
 
 export function HowItWorks() {
   return (
-    <section id="comment-ca-marche" className="bg-neutral-50">
-      <Container>
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="inline-block px-4 py-1.5 bg-primary-100 text-primary-700 text-sm font-medium rounded-full mb-4">
+    <section id="comment-ca-marche" className="py-20 lg:py-28 bg-primary-950 overflow-hidden">
+      {/* Ambient decoration */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-primary-700/20 rounded-full blur-3xl -translate-x-1/2" />
+        <div className="absolute bottom-0 right-0 w-80 h-80 bg-accent-700/15 rounded-full blur-3xl translate-x-1/2" />
+      </div>
+
+      <Container className="relative">
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <span className="inline-block px-4 py-1.5 bg-white/10 text-primary-300 text-sm font-semibold rounded-full mb-4 tracking-wide">
             Simple et efficace
           </span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-neutral-900">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white">
             Comment ça marche ?
           </h2>
-          <p className="mt-4 text-lg text-neutral-600">
+          <p className="mt-4 text-lg text-primary-300/80">
             Réserver votre transport médical n&apos;a jamais été aussi simple.
             En 3 étapes, c&apos;est fait.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
           {steps.map((step, index) => (
             <div key={step.step} className="relative">
-              {/* Connector line */}
+              {/* Connector */}
               {index < steps.length - 1 && (
-                <div className="hidden md:block absolute top-12 left-1/2 w-full h-0.5 bg-gradient-to-r from-primary-200 to-primary-100" />
+                <div className="hidden md:block absolute top-10 left-[calc(50%+4rem)] right-0 h-px bg-gradient-to-r from-primary-700 to-transparent z-0" />
               )}
 
-              <div className="relative bg-white rounded-2xl p-8 shadow-sm border border-neutral-100 hover:shadow-md hover:border-primary-100 transition-all duration-300">
-                {/* Step number */}
-                <div className="absolute -top-4 left-8 px-3 py-1 bg-primary-600 text-white text-sm font-bold rounded-full">
+              <div className="relative bg-white/6 border border-white/10 backdrop-blur-sm rounded-2xl p-7 hover:bg-white/10 hover:border-white/20 transition-all duration-300 group">
+                {/* Step badge */}
+                <div className="absolute -top-3 left-6 px-3 py-1 bg-primary-600 text-white text-xs font-bold rounded-full tracking-widest">
                   {step.step}
                 </div>
 
                 {/* Icon */}
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-50 to-primary-100 text-primary-600 flex items-center justify-center mb-6">
-                  {step.icon}
+                <div className="w-14 h-14 rounded-xl bg-primary-800/60 text-primary-300 flex items-center justify-center mb-5 group-hover:bg-primary-700/60 transition-colors">
+                  <step.Icon className="w-6 h-6" strokeWidth={1.75} />
                 </div>
 
-                <h3 className="text-xl font-bold text-neutral-900 mb-3">
-                  {step.title}
-                </h3>
-                <p className="text-neutral-600 leading-relaxed">
-                  {step.description}
-                </p>
+                <h3 className="text-xl font-bold text-white mb-2">{step.title}</h3>
+                <p className="text-primary-300/80 leading-relaxed text-sm">{step.description}</p>
               </div>
             </div>
           ))}
