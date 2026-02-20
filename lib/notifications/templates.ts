@@ -33,6 +33,8 @@ export function getNotificationTemplates(
       return transportNewRequestTemplates(data);
     case "TRANSPORT_REMINDER":
       return transportReminderTemplates(data);
+    case "TRANSPORT_COMPLETED":
+      return transportCompletedTemplates(data);
     case "TRANSPORT_CUSTOMER_RESPONSE":
       return transportCustomerResponseTemplates(data);
     case "WELCOME_CUSTOMER":
@@ -47,6 +49,8 @@ export function getNotificationTemplates(
       return transportAttachmentAddedTemplates(data);
     case "ADMIN_NEW_SIGNUP":
       return adminNewSignupTemplates(data);
+    case "PASSWORD_RESET_REQUEST":
+      return passwordResetRequestTemplates(data);
     default:
       return defaultTemplates(data);
   }
@@ -192,6 +196,34 @@ function transportReminderTemplates(data: Record<string, unknown>): Notification
     `,
     emailText: `Rappel ${patientName},\n\nVotre transport avec ${companyName} est prévu demain.\n\nDate: ${date}\nHeure: ${time}\nAdresse: ${pickupAddress}\n\nL'équipe AmbuBook`,
     smsMessage: `AmbuBook: Rappel ${patientName}, votre transport avec ${companyName} est prévu demain ${date} à ${time}. Adresse: ${pickupAddress}`,
+  };
+}
+
+function transportCompletedTemplates(data: Record<string, unknown>): NotificationTemplates {
+  const { patientName, companyName, date, time, note, trackingId } = data as {
+    patientName: string;
+    companyName: string;
+    date: string;
+    time: string;
+    note?: string;
+    trackingId?: string;
+  };
+
+  const trackingUrl = trackingId ? `${BASE_URL}/mes-transports/${trackingId}` : BASE_URL;
+
+  return {
+    emailSubject: `Votre transport a été effectué - AmbuBook`,
+    emailHtml: `
+      <h2>Bonjour ${patientName},</h2>
+      <p>Votre transport avec <strong>${companyName}</strong> du <strong>${date} à ${time}</strong> a été clôturé.</p>
+      ${note ? `<p><strong>Note de l'ambulancier :</strong> ${note}</p>` : ""}
+      <p>Nous espérons que votre transport s'est bien passé. N'hésitez pas à réserver à nouveau sur AmbuBook pour vos prochains transports médicaux.</p>
+      <p><a href="${trackingUrl}" style="display:inline-block;padding:12px 24px;background:#0d9488;color:white;text-decoration:none;border-radius:6px;">Voir ma demande</a></p>
+      <br>
+      <p>Merci de votre confiance,<br>L'équipe AmbuBook</p>
+    `,
+    emailText: `Bonjour ${patientName},\n\nVotre transport avec ${companyName} du ${date} à ${time} a été clôturé.${note ? `\n\nNote de l'ambulancier : ${note}` : ""}\n\nNous espérons que votre transport s'est bien passé.\n\nVoir votre demande : ${trackingUrl}\n\nL'équipe AmbuBook`,
+    smsMessage: `AmbuBook: Votre transport avec ${companyName} du ${date} a été clôturé. Merci de votre confiance.`,
   };
 }
 
@@ -403,6 +435,37 @@ function adminNewSignupTemplates(data: Record<string, unknown>): NotificationTem
     `,
     emailText: `Nouvelle inscription AmbuBook\n\nNom: ${userName}\nEmail: ${userEmail}\nSociété: ${companyName}\n\nValidez le compte: ${adminUrl}`,
     smsMessage: `AmbuBook Admin: Nouveau compte en attente - ${userName} (${companyName})`,
+  };
+}
+
+// ============================================
+// SYSTÈME - RESET PASSWORD
+// ============================================
+
+function passwordResetRequestTemplates(data: Record<string, unknown>): NotificationTemplates {
+  const { userName, resetUrl } = data as {
+    userName: string;
+    resetUrl: string;
+  };
+
+  return {
+    emailSubject: `Réinitialisez votre mot de passe - AmbuBook`,
+    emailHtml: `
+      <h2>Bonjour ${userName},</h2>
+      <p>Vous avez demandé à réinitialiser votre mot de passe sur AmbuBook.</p>
+      <p>Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe :</p>
+      <p style="margin: 24px 0;">
+        <a href="${resetUrl}" style="display:inline-block;padding:12px 24px;background:#2563eb;color:white;text-decoration:none;border-radius:6px;font-weight:500;">
+          Réinitialiser mon mot de passe
+        </a>
+      </p>
+      <p style="color:#666;font-size:14px;">Ce lien expire dans 1 heure.</p>
+      <p style="color:#666;font-size:14px;">Si vous n'avez pas fait cette demande, ignorez simplement cet email.</p>
+      <br>
+      <p>L'équipe AmbuBook</p>
+    `,
+    emailText: `Bonjour ${userName},\n\nVous avez demandé à réinitialiser votre mot de passe sur AmbuBook.\n\nCliquez sur ce lien pour créer un nouveau mot de passe : ${resetUrl}\n\nCe lien expire dans 1 heure.\n\nSi vous n'avez pas fait cette demande, ignorez simplement cet email.\n\nL'équipe AmbuBook`,
+    smsMessage: `AmbuBook: Votre lien de réinitialisation de mot de passe : ${resetUrl} (expire dans 1h)`,
   };
 }
 

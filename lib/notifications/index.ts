@@ -26,6 +26,7 @@ const TRANSPORT_UPDATE_TYPES: NotificationType[] = [
   "TRANSPORT_ACCEPTED",
   "TRANSPORT_REFUSED",
   "TRANSPORT_COUNTER_PROPOSAL",
+  "TRANSPORT_COMPLETED",
   "TRANSPORT_NEW_REQUEST",
   "TRANSPORT_CUSTOMER_RESPONSE",
   "TRANSPORT_ATTACHMENT_ADDED",
@@ -695,6 +696,37 @@ export async function notifyTransportAttachmentAdded(params: {
       phone: params.recipientPhone,
       userId: params.userId,
       name: params.recipientName,
+    },
+    channels,
+    data: params,
+  });
+}
+
+/**
+ * Notifier le client que son transport a été clôturé
+ */
+export async function notifyTransportCompleted(params: {
+  patientName: string;
+  patientEmail?: string;
+  patientPhone: string;
+  companyName: string;
+  date: string;
+  time: string;
+  note?: string;
+  trackingId?: string;
+  userId?: string;
+}): Promise<SendNotificationResult> {
+  const channels: NotificationChannel[] = ["sms"];
+  if (params.patientEmail) channels.push("email");
+  if (params.userId) channels.push("inapp");
+
+  return sendNotification({
+    type: "TRANSPORT_COMPLETED",
+    recipient: {
+      email: params.patientEmail,
+      phone: params.patientPhone,
+      userId: params.userId,
+      name: params.patientName,
     },
     channels,
     data: params,

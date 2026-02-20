@@ -10,6 +10,7 @@ export type NotificationType =
   | "TRANSPORT_REFUSED" // Demande refusée
   | "TRANSPORT_COUNTER_PROPOSAL" // Contre-proposition reçue
   | "TRANSPORT_REMINDER" // Rappel J-1
+  | "TRANSPORT_COMPLETED" // Transport clôturé / effectué
 
   // Transport - Ambulancier
   | "TRANSPORT_NEW_REQUEST" // Nouvelle demande reçue
@@ -25,7 +26,8 @@ export type NotificationType =
   | "ADMIN_NEW_SIGNUP" // Nouvelle inscription en attente
 
   // Système
-  | "VERIFICATION_CODE"; // Code de vérification
+  | "VERIFICATION_CODE" // Code de vérification
+  | "PASSWORD_RESET_REQUEST"; // Demande de réinitialisation mot de passe
 
 // Canaux de notification
 export type NotificationChannel = "email" | "sms" | "inapp";
@@ -80,6 +82,7 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   TRANSPORT_REFUSED: "Transport refusé",
   TRANSPORT_COUNTER_PROPOSAL: "Contre-proposition",
   TRANSPORT_REMINDER: "Rappel de transport",
+  TRANSPORT_COMPLETED: "Transport clôturé",
   TRANSPORT_NEW_REQUEST: "Nouvelle demande",
   TRANSPORT_CUSTOMER_RESPONSE: "Réponse client",
   TRANSPORT_ATTACHMENT_ADDED: "Pièce jointe ajoutée",
@@ -88,6 +91,7 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   ACCOUNT_ACTIVATED: "Compte activé",
   ADMIN_NEW_SIGNUP: "Nouvelle inscription",
   VERIFICATION_CODE: "Code de vérification",
+  PASSWORD_RESET_REQUEST: "Réinitialisation mot de passe",
 };
 
 // Labels français pour les canaux

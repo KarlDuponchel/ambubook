@@ -249,7 +249,6 @@ export default function ParametresPage() {
                 className="px-3 py-2 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="fr">Français</option>
-                <option value="en">English</option>
               </select>
             </div>
 
@@ -276,21 +275,6 @@ export default function ParametresPage() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Actions dangereuses */}
-      <div className="rounded-xl border border-danger-200 bg-card-bg">
-        <div className="px-6 py-4 border-b border-danger-200">
-          <h2 className="text-lg font-semibold text-danger-600">Zone de danger</h2>
-        </div>
-        <div className="p-6">
-          <p className="text-sm text-neutral-600 mb-4">
-            Ces actions sont irréversibles. Procédez avec précaution.
-          </p>
-          <button className="px-4 py-2 text-sm font-medium text-danger-600 border border-danger-300 rounded-lg hover:bg-danger-50 transition-colors">
-            Supprimer mon compte
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

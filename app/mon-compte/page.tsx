@@ -16,6 +16,7 @@ interface UserInfo {
   name: string;
   email: string;
   phone: string | null;
+  imageUrl: string | null;
 }
 
 export default function MonComptePage() {
@@ -26,15 +27,17 @@ export default function MonComptePage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("/api/auth/check-status");
-        const data = await res.json();
+        const res = await fetch("/api/user/me");
 
-        if (!data.isLoggedIn) {
+        if (res.status === 401) {
           router.push("/connexion?redirect=/mon-compte");
           return;
         }
 
-        setUser(data.user);
+        if (!res.ok) throw new Error();
+
+        const data = await res.json() as UserInfo;
+        setUser(data);
       } catch (error) {
         console.error("Erreur:", error);
         router.push("/connexion");
@@ -48,11 +51,20 @@ export default function MonComptePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-100">
         <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
       </div>
     );
   }
+
+  const initials = user
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : "";
 
   return (
     <div className="space-y-6">
@@ -66,24 +78,33 @@ export default function MonComptePage() {
 
       {/* Carte profil */}
       {user && (
-        <div className="bg-white rounded-xl border border-neutral-200 p-6">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-xl font-semibold shadow-sm">
-              {user.name
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .toUpperCase()
-                .slice(0, 2)}
+        <div className="bg-white rounded-xl border border-neutral-200">
+          <Link
+              href="/mon-compte/profil" className="flex items-center justify-between  p-6 hover:bg-neutral-50 transition-colors">
+            <div className="flex items-center gap-4">
+              <div className="relative shrink-0">
+                {user.imageUrl ? (
+                  <img
+                    src={user.imageUrl}
+                    alt="Photo de profil"
+                    className="w-14 h-14 rounded-full object-cover shadow-sm"
+                  />
+                ) : (
+                  <div className="w-14 h-14 rounded-full bg-linear-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-xl font-semibold shadow-sm">
+                    {initials}
+                  </div>
+                )}
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-neutral-900">{user.name}</h2>
+                <p className="text-neutral-500">{user.email}</p>
+                {user.phone && (
+                  <p className="text-sm text-neutral-400">{user.phone}</p>
+                )}
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-semibold text-neutral-900">{user.name}</h2>
-              <p className="text-neutral-500">{user.email}</p>
-              {user.phone && (
-                <p className="text-sm text-neutral-400">{user.phone}</p>
-              )}
-            </div>
-          </div>
+            <ChevronRight className="h-5 w-5 text-neutral-400" />
+          </Link>
         </div>
       )}
 
@@ -119,6 +140,24 @@ export default function MonComptePage() {
               <p className="font-medium text-neutral-900">Réserver un transport</p>
               <p className="text-sm text-neutral-500">
                 Trouvez un ambulancier près de chez vous
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="h-5 w-5 text-neutral-400" />
+        </Link>
+
+        <Link
+          href="/mon-compte/profil"
+          className="flex items-center justify-between p-4 hover:bg-neutral-50 transition-colors"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center">
+              <User className="h-5 w-5 text-primary-600" />
+            </div>
+            <div>
+              <p className="font-medium text-neutral-900">Mon profil</p>
+              <p className="text-sm text-neutral-500">
+                Nom, téléphone et photo de profil
               </p>
             </div>
           </div>

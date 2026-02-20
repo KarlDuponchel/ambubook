@@ -1,3 +1,15 @@
+# Modification de profil ambulancier + photo de profil S3
+
+## Implémentation
+- [x] `app/api/ambulancier/me/route.ts` — GET étendu (phone + imageUrl) + PATCH
+- [x] `app/api/ambulancier/me/image/route.ts` — POST (upload S3) + DELETE
+- [x] `app/dashboard/profil/page.tsx` — fetch réel, upload photo, sauvegarde
+
+## Vérification
+- [x] `npx tsc --noEmit` sans erreur
+
+---
+
 # Modal de Prise de Rendez-vous Transport Médical
 
 ## Phase 1 : Composants UI de base
@@ -970,6 +982,7 @@ Widget flottant (infobulle) présent sur toutes les pages client et dashboard pe
   - Body : type, subject, message, screenshot (base64 optionnel), pageUrl
   - Récupérer userAgent automatiquement
   - Upload screenshot vers S3 si fourni
+  - **Rate limiting** : utiliser `lib/rate-limit.ts` (ex: 5 feedbacks/heure)
 
 ### 2.2 Notification admin
 - [ ] Envoyer email à l'admin lors d'un nouveau feedback
@@ -1181,7 +1194,7 @@ Audit et renforcement de la sécurité de la plateforme AmbuBook : authentificat
 - [ ] Configurer les cookies sécurisés (HttpOnly, Secure, SameSite)
 
 ### 1.2 Renforcement connexion
-- [ ] Rate limiting sur /api/auth/login (ex: 5 tentatives/15min)
+- [x] Rate limiting sur /api/auth/sign-in/email (5 tentatives / 5 min) - configuré dans `lib/auth.ts`
 - [ ] Détection de connexions suspectes (nouvel appareil, nouvelle IP)
 - [ ] Option 2FA pour les admins (TOTP avec authenticator)
 - [ ] Logs des connexions (IP, user-agent, timestamp)
@@ -1189,8 +1202,17 @@ Audit et renforcement de la sécurité de la plateforme AmbuBook : authentificat
 ### 1.3 Mots de passe
 - [ ] Politique de mot de passe (min 8 chars, complexité)
 - [ ] Vérification contre liste de mots de passe compromis (haveibeenpwned API)
-- [ ] Expiration des liens de reset password (1h max)
-- [ ] Mise en place du "forgot password"
+- [x] Expiration des liens de reset password (1h max) - Better Auth par défaut
+- [x] Mise en place du "forgot password"
+  - [x] `lib/auth.ts` : ajout `sendResetPassword` dans `emailAndPassword`
+  - [x] Pages customer : `/mot-de-passe-oublie` et `/reinitialiser-mot-de-passe`
+  - [x] Pages dashboard : `/dashboard/mot-de-passe-oublie` et `/dashboard/reinitialiser-mot-de-passe`
+  - [x] Liens "Mot de passe oublié ?" sur pages de connexion
+  - [x] Message de succès après reset sur pages de connexion
+- [x] Changement de mot de passe (utilisateur connecté)
+  - [x] `components/auth/ChangePasswordModal.tsx` : modal réutilisable
+  - [x] Intégration dans `/mon-compte/profil` (section Sécurité ajoutée)
+  - [x] Intégration dans `/dashboard/profil` (bouton rendu fonctionnel)
 
 ---
 
@@ -1497,3 +1519,14 @@ Optimisation du référencement naturel (SEO) pour maximiser la visibilité d'Am
 - [ ] HTTPS partout
 - [ ] Temps de chargement < 3s
 - [ ] Mobile-friendly validé
+
+# Dashboard Ambulancier
+
+## Synchronisation planning
+- [ ] Synchroniser le planning avec celui choisi par l'ambulancier (Outlook, Google Calendar, etc.)
+
+## Vacances
+- [ ] Possibilités de définir des dates de congés en tant qu'ambulancier
+
+## Pièces jointes
+- [ ] Autoriser la caméra photo si téléphone

@@ -10,6 +10,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const registered = searchParams.get("registered");
   const redirect = searchParams.get("redirect");
+  const reset = searchParams.get("reset");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,6 +62,14 @@ function LoginForm() {
           </div>
         )}
 
+        {reset === "success" && (
+          <div className="bg-green-50 text-green-700 p-3 rounded-md text-sm">
+            <strong>Mot de passe modifié !</strong>
+            <br />
+            Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.
+          </div>
+        )}
+
         {error && (
           <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
             {error}
@@ -101,6 +110,14 @@ function LoginForm() {
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-black focus:ring-primary-500 focus:border-transparent"
             placeholder="Votre mot de passe"
           />
+          <div className="text-right mt-1">
+            <Link
+              href="/mot-de-passe-oublie"
+              className="text-sm text-primary-600 hover:underline"
+            >
+              Mot de passe oublié ?
+            </Link>
+          </div>
         </div>
 
         <button

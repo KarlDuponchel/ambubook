@@ -8,6 +8,7 @@ import {
   notifyTransportAccepted,
   notifyTransportRefused,
   notifyTransportCounterProposal,
+  notifyTransportCompleted,
 } from "@/lib/notifications";
 
 // GET - Récupérer les détails d'une demande
@@ -279,6 +280,20 @@ export async function PATCH(
         userId: existingDemande.userId || undefined,
       }).catch((err) => {
         console.error("Erreur notification transport refusé:", err);
+      });
+    } else if (action === "complete") {
+      notifyTransportCompleted({
+        patientName,
+        patientEmail: existingDemande.patientEmail || undefined,
+        patientPhone: existingDemande.patientPhone,
+        companyName: existingDemande.company.name,
+        date: formattedDate,
+        time: existingDemande.requestedTime,
+        note: responseNote || undefined,
+        trackingId: existingDemande.trackingId,
+        userId: existingDemande.userId || undefined,
+      }).catch((err) => {
+        console.error("Erreur notification transport clôturé:", err);
       });
     } else if (action === "counter_proposal") {
       notifyTransportCounterProposal({

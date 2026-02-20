@@ -9,9 +9,22 @@ import {
   notifyTransportRequestCreated,
   notifyNewTransportRequest,
 } from "@/lib/notifications";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 // POST - Créer une nouvelle demande de transport
 export async function POST(request: NextRequest) {
+  // Rate limiting : max 5 demandes par heure par IP
+  const rateLimitResult = await rateLimit({
+    identifier: "create-transport",
+    window: 3600, // 1 heure
+    max: 5,
+  });
+
+  if (!rateLimitResult.success) {
+    const retryAfter = Math.ceil((rateLimitResult.reset - Date.now()) / 1000);
+    return rateLimitResponse(retryAfter);
+  }
+
   try {
     const body = await request.json();
 

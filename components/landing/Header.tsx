@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import useSWR from "swr";
 import { LogOut, Truck, ChevronDown, Calendar, User, LayoutDashboard, Building2, Search, Settings } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
 import { NotificationBell } from "@/components/notifications";
 
-function UserAvatar({ name, size = "md" }: { name: string; size?: "sm" | "md" }) {
+const fetcher = (url: string) => fetch(url).then((r) => r.ok ? r.json() : null);
+
+function UserAvatar({ name, imageUrl, size = "md" }: { name: string; imageUrl?: string | null; size?: "sm" | "md" }) {
   const initials = name
     .split(" ")
     .map((n) => n[0])
@@ -15,6 +18,16 @@ function UserAvatar({ name, size = "md" }: { name: string; size?: "sm" | "md" })
     .slice(0, 2);
 
   const sizeClasses = size === "sm" ? "w-8 h-8 text-xs" : "w-9 h-9 text-sm";
+
+  if (imageUrl) {
+    return (
+      <img
+        src={imageUrl}
+        alt={name}
+        className={`${sizeClasses} rounded-full object-cover shadow-sm`}
+      />
+    );
+  }
 
   return (
     <div
@@ -35,6 +48,23 @@ export function Header() {
   // Vérifier le rôle de l'utilisateur
   const userRole = (session?.user as { role?: string })?.role;
   const isAmbulancier = userRole === "AMBULANCIER" || userRole === "ADMIN";
+
+  // Clé SWR nulle tant que la session n'est pas chargée → pas de fetch
+  const profileEndpoint = session?.user
+    ? isAmbulancier ? "/api/ambulancier/me" : "/api/user/me"
+    : null;
+
+  const { data: profileData } = useSWR<{ imageUrl?: string | null }>(
+    profileEndpoint,
+    fetcher,
+    {
+      revalidateOnFocus: false,       // pas de refetch au retour sur l'onglet
+      revalidateOnReconnect: false,   // pas de refetch à la reconnexion réseau
+      dedupingInterval: 5 * 60 * 1000, // 5 min de cache partagé entre composants
+    }
+  );
+
+  const profileImageUrl = profileData?.imageUrl ?? null;
 
   // Fermer les menus si on clique en dehors
   useEffect(() => {
@@ -138,7 +168,7 @@ export function Header() {
                       : "border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50"
                   }`}
                 >
-                  <UserAvatar name={session.user.name || "U"} size="sm" />
+                  <UserAvatar name={session.user.name || "U"} imageUrl={profileImageUrl} size="sm" />
                   <ChevronDown
                     className={`w-4 h-4 text-neutral-500 transition-transform ${
                       userMenuOpen ? "rotate-180" : ""
@@ -249,13 +279,13 @@ export function Header() {
               <>
                 <Link
                   href="/connexion"
-                  className="px-4 py-2 text-neutral-700 hover:text-neutral-900 font-medium rounded-lg hover:bg-neutral-50 transition-all"
+                  className="px-4 py-2 text-primary-600 hover:text-primary-700 font-medium rounded-lg hover:bg-neutral-50 transition-all"
                 >
                   Connexion
                 </Link>
                 <Link
                   href="/inscription"
-                  className="px-4 py-2 text-primary-600 hover:text-primary-700 font-medium rounded-lg hover:bg-primary-50 transition-all"
+                  className="px-4 py-2 text-white hover:bg-primary-700 font-medium rounded-lg bg-primary-600 transition-all"
                 >
                   Créer un compte
                 </Link>
@@ -370,7 +400,7 @@ export function Header() {
             {session?.user ? (
               <div className="space-y-1">
                 <div className="flex items-center gap-3 px-4 py-3">
-                  <UserAvatar name={session.user.name || "U"} />
+                  <UserAvatar name={session.user.name || "U"} imageUrl={profileImageUrl} />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-neutral-900 truncate">
                       {session.user.name}
@@ -439,7 +469,7 @@ export function Header() {
                 )}
 
                 <Link
-                  href={isAmbulancier ? "/dashboard/profil" : "/profil"}
+                  href={isAmbulancier ? "/dashboard/profil" : "/mon-compte/profil"}
                   className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >

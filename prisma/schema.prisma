@@ -530,3 +530,16 @@ model NotificationPreferences {
 
   @@map("notification_preferences")
 }
+
+// ============================================
+// RATE LIMITING (Better Auth)
+// ============================================
+
+model RateLimit {
+  id          String   @id @default(cuid())
+  key         String   @unique // Identifiant unique (IP + endpoint)
+  count       Int      @default(0)
+  lastRequest BigInt   // Timestamp de la dernière requête
+
+  @@map("rate_limit")
+}
