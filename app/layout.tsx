@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { ToastProvider } from "@/components/ui";
+import { AuthenticatedFeedbackWidget } from "@/components/feedback";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -24,7 +25,10 @@ export default function RootLayout({
         className={`${poppins.className} antialiased bg-background text-foreground`}
         suppressHydrationWarning
       >
-        <ToastProvider>{children}</ToastProvider>
+        <ToastProvider>
+          {children}
+          <AuthenticatedFeedbackWidget />
+        </ToastProvider>
       </body>
     </html>
   );

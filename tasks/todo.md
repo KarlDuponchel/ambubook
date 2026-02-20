@@ -681,6 +681,62 @@ export function NotificationBell() {
 
 ---
 
+# Suivi des demandes (clients non connectés)
+
+## Vue d'ensemble
+
+Permettre aux clients non connectés de suivre leurs demandes de transport via un lien unique, et rattacher automatiquement les demandes à leur compte s'ils en créent un.
+
+---
+
+## Phase 1 : Page de suivi publique `/suivi/[trackingId]`
+
+### 1.1 Page publique
+- [ ] Créer `app/suivi/[trackingId]/page.tsx`
+  - Afficher statut, infos transport, entreprise
+  - Répondre aux contre-propositions (accepter/refuser/proposer autre créneau)
+  - Historique des événements (lecture seule)
+  - Pièces jointes (upload si connecté, sinon lecture seule)
+
+### 1.2 API publique
+- [ ] Créer `GET /api/public/transport/[trackingId]` - Récupérer les infos
+- [ ] Créer `PATCH /api/public/transport/[trackingId]` - Répondre aux contre-propositions
+  - Rate limiting pour éviter les abus
+  - Validation du trackingId (CUID non devinable)
+
+### 1.3 Notifications
+- [ ] Inclure le lien `/suivi/[trackingId]` dans les emails/SMS envoyés au client
+
+### 1.4 SEO
+- [ ] `robots: noindex, nofollow` sur la page
+
+---
+
+## Phase 2 : Liaison automatique par email
+
+### 2.1 À l'inscription
+- [ ] Lors de la création d'un compte client (`/api/customer-signup`)
+  - Rechercher les demandes existantes avec le même email (`patientEmail`)
+  - Les rattacher au nouveau compte (`userId = newUser.id`)
+
+### 2.2 À la connexion (optionnel)
+- [ ] Vérifier s'il existe des demandes orphelines avec l'email de l'utilisateur
+- [ ] Les rattacher automatiquement
+
+### 2.3 UX
+- [ ] Toast/notification : "X demande(s) précédente(s) ont été ajoutées à votre compte"
+
+---
+
+## Checklist
+
+- [ ] Page `/suivi/[trackingId]` fonctionnelle
+- [ ] Contre-propositions possibles sans compte
+- [ ] Liaison automatique à l'inscription
+- [ ] Tests manuels
+
+---
+
 # Dashboard Admin
 
 ## Vue d'ensemble
@@ -920,114 +976,67 @@ Widget flottant (infobulle) présent sur toutes les pages client et dashboard pe
 
 ---
 
-## Phase 1 : Modèle de données
+## Phase 1 : Modèle de données ✅
 
 ### 1.1 Schema Prisma
-- [ ] Créer modèle `Feedback` :
-  ```prisma
-  enum FeedbackType {
-    BUG
-    IMPROVEMENT
-    QUESTION
-    OTHER
-  }
-
-  enum FeedbackStatus {
-    NEW
-    IN_PROGRESS
-    RESOLVED
-    WONT_FIX
-  }
-
-  enum FeedbackPriority {
-    LOW
-    MEDIUM
-    HIGH
-    CRITICAL
-  }
-
-  model Feedback {
-    id          String           @id @default(cuid())
-    type        FeedbackType
-    subject     String
-    message     String           @db.Text
-    screenshot  String?          // URL image uploadée
-    pageUrl     String           // URL où le feedback a été soumis
-    userAgent   String?          // Navigateur/OS
-    status      FeedbackStatus   @default(NEW)
-    priority    FeedbackPriority @default(MEDIUM)
-    adminNotes  String?          @db.Text
-    resolvedAt  DateTime?
-    createdAt   DateTime         @default(now())
-    updatedAt   DateTime         @updatedAt
-
-    user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-    userId String?
-
-    @@index([status])
-    @@index([type])
-    @@index([createdAt])
-    @@map("feedbacks")
-  }
-  ```
-- [ ] Migration Prisma
-- [ ] Ajouter relation sur User
+- [x] Créer modèle `Feedback` (dans `prisma/schema.prisma`)
+- [x] Migration Prisma
+- [x] Ajouter relation sur User
 
 ---
 
-## Phase 2 : API Feedback
+## Phase 2 : API Feedback ✅
 
 ### 2.1 Endpoints utilisateur
-- [ ] `POST /api/feedback` - Soumettre un feedback
+- [x] `POST /api/feedback` - Soumettre un feedback (`app/api/feedback/route.ts`)
   - Body : type, subject, message, screenshot (base64 optionnel), pageUrl
   - Récupérer userAgent automatiquement
   - Upload screenshot vers S3 si fourni
-  - **Rate limiting** : utiliser `lib/rate-limit.ts` (ex: 5 feedbacks/heure)
+  - **Rate limiting** : 5 feedbacks/heure via `lib/rate-limit.ts`
 
 ### 2.2 Notification admin
-- [ ] Envoyer email à l'admin lors d'un nouveau feedback
-- [ ] Notification in-app si implémenté côté admin
+- [x] Envoyer email à l'admin lors d'un nouveau feedback
+- [ ] Notification in-app si implémenté côté admin (TODO dans le code)
 
 ---
 
-## Phase 3 : Widget UI
+## Phase 3 : Widget UI ✅
 
 ### 3.1 Composant FeedbackWidget
-- [ ] `components/feedback/FeedbackWidget.tsx`
-  - Bouton flottant (coin bas-droite) avec icône (MessageSquare ou Bug)
-  - Badge si feedback précédent non résolu (optionnel)
-  - Hover : tooltip "Signaler un bug / Suggestion"
+- [x] `components/feedback/FeedbackWidget.tsx`
+  - Bouton flottant (coin bas-droite) avec icône MessageSquarePlus
+  - Texte "Feedback" visible sur desktop, icône seule sur mobile
 
 ### 3.2 Modal FeedbackForm
-- [ ] `components/feedback/FeedbackModal.tsx`
-  - Select type : Bug, Amélioration, Question, Autre
+- [x] `components/feedback/FeedbackModal.tsx`
+  - Select type : Bug, Amélioration, Question, Autre (avec icônes et couleurs)
   - Input sujet (obligatoire)
   - Textarea message (obligatoire)
-  - Bouton capture d'écran (optionnel) - utiliser html2canvas ou upload manuel
-  - Checkbox "Inclure les infos de debug" (URL, navigateur)
-  - Bouton Envoyer
+  - Upload capture d'écran (optionnel)
+  - Bouton Envoyer avec loading state
 
 ### 3.3 États du widget
-- [ ] État fermé : juste le bouton flottant
-- [ ] État ouvert : modal par-dessus
-- [ ] État envoyé : message de confirmation + fermeture auto
+- [x] État fermé : juste le bouton flottant
+- [x] État ouvert : modal par-dessus
+- [x] État envoyé : toast succès + fermeture auto
+
+### 3.4 Wrapper authentifié
+- [x] `components/feedback/AuthenticatedFeedbackWidget.tsx`
+  - Affiche le widget uniquement si utilisateur connecté
 
 ---
 
-## Phase 4 : Intégration
+## Phase 4 : Intégration ✅
 
 ### 4.1 Ajout global
-- [ ] Ajouter `<FeedbackWidget />` dans :
-  - `app/layout.tsx` (pages publiques) - si connecté
-  - `app/dashboard/layout.tsx` (ambulanciers)
-  - `app/admin/layout.tsx` (admins - optionnel)
+- [x] `AuthenticatedFeedbackWidget` ajouté dans `app/layout.tsx`
+  - Visible sur toutes les pages si connecté (clients + ambulanciers)
 
 ### 4.2 Contexte automatique
-- [ ] Capturer automatiquement :
-  - URL courante (`usePathname`)
-  - User-Agent
-  - Timestamp
-  - User ID si connecté
+- [x] Capturer automatiquement :
+  - URL courante (window.location.href)
+  - User-Agent (côté API via headers)
+  - User ID (session obligatoire)
 
 ---
 
@@ -1046,13 +1055,14 @@ Widget flottant (infobulle) présent sur toutes les pages client et dashboard pe
 
 ## Checklist Widget Feedback
 
-- [ ] Widget non intrusif (petit, coin de l'écran)
-- [ ] Accessible au clavier
-- [ ] Responsive (adaptation mobile)
-- [ ] Validation formulaire
-- [ ] Feedback visuel à l'envoi (toast succès)
-- [ ] Rate limiting (éviter spam)
-- [ ] Tests manuels
+- [x] Widget non intrusif (petit, coin de l'écran)
+- [x] Accessible au clavier (Escape pour fermer, focus trap)
+- [x] Responsive (adaptation mobile - icône seule sur mobile)
+- [x] Validation formulaire (sujet et message obligatoires)
+- [x] Feedback visuel à l'envoi (toast succès)
+- [x] Rate limiting (5 feedbacks/heure)
+- [x] Connexion requise (401 si non connecté)
+- [x] Tests manuels
 
 ---
 

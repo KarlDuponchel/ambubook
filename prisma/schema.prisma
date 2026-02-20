@@ -53,6 +53,9 @@ model User {
   // Préférences de notifications
   notificationPreferences NotificationPreferences?
 
+  // Feedbacks soumis
+  feedbacks Feedback[]
+
   @@map("users")
 }
 
@@ -542,4 +545,53 @@ model RateLimit {
   lastRequest BigInt   // Timestamp de la dernière requête
 
   @@map("rate_limit")
+}
+
+// ============================================
+// FEEDBACK (Bug reports / Suggestions)
+// ============================================
+
+enum FeedbackType {
+  BUG
+  IMPROVEMENT
+  QUESTION
+  OTHER
+}
+
+enum FeedbackStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  WONT_FIX
+}
+
+enum FeedbackPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model Feedback {
+  id          String           @id @default(cuid())
+  type        FeedbackType
+  subject     String
+  message     String           @db.Text
+  screenshot  String?          // URL image S3
+  pageUrl     String           // URL où le feedback a été soumis
+  userAgent   String?          // Navigateur/OS
+  status      FeedbackStatus   @default(NEW)
+  priority    FeedbackPriority @default(MEDIUM)
+  adminNotes  String?          @db.Text
+  resolvedAt  DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId String?
+
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+  @@map("feedbacks")
 }
