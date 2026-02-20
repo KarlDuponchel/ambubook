@@ -82,7 +82,18 @@ export async function POST(request: NextRequest) {
       }),
     ]);
 
-    // 5. Envoyer l'email/SMS de bienvenue (seulement si activé)
+    // 5. Rattacher les demandes de transport existantes avec le même email
+    const linkedTransports = await prisma.transportRequest.updateMany({
+      where: {
+        patientEmail: email,
+        userId: null, // Seulement les demandes orphelines
+      },
+      data: {
+        userId: signUpResponse.user.id,
+      },
+    });
+
+    // 6. Envoyer l'email/SMS de bienvenue (seulement si activé)
     notifyWelcomeCustomer({
       userName: name,
       userEmail: email,
@@ -96,6 +107,7 @@ export async function POST(request: NextRequest) {
       {
         success: true,
         message: "Compte créé avec succès",
+        linkedTransportsCount: linkedTransports.count,
       },
       { status: 201 }
     );

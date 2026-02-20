@@ -11,6 +11,7 @@ function LoginForm() {
   const registered = searchParams.get("registered");
   const redirect = searchParams.get("redirect");
   const reset = searchParams.get("reset");
+  const linkedCount = searchParams.get("linked");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -59,6 +60,16 @@ function LoginForm() {
             <strong>Compte créé avec succès !</strong>
             <br />
             Vous pouvez maintenant vous connecter.
+            {linkedCount && parseInt(linkedCount) > 0 && (
+              <>
+                <br />
+                <span className="text-green-600">
+                  {parseInt(linkedCount) === 1
+                    ? "1 demande de transport précédente a été ajoutée à votre compte."
+                    : `${linkedCount} demandes de transport précédentes ont été ajoutées à votre compte.`}
+                </span>
+              </>
+            )}
           </div>
         )}
 

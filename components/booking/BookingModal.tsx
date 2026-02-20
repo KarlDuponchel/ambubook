@@ -233,7 +233,7 @@ export function BookingModal({ isOpen, onClose, company }: BookingModalProps) {
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-6 py-6">
           {trackingId ? (
-            <SuccessView trackingId={trackingId} onClose={handleClose} />
+            <SuccessView trackingId={trackingId} onClose={handleClose} isLoggedIn={!!session?.user} />
           ) : (
             <>
               <h3 className="text-lg font-medium text-neutral-900 mb-4">
@@ -327,7 +327,19 @@ export function BookingModal({ isOpen, onClose, company }: BookingModalProps) {
   return null;
 }
 
-function SuccessView({ trackingId, onClose }: { trackingId: string; onClose: () => void }) {
+function SuccessView({
+  trackingId,
+  onClose,
+  isLoggedIn,
+}: {
+  trackingId: string;
+  onClose: () => void;
+  isLoggedIn: boolean;
+}) {
+  const trackingUrl = isLoggedIn
+    ? `/mes-transports/${trackingId}`
+    : `/suivi/${trackingId}`;
+
   return (
     <div className="text-center py-6">
       <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-success-100 flex items-center justify-center">
@@ -363,13 +375,27 @@ function SuccessView({ trackingId, onClose }: { trackingId: string; onClose: () 
       </div>
 
       <div className="flex justify-center gap-2">
-        <Link href={`/mes-transports/${trackingId}`}>
-          <Button variant="primary">Voir la demande</Button>
+        <Link href={trackingUrl}>
+          <Button variant="primary">Suivre ma demande</Button>
         </Link>
         <Button type="button" variant="outline" onClick={onClose}>
           Fermer
         </Button>
       </div>
+
+      {!isLoggedIn && (
+        <div className="mt-6 pt-6 border-t border-neutral-200">
+          <p className="text-sm text-neutral-600 mb-3">
+            Créez un compte pour retrouver toutes vos demandes au même endroit.
+          </p>
+          <Link
+            href="/inscription"
+            className="text-sm text-primary-600 hover:text-primary-700 font-medium hover:underline"
+          >
+            Créer un compte gratuit
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

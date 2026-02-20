@@ -69,7 +69,7 @@ function transportRequestCreatedTemplates(data: Record<string, unknown>): Notifi
     trackingId: string;
   };
 
-  const trackingUrl = `${BASE_URL}/mes-transports/${trackingId}`;
+  const trackingUrl = `${BASE_URL}/suivi/${trackingId}`;
 
   return {
     emailSubject: `Votre demande de transport a été enregistrée - AmbuBook`,
@@ -152,7 +152,7 @@ function transportCounterProposalTemplates(data: Record<string, unknown>): Notif
     trackingId: string;
   };
 
-  const trackingUrl = `${BASE_URL}/mes-transports/${trackingId}`;
+  const trackingUrl = `${BASE_URL}/suivi/${trackingId}`;
 
   return {
     emailSubject: `Nouvelle proposition de créneau - AmbuBook`,
@@ -209,7 +209,7 @@ function transportCompletedTemplates(data: Record<string, unknown>): Notificatio
     trackingId?: string;
   };
 
-  const trackingUrl = trackingId ? `${BASE_URL}/mes-transports/${trackingId}` : BASE_URL;
+  const trackingUrl = trackingId ? `${BASE_URL}/suivi/${trackingId}` : BASE_URL;
 
   return {
     emailSubject: `Votre transport a été effectué - AmbuBook`,
@@ -389,7 +389,7 @@ function transportAttachmentAddedTemplates(data: Record<string, unknown>): Notif
     trackingId: string;
   };
 
-  const trackingUrl = `${BASE_URL}/mes-transports/${trackingId}`;
+  const trackingUrl = `${BASE_URL}/suivi/${trackingId}`;
 
   return {
     emailSubject: `Nouvelle pièce jointe ajoutée - AmbuBook`,

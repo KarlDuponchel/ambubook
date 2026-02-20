@@ -60,7 +60,11 @@ function SignUpForm() {
         }),
       });
 
-      const data = await response.json();
+      const data = await response.json() as {
+        success?: boolean;
+        error?: string;
+        linkedTransportsCount?: number;
+      };
 
       if (!response.ok) {
         setError(data.error || "Une erreur est survenue");
@@ -69,10 +73,12 @@ function SignUpForm() {
       }
 
       // Redirection vers login avec message de succès
-      const loginUrl = redirect
-        ? `/connexion?registered=true&redirect=${encodeURIComponent(redirect)}`
-        : "/connexion?registered=true";
-      router.push(loginUrl);
+      const params = new URLSearchParams({ registered: "true" });
+      if (redirect) params.set("redirect", redirect);
+      if (data.linkedTransportsCount && data.linkedTransportsCount > 0) {
+        params.set("linked", data.linkedTransportsCount.toString());
+      }
+      router.push(`/connexion?${params.toString()}`);
     } catch {
       setError("Une erreur est survenue. Veuillez réessayer.");
       setLoading(false);

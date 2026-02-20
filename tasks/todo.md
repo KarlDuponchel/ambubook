@@ -689,50 +689,53 @@ Permettre aux clients non connectés de suivre leurs demandes de transport via u
 
 ---
 
-## Phase 1 : Page de suivi publique `/suivi/[trackingId]`
+## Phase 1 : Page de suivi publique `/suivi/[trackingId]` ✅
 
 ### 1.1 Page publique
-- [ ] Créer `app/suivi/[trackingId]/page.tsx`
+- [x] Créer `app/suivi/[trackingId]/page.tsx`
   - Afficher statut, infos transport, entreprise
   - Répondre aux contre-propositions (accepter/refuser/proposer autre créneau)
   - Historique des événements (lecture seule)
-  - Pièces jointes (upload si connecté, sinon lecture seule)
+  - CTA "Créer un compte" pour centraliser les demandes
 
 ### 1.2 API publique
-- [ ] Créer `GET /api/public/transport/[trackingId]` - Récupérer les infos
-- [ ] Créer `PATCH /api/public/transport/[trackingId]` - Répondre aux contre-propositions
-  - Rate limiting pour éviter les abus
-  - Validation du trackingId (CUID non devinable)
+- [x] Créer `GET /api/public/transport/[trackingId]` - Récupérer les infos
+- [x] Créer `PATCH /api/public/transport/[trackingId]` - Répondre aux contre-propositions
+  - Rate limiting (10 actions/heure par trackingId)
+  - Validation du trackingId (format CUID)
 
 ### 1.3 Notifications
-- [ ] Inclure le lien `/suivi/[trackingId]` dans les emails/SMS envoyés au client
+- [x] Inclure le lien `/suivi/[trackingId]` dans les emails/SMS envoyés au client
+  - Mis à jour dans `lib/notifications/templates.ts`
 
 ### 1.4 SEO
-- [ ] `robots: noindex, nofollow` sur la page
+- [x] `robots: noindex, nofollow` sur la page (layout.tsx)
 
 ---
 
-## Phase 2 : Liaison automatique par email
+## Phase 2 : Liaison automatique par email ✅
 
 ### 2.1 À l'inscription
-- [ ] Lors de la création d'un compte client (`/api/customer-signup`)
+- [x] Lors de la création d'un compte client (`/api/customer-signup`)
   - Rechercher les demandes existantes avec le même email (`patientEmail`)
   - Les rattacher au nouveau compte (`userId = newUser.id`)
+  - Retourner `linkedTransportsCount` dans la réponse
 
 ### 2.2 À la connexion (optionnel)
 - [ ] Vérifier s'il existe des demandes orphelines avec l'email de l'utilisateur
 - [ ] Les rattacher automatiquement
 
 ### 2.3 UX
-- [ ] Toast/notification : "X demande(s) précédente(s) ont été ajoutées à votre compte"
+- [x] Message sur la page de connexion : "X demande(s) précédente(s) ont été ajoutées à votre compte"
+  - Passage du count via URL param `?linked=X`
 
 ---
 
 ## Checklist
 
-- [ ] Page `/suivi/[trackingId]` fonctionnelle
-- [ ] Contre-propositions possibles sans compte
-- [ ] Liaison automatique à l'inscription
+- [x] Page `/suivi/[trackingId]` fonctionnelle
+- [x] Contre-propositions possibles sans compte
+- [x] Liaison automatique à l'inscription
 - [ ] Tests manuels
 
 ---
