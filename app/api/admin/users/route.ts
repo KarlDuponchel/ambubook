@@ -15,12 +15,18 @@ export async function GET(request: NextRequest) {
   const search = searchParams.get("search") || "";
   const role = searchParams.get("role") || "ALL";
   const status = searchParams.get("status") || "ALL";
+  const includeDeleted = searchParams.get("includeDeleted") === "true";
   const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
   const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") || "10", 10)));
 
   // Construction du filtre WHERE
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = {};
+
+  // Exclure les utilisateurs supprimés par défaut
+  if (!includeDeleted) {
+    where.deletedAt = null;
+  }
 
   // Filtre recherche
   if (search) {
@@ -45,15 +51,19 @@ export async function GET(request: NextRequest) {
 
   // Comptages pour les filtres (sans pagination, avec recherche)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const baseWhere: any = search
-    ? {
-        OR: [
-          { name: { contains: search, mode: "insensitive" } },
-          { email: { contains: search, mode: "insensitive" } },
-          { company: { name: { contains: search, mode: "insensitive" } } },
-        ],
-      }
-    : {};
+  const baseWhere: any = {
+    // Toujours exclure les supprimés des comptages sauf si explicitement demandé
+    ...(includeDeleted ? {} : { deletedAt: null }),
+    ...(search
+      ? {
+          OR: [
+            { name: { contains: search, mode: "insensitive" } },
+            { email: { contains: search, mode: "insensitive" } },
+            { company: { name: { contains: search, mode: "insensitive" } } },
+          ],
+        }
+      : {}),
+  };
 
   const [total, totalFiltered, admins, ambulanciers, customers, pending] = await Promise.all([
     prisma.user.count({ where: baseWhere }),
@@ -74,6 +84,13 @@ export async function GET(request: NextRequest) {
           name: true,
           slug: true,
           ownerId: true,
+          siret: true,
+          licenseNumber: true,
+          phone: true,
+          email: true,
+          address: true,
+          city: true,
+          postalCode: true,
         },
       },
     },

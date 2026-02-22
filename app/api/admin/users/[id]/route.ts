@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { headers } from "next/headers";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, isAuthError } from "@/lib/auth-guard";
 import { notifyAccountActivated } from "@/lib/notifications";
+import { anonymizeUser } from "@/lib/user-anonymization";
+import { AuditHelpers, extractRequestInfo } from "@/lib/audit-log";
 
 const updateUserSchema = z.object({
   name: z.string().min(2).optional(),
@@ -73,7 +76,7 @@ export async function PATCH(
   // Récupérer l'utilisateur avant modification pour comparer isActive
   const existingUser = await prisma.user.findUnique({
     where: { id },
-    select: { isActive: true, name: true, email: true, phone: true },
+    select: { isActive: true, name: true, email: true, phone: true, role: true },
   });
 
   if (!existingUser) {
@@ -94,8 +97,13 @@ export async function PATCH(
     },
   });
 
-  // Si le compte vient d'être activé, envoyer un email et SMS
+  const reqHeaders = await headers();
+  const { ipAddress } = extractRequestInfo(reqHeaders);
+
+  // Logger les actions
   if (!existingUser.isActive && validation.data.isActive === true) {
+    // Compte activé
+    AuditHelpers.userActivated(authResult.user.id, id, existingUser.name, ipAddress);
     notifyAccountActivated({
       userName: existingUser.name,
       userEmail: existingUser.email,
@@ -104,13 +112,22 @@ export async function PATCH(
     }).catch((err) => {
       console.error("Erreur notification activation compte:", err);
     });
+  } else if (existingUser.isActive && validation.data.isActive === false) {
+    // Compte désactivé
+    AuditHelpers.userDeactivated(authResult.user.id, id, existingUser.name, ipAddress);
+  } else if (validation.data.role && validation.data.role !== existingUser.role) {
+    // Rôle modifié
+    AuditHelpers.userRoleChanged(authResult.user.id, id, existingUser.role, validation.data.role, ipAddress);
+  } else {
+    // Modification générale
+    AuditHelpers.userUpdated(authResult.user.id, id, validation.data, ipAddress);
   }
 
   return NextResponse.json(user);
 }
 
 /**
- * DELETE /api/admin/users/[id] - Supprime un utilisateur
+ * DELETE /api/admin/users/[id] - Supprime (anonymise) un utilisateur
  */
 export async function DELETE(
   request: NextRequest,
@@ -140,9 +157,17 @@ export async function DELETE(
     );
   }
 
-  await prisma.user.delete({
-    where: { id },
-  });
+  // Utiliser l'anonymisation au lieu de la suppression complète
+  const result = await anonymizeUser(id);
 
-  return NextResponse.json({ success: true });
+  if (!result.success) {
+    return NextResponse.json({ error: result.message }, { status: 400 });
+  }
+
+  // Logger la suppression/anonymisation
+  const reqHeaders = await headers();
+  const { ipAddress } = extractRequestInfo(reqHeaders);
+  AuditHelpers.userDeleted(authResult.user.id, id, user.name, ipAddress);
+
+  return NextResponse.json({ success: true, message: result.message });
 }

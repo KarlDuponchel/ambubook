@@ -124,7 +124,7 @@ export function UsersTable({
                   <td className="px-4 py-3 hidden md:table-cell">
                     {user.company ? (
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-neutral-700 truncate max-w-[150px]">
+                        <span className="text-sm text-neutral-700 truncate max-w-37.5">
                           {user.company.name}
                         </span>
                         {isOwner && (

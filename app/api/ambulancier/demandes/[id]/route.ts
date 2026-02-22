@@ -10,6 +10,7 @@ import {
   notifyTransportCounterProposal,
   notifyTransportCompleted,
 } from "@/lib/notifications";
+import { AuditHelpers } from "@/lib/audit-log";
 
 // GET - Récupérer les détails d'une demande
 export async function GET(
@@ -258,6 +259,7 @@ export async function PATCH(
     const formattedDate = existingDemande.requestedDate.toLocaleDateString("fr-FR");
 
     if (action === "accept") {
+      AuditHelpers.transportAccepted(user.id, id);
       notifyTransportAccepted({
         patientName,
         patientEmail: existingDemande.patientEmail || undefined,
@@ -271,6 +273,7 @@ export async function PATCH(
         console.error("Erreur notification transport accepté:", err);
       });
     } else if (action === "refuse") {
+      AuditHelpers.transportRefused(user.id, id, responseNote);
       notifyTransportRefused({
         patientName,
         patientEmail: existingDemande.patientEmail || undefined,

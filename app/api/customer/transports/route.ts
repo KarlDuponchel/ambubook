@@ -10,6 +10,7 @@ import {
   notifyNewTransportRequest,
 } from "@/lib/notifications";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { AuditHelpers } from "@/lib/audit-log";
 
 // POST - Créer une nouvelle demande de transport
 export async function POST(request: NextRequest) {
@@ -124,6 +125,9 @@ export async function POST(request: NextRequest) {
 
       return request;
     });
+
+    // Logger la création de la demande
+    AuditHelpers.transportCreated(userId, transportRequest.id);
 
     // Récupérer les infos de la company pour les notifications
     const companyInfo = await prisma.company.findUnique({

@@ -58,7 +58,7 @@ export function CompanyDescriptionCard({ company, isOwner, onUpdate }: CompanyDe
             placeholder="Décrivez votre entreprise, vos services, votre zone d'intervention..."
           />
         ) : (
-          <div className="min-h-[100px]">
+          <div className="min-h-25">
             {company.description ? (
               <p className="text-neutral-700 whitespace-pre-wrap">{company.description}</p>
             ) : (

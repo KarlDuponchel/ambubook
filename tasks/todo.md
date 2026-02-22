@@ -809,7 +809,7 @@ Interface d'administration complète pour gérer la plateforme AmbuBook : utilis
 ## Phase 3 : Gestion des entreprises
 
 ### 3.1 Liste entreprises
-- [ ] `app/admin/entreprises/page.tsx`
+- [x] `app/admin/entreprises/page.tsx`
   - Tableau paginé avec recherche (nom, ville, SIRET)
   - Filtres : statut (active/inactive), services (ambulance/VSL), région
   - Colonnes : nom, ville, gérant, nb employés, nb transports, statut
@@ -824,10 +824,10 @@ Interface d'administration complète pour gérer la plateforme AmbuBook : utilis
   - Actions : modifier, activer/désactiver, supprimer
 
 ### 3.3 API entreprises
-- [ ] `GET /api/admin/companies` - Liste paginée
-- [ ] `GET /api/admin/companies/[id]` - Détail complet
-- [ ] `PATCH /api/admin/companies/[id]` - Modifier
-- [ ] `DELETE /api/admin/companies/[id]` - Supprimer (soft delete)
+- [x] `GET /api/admin/companies` - Liste paginée
+- [x] `GET /api/admin/companies/[id]` - Détail complet
+- [x] `PATCH /api/admin/companies/[id]` - Modifier
+- [x] `DELETE /api/admin/companies/[id]` - Supprimer (soft delete)
 
 ---
 
@@ -1538,3 +1538,10 @@ Optimisation du référencement naturel (SEO) pour maximiser la visibilité d'Am
 - [ ] Autoriser la caméra photo si téléphone
 
 ## Créer une demande de transport côté ambulancier
+
+# Mise en production
+
+## Performances
+
+- [ ] Vérifier comment gérer les performances
+- [ ] Voir pour les attaques XSS/CSRF et DDOS etc...

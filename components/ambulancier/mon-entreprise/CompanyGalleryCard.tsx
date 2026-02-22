@@ -127,7 +127,7 @@ export function CompanyGalleryCard({ photos, isOwner, onUpdate }: CompanyGallery
               {photos.map((photo) => (
                 <div
                   key={photo.id}
-                  className="group relative aspect-[4/3] rounded-lg overflow-hidden bg-neutral-100 cursor-pointer"
+                  className="group relative aspect-4/3 rounded-lg overflow-hidden bg-neutral-100 cursor-pointer"
                   onClick={() => setSelectedPhoto(photo)}
                 >
                   <Image
@@ -153,7 +153,7 @@ export function CompanyGalleryCard({ photos, isOwner, onUpdate }: CompanyGallery
                     </button>
                   )}
                   {photo.caption && (
-                    <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent">
+                    <div className="absolute bottom-0 left-0 right-0 p-2 bg-linear-to-t from-black/70 to-transparent">
                       <p className="text-white text-sm truncate">{photo.caption}</p>
                     </div>
                   )}

@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSignedDownloadUrl, isS3Configured } from "@/lib/s3";
 import { Prisma, RequestStatus, HistoryEventType } from "@/generated/prisma/client";
 import { notifyTransportCustomerResponse } from "@/lib/notifications";
+import { AuditHelpers } from "@/lib/audit-log";
 
 export async function GET(
   request: NextRequest,
@@ -255,6 +256,11 @@ export async function PATCH(
         data: historyData,
       }),
     ]);
+
+    // Logger l'action
+    if (action === "cancel") {
+      AuditHelpers.transportCancelled(session.user.id, existingTransport.id);
+    }
 
     // Notifier les ambulanciers de la réponse du client
     const patientName = `${existingTransport.patientFirstName} ${existingTransport.patientLastName}`;

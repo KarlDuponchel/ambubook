@@ -457,6 +457,58 @@ export interface AdminCompany {
   name: string;
   slug: string;
   ownerId: string | null;
+  // Infos pour validation ambulancier
+  siret: string | null;
+  licenseNumber: string | null; // N° agrément ARS
+  phone: string | null;
+  email: string | null;
+  address: string | null;
+  city: string | null;
+  postalCode: string | null;
+}
+
+// Type enrichi pour la liste admin des entreprises
+export interface AdminCompanyFull extends AdminCompany {
+  isActive: boolean;
+  hasAmbulance: boolean;
+  hasVSL: boolean;
+  createdAt: string;
+  updatedAt: string;
+  coverageRadius: number | null;
+  description: string | null;
+  logoUrl: string | null;
+  owner: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
+  _count: {
+    users: number;
+    transportRequests: number;
+  };
+}
+
+export type AdminCompanyStatus = "ALL" | "ACTIVE" | "INACTIVE";
+export type AdminCompanyService = "ALL" | "AMBULANCE" | "VSL";
+
+export interface AdminCompaniesFilters {
+  search: string;
+  status: AdminCompanyStatus;
+  service: AdminCompanyService;
+}
+
+export interface AdminCompaniesCounts {
+  total: number;
+  active: number;
+  inactive: number;
+  withAmbulance: number;
+  withVSL: number;
+}
+
+export interface AdminCompaniesResponse {
+  companies: AdminCompanyFull[];
+  pagination: AdminPagination;
+  counts: AdminCompaniesCounts;
 }
 
 export interface AdminUser {
@@ -501,4 +553,112 @@ export interface AdminUsersResponse {
   users: AdminUser[];
   pagination: AdminPagination;
   counts: AdminUsersCounts;
+}
+
+// ============================================
+// Audit Logs
+// ============================================
+
+export type AuditActionType =
+  | "LOGIN"
+  | "LOGOUT"
+  | "LOGIN_FAILED"
+  | "PASSWORD_RESET"
+  | "PASSWORD_CHANGED"
+  | "USER_CREATED"
+  | "USER_UPDATED"
+  | "USER_DELETED"
+  | "USER_ACTIVATED"
+  | "USER_DEACTIVATED"
+  | "USER_ROLE_CHANGED"
+  | "COMPANY_CREATED"
+  | "COMPANY_UPDATED"
+  | "COMPANY_DELETED"
+  | "COMPANY_ACTIVATED"
+  | "COMPANY_DEACTIVATED"
+  | "COMPANY_OWNER_CHANGED"
+  | "TRANSPORT_CREATED"
+  | "TRANSPORT_ACCEPTED"
+  | "TRANSPORT_REFUSED"
+  | "TRANSPORT_CANCELLED"
+  | "TRANSPORT_COMPLETED"
+  | "ADMIN_ACTION";
+
+export interface AuditLogUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+}
+
+export interface AuditLogEntry {
+  id: string;
+  action: AuditActionType;
+  details: string | null;
+  metadata: Record<string, unknown> | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: string;
+  userId: string | null;
+  user: AuditLogUser | null;
+  targetType: string | null;
+  targetId: string | null;
+}
+
+export interface AdminLogsFilters {
+  search: string;
+  action: "ALL" | AuditActionType;
+  targetType: "ALL" | "user" | "company" | "transport";
+  userId: string;
+  dateFrom: string;
+  dateTo: string;
+}
+
+export interface AdminLogsResponse {
+  logs: AuditLogEntry[];
+  pagination: AdminPagination;
+  stats: {
+    total: number;
+    actionCounts: { action: AuditActionType; count: number }[];
+  };
+}
+
+// ============================================
+// Error Logs
+// ============================================
+
+export type ErrorSeverityType = "DEBUG" | "INFO" | "WARNING" | "ERROR" | "CRITICAL";
+
+export interface ErrorLogEntry {
+  id: string;
+  severity: ErrorSeverityType;
+  message: string;
+  stack: string | null;
+  path: string | null;
+  method: string | null;
+  metadata: Record<string, unknown> | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  resolved: boolean;
+  createdAt: string;
+  userId: string | null;
+  user: { id: string; name: string; email: string } | null;
+}
+
+export interface AdminErrorsFilters {
+  search: string;
+  severity: "ALL" | ErrorSeverityType;
+  resolved: "ALL" | "true" | "false";
+  dateFrom: string;
+  dateTo: string;
+}
+
+export interface AdminErrorsResponse {
+  errors: ErrorLogEntry[];
+  pagination: AdminPagination;
+  stats: {
+    total: number;
+    unresolved: number;
+    severityCounts: { severity: ErrorSeverityType; count: number }[];
+  };
 }

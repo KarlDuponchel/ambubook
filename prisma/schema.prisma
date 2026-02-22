@@ -26,6 +26,7 @@ model User {
   isActive      Boolean   @default(true) // Actif par défaut (sauf ambulanciers qui doivent être validés)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime? // Soft delete - null = actif, date = supprimé/anonymisé
 
   // Relations Better Auth
   sessions Session[]
@@ -55,6 +56,10 @@ model User {
 
   // Feedbacks soumis
   feedbacks Feedback[]
+
+  // Logs système
+  auditLogs AuditLog[] @relation("AuditLogUser")
+  errorLogs ErrorLog[] @relation("ErrorLogUser")
 
   @@map("users")
 }
@@ -598,4 +603,103 @@ model Feedback {
   @@index([type])
   @@index([createdAt])
   @@map("feedbacks")
+}
+
+// ============================================
+// AUDIT LOGS (Actions système)
+// ============================================
+
+enum AuditAction {
+  // Authentification
+  LOGIN
+  LOGOUT
+  LOGIN_FAILED
+  PASSWORD_RESET
+  PASSWORD_CHANGED
+
+  // Utilisateurs
+  USER_CREATED
+  USER_UPDATED
+  USER_DELETED
+  USER_ACTIVATED
+  USER_DEACTIVATED
+  USER_ROLE_CHANGED
+
+  // Entreprises
+  COMPANY_CREATED
+  COMPANY_UPDATED
+  COMPANY_DELETED
+  COMPANY_ACTIVATED
+  COMPANY_DEACTIVATED
+  COMPANY_OWNER_CHANGED
+
+  // Transports
+  TRANSPORT_CREATED
+  TRANSPORT_ACCEPTED
+  TRANSPORT_REFUSED
+  TRANSPORT_CANCELLED
+  TRANSPORT_COMPLETED
+
+  // Admin
+  ADMIN_ACTION
+}
+
+model AuditLog {
+  id        String      @id @default(cuid())
+  action    AuditAction
+  details   String?     @db.Text // Description lisible de l'action
+  metadata  Json?       // Données additionnelles (ancien/nouveau état, etc.)
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime    @default(now())
+
+  // Qui a effectué l'action
+  user   User?   @relation("AuditLogUser", fields: [userId], references: [id], onDelete: SetNull)
+  userId String?
+
+  // Entité cible de l'action (optionnel)
+  targetType String? // "user", "company", "transport"
+  targetId   String?
+
+  @@index([action])
+  @@index([userId])
+  @@index([targetType, targetId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ============================================
+// ERROR LOGS (Erreurs applicatives)
+// ============================================
+
+enum ErrorSeverity {
+  DEBUG
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+model ErrorLog {
+  id        String        @id @default(cuid())
+  severity  ErrorSeverity @default(ERROR)
+  message   String        @db.Text
+  stack     String?       @db.Text // Stack trace
+  path      String?       // URL/route où l'erreur s'est produite
+  method    String?       // GET, POST, etc.
+  metadata  Json?         // Données additionnelles (body, query, headers)
+  ipAddress String?
+  userAgent String?
+  resolved  Boolean       @default(false)
+  createdAt DateTime      @default(now())
+
+  // Utilisateur concerné (optionnel)
+  user   User?   @relation("ErrorLogUser", fields: [userId], references: [id], onDelete: SetNull)
+  userId String?
+
+  @@index([severity])
+  @@index([resolved])
+  @@index([path])
+  @@index([createdAt])
+  @@map("error_logs")
 }

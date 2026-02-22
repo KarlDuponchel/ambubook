@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Mail, Phone, Building2, Calendar, Crown } from "lucide-react";
+import { X, Mail, Phone, Building2, Calendar, Crown, FileText, BadgeCheck, MapPin } from "lucide-react";
 import { AdminUser, UserRole } from "@/lib/types";
 
 interface UserDetailsModalProps {
@@ -110,6 +110,84 @@ export function UserDetailsModal({ user, onClose }: UserDetailsModalProps) {
               </span>
             </div>
           </div>
+
+          {/* Infos entreprise pour ambulanciers */}
+          {user.role === "AMBULANCIER" && user.company && (
+            <div className="mt-6 pt-4 border-t border-neutral-100">
+              <h4 className="text-sm font-medium text-neutral-900 mb-3">
+                Informations entreprise
+              </h4>
+              <div className="space-y-3">
+                {/* SIRET */}
+                <div className="flex items-start gap-3 text-sm">
+                  <FileText className="h-4 w-4 text-neutral-400 mt-0.5" />
+                  <div>
+                    <span className="text-neutral-500 text-xs">SIRET</span>
+                    <p className="text-neutral-700">
+                      {user.company.siret || <span className="text-neutral-400 italic">Non renseigné</span>}
+                    </p>
+                  </div>
+                </div>
+
+                {/* N° Agrément ARS */}
+                <div className="flex items-start gap-3 text-sm">
+                  <BadgeCheck className="h-4 w-4 text-neutral-400 mt-0.5" />
+                  <div>
+                    <span className="text-neutral-500 text-xs">N° Agrément ARS</span>
+                    <p className="text-neutral-700">
+                      {user.company.licenseNumber || <span className="text-neutral-400 italic">Non renseigné</span>}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Adresse */}
+                <div className="flex items-start gap-3 text-sm">
+                  <MapPin className="h-4 w-4 text-neutral-400 mt-0.5" />
+                  <div>
+                    <span className="text-neutral-500 text-xs">Adresse</span>
+                    <p className="text-neutral-700">
+                      {user.company.address || user.company.city || user.company.postalCode ? (
+                        <>
+                          {user.company.address && <span>{user.company.address}</span>}
+                          {(user.company.postalCode || user.company.city) && (
+                            <span className="block">
+                              {user.company.postalCode} {user.company.city}
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-neutral-400 italic">Non renseignée</span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Contact entreprise */}
+                {(user.company.phone || user.company.email) && (
+                  <>
+                    {user.company.phone && (
+                      <div className="flex items-center gap-3 text-sm">
+                        <Phone className="h-4 w-4 text-neutral-400" />
+                        <div>
+                          <span className="text-neutral-500 text-xs">Tél. entreprise</span>
+                          <p className="text-neutral-700">{user.company.phone}</p>
+                        </div>
+                      </div>
+                    )}
+                    {user.company.email && (
+                      <div className="flex items-center gap-3 text-sm">
+                        <Mail className="h-4 w-4 text-neutral-400" />
+                        <div>
+                          <span className="text-neutral-500 text-xs">Email entreprise</span>
+                          <p className="text-neutral-700">{user.company.email}</p>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* ID */}
           <div className="mt-6 pt-4 border-t border-neutral-100">
