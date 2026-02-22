@@ -5,29 +5,25 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  FileText,
-  Calendar,
-  BarChart3,
+  Users,
   Building2,
+  Truck,
+  Bell,
+  MessageSquare,
+  ScrollText,
   Settings,
-  User,
   LogOut,
   ChevronLeft,
   Menu,
-  Ambulance,
-  UserPlus,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
-import { NotificationBell } from "@/components/notifications";
-import Image from "next/image";
 
-interface SidebarProps {
+interface AdminSidebarProps {
   user: {
     name: string;
     email: string;
-    isOwner?: boolean;
-    imageUrl?: string;
   };
   isCollapsed?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
@@ -37,16 +33,20 @@ interface NavItem {
   label: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
-  showIf?: boolean;
+  badge?: number;
 }
 
-export function Sidebar({ user, isCollapsed: controlledCollapsed, onCollapsedChange }: SidebarProps) {
+export function AdminSidebar({
+  user,
+  isCollapsed: controlledCollapsed,
+  onCollapsedChange,
+}: AdminSidebarProps) {
   const pathname = usePathname();
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  // Utiliser l'état contrôlé si fourni, sinon l'état interne
-  const isCollapsed = controlledCollapsed !== undefined ? controlledCollapsed : internalCollapsed;
+  const isCollapsed =
+    controlledCollapsed !== undefined ? controlledCollapsed : internalCollapsed;
   const setIsCollapsed = (value: boolean) => {
     if (onCollapsedChange) {
       onCollapsedChange(value);
@@ -57,77 +57,67 @@ export function Sidebar({ user, isCollapsed: controlledCollapsed, onCollapsedCha
 
   const navItems: NavItem[] = [
     {
-      label: "Tableau de bord",
-      href: "/dashboard",
+      label: "Dashboard",
+      href: "/admin",
       icon: LayoutDashboard,
-      showIf: true,
     },
     {
-      label: "Demandes",
-      href: "/dashboard/demandes",
-      icon: FileText,
-      showIf: true,
+      label: "Utilisateurs",
+      href: "/admin/utilisateurs",
+      icon: Users,
     },
     {
-      label: "Calendrier",
-      href: "/dashboard/calendrier",
-      icon: Calendar,
-      showIf: true,
-    },
-    {
-      label: "Statistiques",
-      href: "/dashboard/statistiques",
-      icon: BarChart3,
-      showIf: true,
-    },
-    {
-      label: "Mon entreprise",
-      href: "/dashboard/mon-entreprise",
+      label: "Entreprises",
+      href: "/admin/entreprises",
       icon: Building2,
-      showIf: true,
     },
     {
-      label: "Inviter",
-      href: "/dashboard/invite",
-      icon: UserPlus,
-      showIf: user.isOwner === true,
+      label: "Transports",
+      href: "/admin/transports",
+      icon: Truck,
     },
     {
-      label: "Paramètres",
-      href: "/dashboard/parametres",
+      label: "Notifications",
+      href: "/admin/notifications",
+      icon: Bell,
+    },
+    {
+      label: "Feedback",
+      href: "/admin/feedback",
+      icon: MessageSquare,
+    },
+    {
+      label: "Logs",
+      href: "/admin/logs",
+      icon: ScrollText,
+    },
+    {
+      label: "Configuration",
+      href: "/admin/configuration",
       icon: Settings,
-      showIf: true,
-    },
-    {
-      label: "Profil",
-      href: "/dashboard/profil",
-      icon: User,
-      showIf: true,
     },
   ];
 
   const handleLogout = async () => {
     await authClient.signOut();
-    window.location.href = "/dashboard/connexion";
+    window.location.href = "/connexion";
   };
-
-  const filteredNavItems = navItems.filter((item) => item.showIf);
 
   return (
     <>
       {/* Bouton mobile */}
       <button
         onClick={() => setIsMobileOpen(true)}
-        className="fixed top-4 left-4 z-50 p-2 rounded-xl bg-sidebar-bg/90 border border-sidebar-border shadow-sm backdrop-blur lg:hidden"
+        className="fixed top-4 left-4 z-50 p-2 rounded-xl bg-neutral-900/90 border border-neutral-700 shadow-sm backdrop-blur lg:hidden"
         aria-label="Ouvrir le menu"
       >
-        <Menu className="h-6 w-6 text-neutral-700" />
+        <Menu className="h-6 w-6 text-neutral-200" />
       </button>
 
       {/* Overlay mobile */}
       {isMobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
@@ -135,32 +125,32 @@ export function Sidebar({ user, isCollapsed: controlledCollapsed, onCollapsedCha
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-50 h-screen bg-sidebar-bg border-r border-sidebar-border flex flex-col transition-all duration-300 shadow-xl shadow-black/5",
+          "fixed top-0 left-0 z-50 h-screen bg-neutral-900 border-r border-neutral-800 flex flex-col transition-all duration-300 shadow-xl",
           isCollapsed ? "w-20" : "w-72",
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
         {/* Header */}
-        <div className="relative flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
-          <div className="absolute inset-0 bg-linear-to-r from-primary-50 via-background to-accent-50 opacity-70" />
+        <div className="relative flex items-center justify-between h-16 px-4 border-b border-neutral-800">
+          <div className="absolute inset-0 bg-gradient-to-r from-violet-950/50 via-neutral-900 to-purple-950/50 opacity-70" />
           <Link
-            href="/dashboard"
+            href="/admin"
             className={cn(
-              "relative z-10 flex items-center gap-2 text-primary-700 font-semibold",
+              "relative z-10 flex items-center gap-2 text-white font-semibold",
               isCollapsed && "justify-center"
             )}
           >
-            <div className="h-9 w-9 rounded-xl bg-primary-600 text-white flex items-center justify-center shadow-md shadow-primary-600/30">
-              <Ambulance className="h-5 w-5 shrink-0" />
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 text-white flex items-center justify-center shadow-lg shadow-violet-600/30">
+              <Shield className="h-5 w-5 shrink-0" />
             </div>
-            {!isCollapsed && <span className="text-lg tracking-tight">AmbuBook</span>}
+            {!isCollapsed && (
+              <span className="text-lg tracking-tight">Admin</span>
+            )}
           </Link>
           <div className="relative z-10 flex items-center gap-1">
-            {/* Notifications */}
-            {!isCollapsed && <NotificationBell variant="dashboard" />}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="hidden lg:flex p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-500"
+              className="hidden lg:flex p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400"
               aria-label={isCollapsed ? "Agrandir" : "Réduire"}
             >
               <ChevronLeft
@@ -172,7 +162,7 @@ export function Sidebar({ user, isCollapsed: controlledCollapsed, onCollapsedCha
             </button>
             <button
               onClick={() => setIsMobileOpen(false)}
-              className="lg:hidden p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-500"
+              className="lg:hidden p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400"
               aria-label="Fermer le menu"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -183,8 +173,10 @@ export function Sidebar({ user, isCollapsed: controlledCollapsed, onCollapsedCha
         {/* Navigation */}
         <nav className="flex-1 px-3 py-4 overflow-y-auto">
           <ul className="space-y-1">
-            {filteredNavItems.map((item) => {
-              const isActive = pathname === item.href;
+            {navItems.map((item) => {
+              const isActive =
+                pathname === item.href ||
+                (item.href !== "/admin" && pathname.startsWith(item.href));
               const Icon = item.icon;
 
               return (
@@ -195,17 +187,24 @@ export function Sidebar({ user, isCollapsed: controlledCollapsed, onCollapsedCha
                     className={cn(
                       "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors relative",
                       isActive
-                        ? "bg-primary-50 text-primary-700 font-semibold"
-                        : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900",
+                        ? "bg-violet-600/20 text-violet-400 font-semibold"
+                        : "text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200",
                       isCollapsed && "justify-center px-2"
                     )}
                     title={isCollapsed ? item.label : undefined}
                   >
                     {isActive && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-full bg-primary-600" />
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-full bg-violet-500" />
                     )}
                     <Icon className="h-5 w-5 shrink-0" />
-                    {!isCollapsed && <span>{item.label}</span>}
+                    {!isCollapsed && (
+                      <span className="flex-1">{item.label}</span>
+                    )}
+                    {!isCollapsed && item.badge !== undefined && item.badge > 0 && (
+                      <span className="px-2 py-0.5 text-xs font-medium bg-violet-600 text-white rounded-full">
+                        {item.badge}
+                      </span>
+                    )}
                   </Link>
                 </li>
               );
@@ -214,32 +213,21 @@ export function Sidebar({ user, isCollapsed: controlledCollapsed, onCollapsedCha
         </nav>
 
         {/* User section */}
-        <div className="border-t border-sidebar-border p-4">
+        <div className="border-t border-neutral-800 p-4">
           <div
             className={cn(
               "flex items-center gap-3",
               isCollapsed && "justify-center"
             )}
           >
-            <div className="h-10 w-10 rounded-2xl bg-primary-100 flex items-center justify-center shrink-0 ring-2 ring-white">
-              {user.imageUrl ? (
-                <Image
-                  src={user.imageUrl}
-                  alt={user.name}
-                  className="h-10 w-10 rounded-2xl"
-                  width={40}
-                  height={40}
-                  unoptimized
-                />
-              ) : (
-                <span className="text-primary-700 font-semibold">
-                  {user.name.charAt(0).toUpperCase()}
-                </span>
-              )}
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center shrink-0 ring-2 ring-neutral-800">
+              <span className="text-white font-semibold">
+                {user.name.charAt(0).toUpperCase()}
+              </span>
             </div>
             {!isCollapsed && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-neutral-900 truncate">
+                <p className="text-sm font-medium text-neutral-100 truncate">
                   {user.name}
                 </p>
                 <p className="text-xs text-neutral-500 truncate">{user.email}</p>
@@ -249,7 +237,7 @@ export function Sidebar({ user, isCollapsed: controlledCollapsed, onCollapsedCha
           <button
             onClick={handleLogout}
             className={cn(
-              "mt-3 w-full flex items-center gap-3 px-3 py-2 rounded-xl text-neutral-600 hover:bg-danger-50 hover:text-danger-600 transition-colors",
+              "mt-3 w-full flex items-center gap-3 px-3 py-2 rounded-xl text-neutral-400 hover:bg-red-950/50 hover:text-red-400 transition-colors",
               isCollapsed && "justify-center px-2"
             )}
             title={isCollapsed ? "Se déconnecter" : undefined}

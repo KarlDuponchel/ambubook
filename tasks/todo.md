@@ -751,8 +751,8 @@ Interface d'administration complète pour gérer la plateforme AmbuBook : utilis
 ## Phase 1 : Layout et navigation admin
 
 ### 1.1 Structure
-- [ ] Créer layout `app/admin/layout.tsx` avec sidebar admin
-- [ ] Composant `AdminSidebar.tsx` avec navigation :
+- [x] Créer layout `app/admin/layout.tsx` avec sidebar admin
+- [x] Composant `AdminSidebar.tsx` avec navigation :
   - Dashboard (vue d'ensemble)
   - Utilisateurs
   - Entreprises
@@ -761,7 +761,7 @@ Interface d'administration complète pour gérer la plateforme AmbuBook : utilis
   - Feedback
   - Logs système
   - Configuration
-- [ ] Protection : middleware vérifiant `role === ADMIN`
+- [x] Protection : API `/api/admin/me` vérifiant `role === ADMIN`
 - [ ] Breadcrumbs pour navigation
 
 ### 1.2 Dashboard principal

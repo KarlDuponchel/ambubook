@@ -1,13 +1,19 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import Link from "next/link";
-import { useSession, signOut } from "@/lib/auth-client";
+import { AdminSidebar } from "@/components/admin";
+import { LoadingSpinner } from "@/components/ui";
 
-const navItems = [
-  { href: "/admin", label: "Dashboard", icon: "📊" },
-  { href: "/admin/users", label: "Utilisateurs", icon: "👥" },
-];
+// Pages publiques admin (connexion si on en crée une)
+const PUBLIC_PATHS = ["/admin/connexion"];
+
+interface AdminUserData {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
 
 export default function AdminLayout({
   children,
@@ -16,74 +22,84 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { data: session, isPending } = useSession();
+  const [user, setUser] = useState<AdminUserData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  const handleSignOut = async () => {
-    await signOut();
-    router.push("/dashboard/connexion");
-  };
+  const isPublicPath = PUBLIC_PATHS.includes(pathname);
 
-  if (isPending) {
+  useEffect(() => {
+    if (isPublicPath) {
+      setIsLoading(false);
+      return;
+    }
+
+    const fetchUser = async () => {
+      try {
+        const response = await fetch("/api/admin/me");
+
+        if (response.status === 401) {
+          router.push("/connexion");
+          return;
+        }
+
+        if (response.status === 403) {
+          router.push("/");
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error("Erreur lors de la récupération des données");
+        }
+
+        const data = await response.json();
+        setUser(data);
+      } catch (error) {
+        console.error("Erreur de récupération admin:", error);
+        router.push("/connexion");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [router, pathname, isPublicPath]);
+
+  // Pages publiques : afficher directement
+  if (isPublicPath) {
+    return <>{children}</>;
+  }
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p className="text-gray-500">Chargement...</p>
+      <div className="min-h-screen flex items-center justify-center bg-neutral-950">
+        <LoadingSpinner size="lg" text="Chargement..." />
       </div>
     );
   }
 
-  if (!session) {
-    router.push("/connexion");
-    return null;
-  }
-
-  // Vérifier que l'utilisateur est admin
-  const isAdmin = (session.user as { role?: string }).role === "ADMIN";
-  if (!isAdmin) {
-    router.push("/dashboard");
+  if (!user) {
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Sidebar */}
-      <aside className="fixed inset-y-0 left-0 w-64 bg-gray-900 text-white">
-        <div className="p-4 border-b border-gray-800">
-          <h1 className="text-xl font-bold">AmbuBook Admin</h1>
+    <div className="min-h-screen bg-neutral-950">
+      <AdminSidebar
+        user={user}
+        isCollapsed={isSidebarCollapsed}
+        onCollapsedChange={setIsSidebarCollapsed}
+      />
+
+      {/* Contenu principal */}
+      <main
+        className={`relative min-h-screen transition-[margin] duration-300 ${
+          isSidebarCollapsed ? "lg:ml-20" : "lg:ml-72"
+        }`}
+      >
+        <div className="px-4 sm:px-6 lg:px-10 py-6 pt-20 lg:pt-8">
+          <div className="mx-auto w-full max-w-7xl">{children}</div>
         </div>
-
-        <nav className="p-4 space-y-1">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-                  isActive
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
-                }`}
-              >
-                <span>{item.icon}</span>
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-800">
-          <div className="text-sm text-gray-400 mb-2">{session.user.name}</div>
-          <button
-            onClick={handleSignOut}
-            className="text-sm text-red-400 hover:text-red-300"
-          >
-            Déconnexion
-          </button>
-        </div>
-      </aside>
-
-      {/* Main content */}
-      <main className="ml-64 p-8">{children}</main>
+      </main>
     </div>
   );
 }
