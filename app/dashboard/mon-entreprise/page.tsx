@@ -9,6 +9,7 @@ import { CompanyInfoCard } from "@/components/ambulancier/mon-entreprise/Company
 import { CompanyDescriptionCard } from "@/components/ambulancier/mon-entreprise/CompanyDescriptionCard";
 import { CompanyServicesCard } from "@/components/ambulancier/mon-entreprise/CompanyServicesCard";
 import { CompanyHoursCard } from "@/components/ambulancier/mon-entreprise/CompanyHoursCard";
+import { CompanyTimeOffCard } from "@/components/ambulancier/mon-entreprise/CompanyTimeOffCard";
 import { CompanyGalleryCard } from "@/components/ambulancier/mon-entreprise/CompanyGalleryCard";
 import { UsersCompany } from "@/components/ambulancier/mon-entreprise/UsersCompany";
 
@@ -150,6 +151,11 @@ export default function MonEntreprisePage() {
             hours={company.hours}
             isOwner={company.isOwner}
             onUpdate={handleUpdateHours}
+          />
+          <CompanyTimeOffCard
+            timeOffs={company.timeOffs || []}
+            isOwner={company.isOwner}
+            onUpdate={fetchCompany}
           />
         </div>
 

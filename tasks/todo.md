@@ -1531,13 +1531,47 @@ Optimisation du référencement naturel (SEO) pour maximiser la visibilité d'Am
 ## Synchronisation planning
 - [ ] Synchroniser le planning avec celui choisi par l'ambulancier (Outlook, Google Calendar, etc.)
 
-## Vacances
-- [ ] Possibilités de définir des dates de congés en tant qu'ambulancier
+## Vacances ✅
+- [x] Possibilités de définir des dates de congés en tant qu'ambulancier
+  - [x] `prisma/schema.prisma` - Modèle `CompanyTimeOff` avec relation Company
+  - [x] `lib/types.ts` - Type `CompanyTimeOff`, mise à jour `CompanyFull`
+  - [x] `app/api/companies/me/route.ts` - Include `timeOffs` dans GET/PATCH
+  - [x] `app/api/companies/me/time-off/route.ts` - GET liste + POST ajout
+  - [x] `app/api/companies/me/time-off/[id]/route.ts` - DELETE suppression
+  - [x] `components/ambulancier/mon-entreprise/CompanyTimeOffCard.tsx` - UI gestion congés
+  - [x] `app/dashboard/mon-entreprise/page.tsx` - Intégration CompanyTimeOffCard
+  - [x] `app/api/customer/transports/route.ts` - Blocage réservation si congés
+  - [x] `app/[slug]/page.tsx` - Inclure `timeOffs` dans getCompany
+  - [x] `app/[slug]/CompanyPageClient.tsx` - Section "Prochaines fermetures"
+  - [x] Migration Prisma `add_company_time_off`
+  - [x] `npx tsc --noEmit` sans erreur
 
 ## Pièces jointes
 - [ ] Autoriser la caméra photo si téléphone
 
-## Créer une demande de transport côté ambulancier
+## Créer une demande de transport côté ambulancier ✅
+
+### Implémentation
+- [x] `lib/validations/transport-request.ts` - Ajout schema `ambulancierTransportRequestSchema` (sans companyId)
+- [x] `app/api/ambulancier/demandes/route.ts` - Ajout méthode POST pour création par ambulancier
+- [x] `app/api/ambulancier/company/route.ts` - Nouvelle API pour récupérer les infos company de l'ambulancier
+- [x] `components/ambulancier/CreateTransportModal.tsx` - Modal de création réutilisant les steps de BookingModal
+- [x] `components/booking/types.ts` - Ajout prop `hideLoginSuggestion` à PatientInfoStepProps
+- [x] `components/booking/steps/PatientInfoStep.tsx` - Support de `hideLoginSuggestion`
+- [x] `app/dashboard/demandes/page.tsx` - Ajout bouton "Nouvelle demande" + intégration modal
+
+### Fonctionnalités
+- Création de demande depuis le dashboard ambulancier
+- Formulaire en 4 étapes (réutilisation des steps existants)
+- companyId auto-inféré depuis la session
+- Historique : "Demande créée par l'ambulancier [Nom]"
+- Notifications au patient (email/SMS si fournis)
+- Logging audit
+
+### Vérification
+- [x] `npx tsc --noEmit` sans erreur
+- [x] ESLint sans erreur
+- [ ] Tests manuels du flux complet
 
 # Mise en production
 

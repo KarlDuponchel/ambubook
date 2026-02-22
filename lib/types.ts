@@ -119,6 +119,15 @@ export interface CompanyHour {
   isClosed: boolean;
 }
 
+// Congés / Fermetures exceptionnelles
+export interface CompanyTimeOff {
+  id: string;
+  title: string;
+  startDate: string;
+  endDate: string;
+  createdAt: string;
+}
+
 // Company enrichie avec toutes les infos
 export interface CompanyFull extends Company {
   slug: string;
@@ -135,6 +144,7 @@ export interface CompanyFull extends Company {
   licenseNumber: string | null;
   photos: CompanyPhoto[];
   hours: CompanyHour[];
+  timeOffs: CompanyTimeOff[];
   isOwner: boolean;
   ownerId: string | null;
 }

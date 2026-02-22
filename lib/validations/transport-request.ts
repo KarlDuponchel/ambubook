@@ -2,10 +2,8 @@ import { z } from "zod";
 
 const phoneRegex = /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/;
 
-export const transportRequestSchema = z.object({
-  // Company
-  companyId: z.string().min(1, "L'identifiant de l'ambulancier est requis"),
-
+// Schéma de base sans companyId (pour réutilisation)
+const baseTransportRequestSchema = z.object({
   // Patient
   patientFirstName: z
     .string()
@@ -63,9 +61,31 @@ export const transportRequestSchema = z.object({
   hasTransportVoucher: z.boolean().default(false),
   reason: z.string().optional().or(z.literal("")),
   notes: z.string().optional().or(z.literal("")),
-}).refine(
+});
+
+// Schéma complet avec companyId (pour création par client)
+export const transportRequestSchema = baseTransportRequestSchema
+  .extend({
+    companyId: z.string().min(1, "L'identifiant de l'ambulancier est requis"),
+  })
+  .refine(
+    (data) => {
+      if (data.tripType === "ROUND_TRIP") {
+        return !!data.returnDate && !!data.returnTime;
+      }
+      return true;
+    },
+    {
+      message: "La date et l'heure de retour sont requises pour un aller-retour",
+      path: ["returnDate"],
+    }
+  );
+
+export type TransportRequestInput = z.infer<typeof transportRequestSchema>;
+
+// Schéma pour création par ambulancier (companyId auto-inféré)
+export const ambulancierTransportRequestSchema = baseTransportRequestSchema.refine(
   (data) => {
-    // Si aller-retour, les champs de retour sont requis
     if (data.tripType === "ROUND_TRIP") {
       return !!data.returnDate && !!data.returnTime;
     }
@@ -77,4 +97,4 @@ export const transportRequestSchema = z.object({
   }
 );
 
-export type TransportRequestInput = z.infer<typeof transportRequestSchema>;
+export type AmbulancierTransportRequestInput = z.infer<typeof ambulancierTransportRequestSchema>;

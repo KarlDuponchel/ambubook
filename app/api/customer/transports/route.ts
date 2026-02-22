@@ -52,6 +52,46 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Vérifier que l'ambulancier n'est pas en congés à la date demandée
+    const requestedDate = new Date(validatedData.requestedDate);
+    const timeOffForRequestedDate = await prisma.companyTimeOff.findFirst({
+      where: {
+        companyId: validatedData.companyId,
+        startDate: { lte: requestedDate },
+        endDate: { gte: requestedDate },
+      },
+    });
+
+    if (timeOffForRequestedDate) {
+      const startStr = new Date(timeOffForRequestedDate.startDate).toLocaleDateString("fr-FR");
+      const endStr = new Date(timeOffForRequestedDate.endDate).toLocaleDateString("fr-FR");
+      return NextResponse.json(
+        { error: `L'ambulancier est en congés du ${startStr} au ${endStr} (${timeOffForRequestedDate.title}). Veuillez choisir une autre date.` },
+        { status: 400 }
+      );
+    }
+
+    // Vérifier également la date de retour si aller-retour
+    if (validatedData.returnDate) {
+      const returnDate = new Date(validatedData.returnDate);
+      const timeOffForReturnDate = await prisma.companyTimeOff.findFirst({
+        where: {
+          companyId: validatedData.companyId,
+          startDate: { lte: returnDate },
+          endDate: { gte: returnDate },
+        },
+      });
+
+      if (timeOffForReturnDate) {
+        const startStr = new Date(timeOffForReturnDate.startDate).toLocaleDateString("fr-FR");
+        const endStr = new Date(timeOffForReturnDate.endDate).toLocaleDateString("fr-FR");
+        return NextResponse.json(
+          { error: `L'ambulancier est en congés du ${startStr} au ${endStr} (${timeOffForReturnDate.title}). Veuillez choisir une autre date de retour.` },
+          { status: 400 }
+        );
+      }
+    }
+
     // Récupérer la session (optionnelle - la demande peut être anonyme)
     const session = await auth.api.getSession({
       headers: await headers(),

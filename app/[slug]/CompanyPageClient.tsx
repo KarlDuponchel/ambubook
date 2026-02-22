@@ -12,6 +12,7 @@ import {
   Ambulance,
   Car,
   Calendar,
+  CalendarOff,
   Shield,
   Users,
   Target,
@@ -254,6 +255,54 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
                         )}
                       </div>
                     ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Prochaines fermetures */}
+              {company.timeOffs && company.timeOffs.length > 0 && (
+                <section className="bg-white rounded-xl border border-neutral-200 p-6">
+                  <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
+                    <CalendarOff className="h-5 w-5 text-warning-600" />
+                    Prochaines fermetures
+                  </h2>
+                  <div className="space-y-3">
+                    {company.timeOffs.map((timeOff) => {
+                      const start = new Date(timeOff.startDate);
+                      const end = new Date(timeOff.endDate);
+                      const now = new Date();
+                      const isActive = start <= now && end >= now;
+
+                      const formatDateRange = () => {
+                        if (start.toDateString() === end.toDateString()) {
+                          return start.toLocaleDateString("fr-FR", {
+                            day: "numeric",
+                            month: "long",
+                          });
+                        }
+                        if (start.getMonth() === end.getMonth()) {
+                          return `${start.getDate()} - ${end.getDate()} ${end.toLocaleDateString("fr-FR", { month: "long" })}`;
+                        }
+                        return `${start.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} - ${end.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`;
+                      };
+
+                      return (
+                        <div
+                          key={timeOff.id}
+                          className={`p-3 rounded-lg ${isActive ? "bg-warning-50 border border-warning-200" : "bg-neutral-50"}`}
+                        >
+                          <div className="flex items-center gap-2">
+                            {isActive && (
+                              <span className="px-2 py-0.5 text-xs font-medium bg-warning-100 text-warning-700 rounded-full">
+                                En cours
+                              </span>
+                            )}
+                            <span className="font-medium text-neutral-900">{timeOff.title}</span>
+                          </div>
+                          <p className="text-sm text-neutral-500 mt-1">{formatDateRange()}</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </section>
               )}

@@ -10,6 +10,7 @@ export function PatientInfoStep({
   errors,
   isLoggedIn,
   companySlug,
+  hideLoginSuggestion,
 }: PatientInfoStepProps) {
   const handleChange = (field: keyof typeof formData, value: string) => {
     setFormData({ ...formData, [field]: value });
@@ -38,7 +39,7 @@ export function PatientInfoStep({
   return (
     <div className="space-y-4">
       {/* Lien vers connexion si pas connecté */}
-      {!isLoggedIn && (
+      {!isLoggedIn && !hideLoginSuggestion && (
         <div className="bg-primary-50 border border-primary-200 rounded-lg p-3 text-sm">
           <p className="text-primary-800">
             <Link

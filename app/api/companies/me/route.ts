@@ -31,6 +31,9 @@ export async function GET() {
       hours: {
         orderBy: { dayOfWeek: "asc" },
       },
+      timeOffs: {
+        orderBy: { startDate: "asc" },
+      },
     },
   });
 
@@ -177,6 +180,9 @@ export async function PATCH(request: NextRequest) {
       },
       hours: {
         orderBy: { dayOfWeek: "asc" },
+      },
+      timeOffs: {
+        orderBy: { startDate: "asc" },
       },
     },
   });

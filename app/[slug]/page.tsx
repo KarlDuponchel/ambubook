@@ -24,6 +24,13 @@ async function getCompany(slug: string): Promise<CompanyFull | null> {
       hours: {
         orderBy: { dayOfWeek: "asc" },
       },
+      timeOffs: {
+        where: {
+          endDate: { gte: new Date() },
+        },
+        orderBy: { startDate: "asc" },
+        take: 5, // Limiter aux 5 prochains congés
+      },
     },
   });
 
@@ -64,6 +71,15 @@ async function getCompany(slug: string): Promise<CompanyFull | null> {
     isClosed: h.isClosed,
   }));
 
+  // Transformer les timeOffs pour le type
+  const timeOffsFormatted = company.timeOffs.map((t) => ({
+    id: t.id,
+    title: t.title,
+    startDate: t.startDate.toISOString(),
+    endDate: t.endDate.toISOString(),
+    createdAt: t.createdAt.toISOString(),
+  }));
+
   return {
     id: company.id,
     name: company.name,
@@ -88,6 +104,7 @@ async function getCompany(slug: string): Promise<CompanyFull | null> {
     licenseNumber: company.licenseNumber,
     photos: photosWithSignedUrls,
     hours: hoursFormatted,
+    timeOffs: timeOffsFormatted,
     isOwner: false,
     ownerId: company.ownerId,
   };

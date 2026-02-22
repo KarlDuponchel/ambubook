@@ -82,6 +82,7 @@ export interface StepProps {
 export interface PatientInfoStepProps extends StepProps {
   isLoggedIn?: boolean;
   companySlug?: string;
+  hideLoginSuggestion?: boolean;
 }
 
 export interface TransportStepProps extends StepProps {

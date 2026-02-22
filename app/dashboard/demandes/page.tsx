@@ -13,8 +13,10 @@ import {
   Car,
   ChevronRight,
   RefreshCw,
+  Plus,
 } from "lucide-react";
-import { PageHeader, Card, CardContent, EmptyState, LoadingSpinner, StatusBadge, useToast } from "@/components/ui";
+import { PageHeader, Card, CardContent, EmptyState, LoadingSpinner, StatusBadge, Button, useToast } from "@/components/ui";
+import { CreateTransportModal } from "@/components/ambulancier/CreateTransportModal";
 import type { RequestStatus, TransportRequestSummary, StatusConfig } from "@/lib/types";
 
 const statusConfig: Record<RequestStatus, Required<StatusConfig>> = {
@@ -78,6 +80,7 @@ export default function DemandesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<RequestStatus | "ALL">("ALL");
   const [refreshing, setRefreshing] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const fetchDemandes = useCallback(async () => {
     try {
@@ -174,10 +177,13 @@ export default function DemandesPage() {
               <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
               Actualiser
             </button>
-            <div className="hidden sm:flex items-center gap-2 rounded-xl border border-card-border bg-card-bg px-3 py-2 text-xs text-neutral-600 shadow-sm">
-              <span className="h-2 w-2 rounded-full bg-success-500" />
-              Temps réel
-            </div>
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Nouvelle demande
+            </Button>
           </div>
         }
       />
@@ -302,6 +308,16 @@ export default function DemandesPage() {
           </div>
         )}
       </Card>
+
+      {/* Modal de création */}
+      <CreateTransportModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={() => {
+          setIsCreateModalOpen(false);
+          fetchDemandes();
+        }}
+      />
     </div>
   );
 }

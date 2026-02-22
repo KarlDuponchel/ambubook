@@ -213,6 +213,7 @@ model Company {
   invitations       Invitation[]
   photos            CompanyPhoto[]
   hours             CompanyHours[]
+  timeOffs          CompanyTimeOff[]
 
   @@map("companies")
 }
@@ -445,6 +446,27 @@ model CompanyHours {
 
   @@unique([companyId, dayOfWeek])
   @@map("company_hours")
+}
+
+// ============================================
+// CONGÉS / FERMETURES EXCEPTIONNELLES
+// ============================================
+
+model CompanyTimeOff {
+  id        String   @id @default(cuid())
+  title     String   // "Vacances d'été", "Jour férié", etc.
+  startDate DateTime
+  endDate   DateTime
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([startDate, endDate])
+  @@map("company_time_off")
 }
 
 // ============================================
