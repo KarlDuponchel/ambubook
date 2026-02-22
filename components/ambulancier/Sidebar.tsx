@@ -27,6 +27,8 @@ interface SidebarProps {
     email: string;
     isOwner?: boolean;
   };
+  isCollapsed?: boolean;
+  onCollapsedChange?: (collapsed: boolean) => void;
 }
 
 interface NavItem {
@@ -36,10 +38,20 @@ interface NavItem {
   showIf?: boolean;
 }
 
-export function Sidebar({ user }: SidebarProps) {
+export function Sidebar({ user, isCollapsed: controlledCollapsed, onCollapsedChange }: SidebarProps) {
   const pathname = usePathname();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [internalCollapsed, setInternalCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  // Utiliser l'état contrôlé si fourni, sinon l'état interne
+  const isCollapsed = controlledCollapsed !== undefined ? controlledCollapsed : internalCollapsed;
+  const setIsCollapsed = (value: boolean) => {
+    if (onCollapsedChange) {
+      onCollapsedChange(value);
+    } else {
+      setInternalCollapsed(value);
+    }
+  };
 
   const navItems: NavItem[] = [
     {

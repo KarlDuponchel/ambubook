@@ -70,13 +70,36 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      if (!companySiret || companySiret.trim().length === 0) {
+        return NextResponse.json(
+          { error: "Le numéro SIRET est requis" },
+          { status: 400 }
+        );
+      }
+
+      // Validation format SIRET (14 chiffres)
+      const siretClean = companySiret.replace(/\s/g, "");
+      if (!/^\d{14}$/.test(siretClean)) {
+        return NextResponse.json(
+          { error: "Le SIRET doit contenir 14 chiffres" },
+          { status: 400 }
+        );
+      }
+
+      if (!companyLicenseNumber || companyLicenseNumber.trim().length === 0) {
+        return NextResponse.json(
+          { error: "Le numéro d'agrément ARS est requis" },
+          { status: 400 }
+        );
+      }
+
       return handleNewCompanySignup({
         name,
         email,
         password,
         phone,
         companyName,
-        companySiret,
+        companySiret: siretClean,
         companyLicenseNumber,
       });
     }
@@ -202,8 +225,8 @@ async function handleNewCompanySignup(params: {
   password: string;
   phone?: string;
   companyName: string;
-  companySiret?: string;
-  companyLicenseNumber?: string;
+  companySiret: string;
+  companyLicenseNumber: string;
 }) {
   const { name, email, password, phone, companyName, companySiret, companyLicenseNumber } = params;
 
@@ -252,9 +275,10 @@ async function handleNewCompanySignup(params: {
       data: {
         name: companyName,
         slug,
-        siret: companySiret || null,
-        licenseNumber: companyLicenseNumber || null,
+        siret: companySiret,
+        licenseNumber: companyLicenseNumber,
         ownerId: signUpResponse.user.id, // Premier utilisateur = owner
+        onboardingStep: 0, // Déclenche l'onboarding à la première connexion
       },
     });
 

@@ -22,6 +22,7 @@ export async function GET() {
             id: true,
             name: true,
             ownerId: true,
+            onboardingStep: true,
           },
         },
       },
@@ -56,6 +57,7 @@ export async function GET() {
         ? {
             id: user.company.id,
             name: user.company.name,
+            onboardingStep: user.company.onboardingStep,
           }
         : null,
     });

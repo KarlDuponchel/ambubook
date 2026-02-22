@@ -194,6 +194,10 @@ model Company {
   coverageRadius       Int?      // Rayon de couverture en km
   licenseNumber        String?   // N° agrément ARS
 
+  // Onboarding Owner
+  onboardingStep        Int?      @default(0)  // 0=non commencé, 1-6=en cours, null=terminé
+  onboardingCompletedAt DateTime?
+
   // Gérant de l'entreprise
   owner   User?   @relation("CompanyOwner", fields: [ownerId], references: [id])
   ownerId String?

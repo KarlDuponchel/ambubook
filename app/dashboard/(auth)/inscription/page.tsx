@@ -295,7 +295,7 @@ function SignUpForm() {
 
               <div>
                 <label htmlFor="companySiret" className="block text-sm font-medium text-neutral-700 mb-1">
-                  SIRET
+                  SIRET *
                 </label>
                 <input
                   id="companySiret"
@@ -303,14 +303,18 @@ function SignUpForm() {
                   type="text"
                   value={formData.companySiret}
                   onChange={handleChange}
+                  required
                   className="w-full px-4 py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 text-neutral-900"
                   placeholder="123 456 789 00012"
                 />
+                <p className="mt-1 text-xs text-neutral-500">
+                  14 chiffres
+                </p>
               </div>
 
               <div>
                 <label htmlFor="companyLicenseNumber" className="block text-sm font-medium text-neutral-700 mb-1">
-                  N° agrément ARS (recommandé)
+                  N° agrément ARS *
                 </label>
                 <input
                   id="companyLicenseNumber"
@@ -318,6 +322,7 @@ function SignUpForm() {
                   type="text"
                   value={formData.companyLicenseNumber}
                   onChange={handleChange}
+                  required
                   className="w-full px-4 py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 text-neutral-900"
                   placeholder="XX-XXXX-XXXX"
                 />
