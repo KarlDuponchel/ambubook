@@ -722,8 +722,8 @@ Permettre aux clients non connectés de suivre leurs demandes de transport via u
   - Retourner `linkedTransportsCount` dans la réponse
 
 ### 2.2 À la connexion (optionnel)
-- [ ] Vérifier s'il existe des demandes orphelines avec l'email de l'utilisateur
-- [ ] Les rattacher automatiquement
+- [x] Vérifier s'il existe des demandes orphelines avec l'email de l'utilisateur
+- [x] Les rattacher automatiquement
 
 ### 2.3 UX
 - [x] Message sur la page de connexion : "X demande(s) précédente(s) ont été ajoutées à votre compte"
