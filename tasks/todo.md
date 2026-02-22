@@ -776,15 +776,15 @@ Interface d'administration complète pour gérer la plateforme AmbuBook : utilis
 ## Phase 2 : Gestion des utilisateurs
 
 ### 2.1 Liste utilisateurs
-- [ ] `app/admin/utilisateurs/page.tsx`
-  - Tableau paginé avec recherche
-  - Filtres : rôle (ADMIN/AMBULANCIER/CUSTOMER), statut (actif/inactif), date inscription
-  - Colonnes : nom, email, rôle, entreprise, statut, date inscription, dernière connexion
-  - Actions rapides : activer/désactiver, voir détail
+- [x] `app/admin/utilisateurs/page.tsx`
+  - Tableau avec recherche
+  - Filtres : rôle (ADMIN/AMBULANCIER/CUSTOMER), statut (actif/inactif)
+  - Colonnes : nom, email, rôle, entreprise, statut, date inscription
+  - Actions rapides : activer/désactiver, voir détail, modifier, supprimer
 
 ### 2.2 Détail utilisateur
-- [ ] `app/admin/utilisateurs/[id]/page.tsx`
-  - Informations complètes
+- [x] Modal `UserDetailsModal.tsx` avec informations complètes
+- [ ] `app/admin/utilisateurs/[id]/page.tsx` - Page détail dédiée (optionnel)
   - Historique des connexions
   - Transports associés (si client)
   - Entreprise associée (si ambulancier)
@@ -792,16 +792,16 @@ Interface d'administration complète pour gérer la plateforme AmbuBook : utilis
   - Actions : modifier rôle, activer/désactiver, supprimer, réinitialiser MDP
 
 ### 2.3 Ambulanciers en attente
-- [ ] Section ou filtre dédié aux comptes AMBULANCIER `isActive=false`
+- [x] Filtre "En attente" dédié aux comptes `isActive=false`
   - Liste avec infos entreprise
-  - Actions : valider, refuser avec motif
-  - Notification automatique à la validation
+  - Actions : activer depuis le tableau
+- [ ] Notification automatique à la validation
 
 ### 2.4 API utilisateurs
-- [ ] `GET /api/admin/users` - Liste paginée avec filtres
+- [x] `GET /api/admin/users` - Liste avec recherche
+- [x] `PATCH /api/admin/users/[id]` - Modifier (rôle, statut)
+- [x] `DELETE /api/admin/users/[id]` - Supprimer
 - [ ] `GET /api/admin/users/[id]` - Détail complet
-- [ ] `PATCH /api/admin/users/[id]` - Modifier (rôle, statut)
-- [ ] `DELETE /api/admin/users/[id]` - Supprimer (soft delete)
 - [ ] `POST /api/admin/users/[id]/reset-password` - Envoyer lien reset
 
 ---

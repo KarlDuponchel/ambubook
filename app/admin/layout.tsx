@@ -72,7 +72,7 @@ export default function AdminLayout({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-950">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <LoadingSpinner size="lg" text="Chargement..." />
       </div>
     );
@@ -83,7 +83,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950">
+    <div className="min-h-screen bg-white">
       <AdminSidebar
         user={user}
         isCollapsed={isSidebarCollapsed}

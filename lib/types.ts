@@ -447,3 +447,58 @@ export interface CalendarEvent {
   pickupCity: string;
   destinationCity: string;
 }
+
+// ============================================
+// Admin
+// ============================================
+
+export interface AdminCompany {
+  id: string;
+  name: string;
+  slug: string;
+  ownerId: string | null;
+}
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  role: UserRole;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  company: AdminCompany | null;
+  companyId: string | null;
+  isCompanyOwner?: boolean;
+}
+
+export type AdminUserRole = "ALL" | UserRole;
+export type AdminUserStatus = "ALL" | "ACTIVE" | "PENDING";
+
+export interface AdminUsersFilters {
+  search: string;
+  role: AdminUserRole;
+  status: AdminUserStatus;
+}
+
+export interface AdminUsersCounts {
+  total: number;
+  admins: number;
+  ambulanciers: number;
+  customers: number;
+  pending: number;
+}
+
+export interface AdminPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface AdminUsersResponse {
+  users: AdminUser[];
+  pagination: AdminPagination;
+  counts: AdminUsersCounts;
+}
