@@ -829,3 +829,123 @@ export const NOTIFICATION_STATUS_FILTER_LABELS: Record<AdminNotificationStatusFi
   FAILED: "Échec",
   BOUNCED: "Rejeté",
 };
+
+// ============================================
+// Admin Transports
+// ============================================
+
+// Version liste pour l'admin
+export interface AdminTransport {
+  id: string;
+  trackingId: string;
+  status: RequestStatus;
+  patientFirstName: string;
+  patientLastName: string;
+  patientPhone: string;
+  patientEmail: string | null;
+  transportType: TransportType;
+  tripType: TripType;
+  mobilityType: MobilityType;
+  requestedDate: string;
+  requestedTime: string;
+  pickupCity: string;
+  destinationCity: string;
+  createdAt: string;
+  company: {
+    id: string;
+    name: string;
+  };
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
+  _count: {
+    history: number;
+    attachments: number;
+  };
+}
+
+// Version complète pour le détail
+export interface AdminTransportFull {
+  id: string;
+  trackingId: string;
+  status: RequestStatus;
+  patientFirstName: string;
+  patientLastName: string;
+  patientPhone: string;
+  patientEmail: string | null;
+  patientBirthDate: string | null;
+  transportType: TransportType;
+  tripType: TripType;
+  mobilityType: MobilityType;
+  requestedDate: string;
+  requestedTime: string;
+  returnDate: string | null;
+  returnTime: string | null;
+  hasTransportVoucher: boolean;
+  isRecurring: boolean;
+  needsAccompanist: boolean;
+  accompanistName: string | null;
+  pickupAddress: string;
+  pickupCity: string;
+  pickupPostalCode: string;
+  pickupDetails: string | null;
+  destinationAddress: string;
+  destinationCity: string;
+  destinationPostalCode: string;
+  destinationDetails: string | null;
+  reason: string | null;
+  notes: string | null;
+  responseNote: string | null;
+  proposedDate: string | null;
+  proposedTime: string | null;
+  respondedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  company: {
+    id: string;
+    name: string;
+    phone: string | null;
+    email: string | null;
+  };
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string | null;
+  } | null;
+  history: RequestHistoryEntry[];
+  attachments: RequestAttachment[];
+}
+
+export type AdminTransportStatusFilter = "ALL" | RequestStatus;
+export type AdminTransportTypeFilter = "ALL" | TransportType;
+export type AdminTripTypeFilter = "ALL" | TripType;
+
+export interface AdminTransportsFilters {
+  search: string;
+  status: AdminTransportStatusFilter;
+  transportType: AdminTransportTypeFilter;
+  tripType: AdminTripTypeFilter;
+  companyId: string;
+  dateFrom: string;
+  dateTo: string;
+}
+
+export interface AdminTransportsCounts {
+  total: number;
+  pending: number;
+  accepted: number;
+  refused: number;
+  completed: number;
+  cancelled: number;
+  ambulance: number;
+  vsl: number;
+}
+
+export interface AdminTransportsResponse {
+  transports: AdminTransport[];
+  pagination: AdminPagination;
+  counts: AdminTransportsCounts;
+}

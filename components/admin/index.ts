@@ -21,3 +21,8 @@ export { FeedbackDetailsModal } from "./feedback/FeedbackDetailsModal";
 export { NotificationFilters } from "./notifications/NotificationFilters";
 export { NotificationsTable } from "./notifications/NotificationsTable";
 export { NotificationDetailsModal } from "./notifications/NotificationDetailsModal";
+
+// Transports
+export { TransportFilters } from "./transports/TransportFilters";
+export { TransportsTable } from "./transports/TransportsTable";
+export { TransportDetailsModal } from "./transports/TransportDetailsModal";
