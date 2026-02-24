@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin, isAuthError } from "@/lib/auth-guard";
 
 /**
- * GET /api/admin/notifications - Liste les logs de notifications
+ * GET /api/admin/notifications - Liste paginée des logs de notifications avec filtres
  */
 export async function GET(request: NextRequest) {
   const authResult = await requireAdmin();
@@ -12,41 +12,96 @@ export async function GET(request: NextRequest) {
   }
 
   const searchParams = request.nextUrl.searchParams;
-  const page = parseInt(searchParams.get("page") || "1");
-  const limit = parseInt(searchParams.get("limit") || "50");
-  const channel = searchParams.get("channel"); // EMAIL, SMS
-  const status = searchParams.get("status"); // PENDING, SENT, FAILED, BOUNCED
-  const type = searchParams.get("type"); // Type de notification
-  const search = searchParams.get("search"); // Recherche par recipient
+  const search = searchParams.get("search") || "";
+  const channel = searchParams.get("channel") || "ALL";
+  const status = searchParams.get("status") || "ALL";
+  const type = searchParams.get("type") || "";
+  const dateFrom = searchParams.get("dateFrom") || "";
+  const dateTo = searchParams.get("dateTo") || "";
+  const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+  const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") || "10", 10)));
 
-  // Construire le filtre
-  const where: {
-    channel?: "EMAIL" | "SMS";
-    status?: "PENDING" | "SENT" | "FAILED" | "BOUNCED";
-    type?: string;
-    recipient?: { contains: string; mode: "insensitive" };
-  } = {};
+  // Construction du filtre WHERE
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const where: any = {};
 
-  if (channel && (channel === "EMAIL" || channel === "SMS")) {
+  // Filtre recherche (destinataire ou sujet)
+  if (search) {
+    where.OR = [
+      { recipient: { contains: search, mode: "insensitive" } },
+      { subject: { contains: search, mode: "insensitive" } },
+      { user: { name: { contains: search, mode: "insensitive" } } },
+      { user: { email: { contains: search, mode: "insensitive" } } },
+    ];
+  }
+
+  // Filtre canal
+  if (channel !== "ALL" && ["EMAIL", "SMS", "INAPP"].includes(channel)) {
     where.channel = channel;
   }
 
-  if (status && ["PENDING", "SENT", "FAILED", "BOUNCED"].includes(status)) {
-    where.status = status as "PENDING" | "SENT" | "FAILED" | "BOUNCED";
+  // Filtre statut
+  if (status !== "ALL" && ["PENDING", "SENT", "FAILED", "BOUNCED"].includes(status)) {
+    where.status = status;
   }
 
+  // Filtre type
   if (type) {
     where.type = type;
   }
 
-  if (search) {
-    where.recipient = { contains: search, mode: "insensitive" };
+  // Filtre date
+  if (dateFrom || dateTo) {
+    where.sentAt = {};
+    if (dateFrom) {
+      where.sentAt.gte = new Date(dateFrom);
+    }
+    if (dateTo) {
+      // Ajouter 1 jour pour inclure toute la journée
+      const endDate = new Date(dateTo);
+      endDate.setDate(endDate.getDate() + 1);
+      where.sentAt.lt = endDate;
+    }
   }
 
-  // Compter le total
-  const total = await prisma.notificationLog.count({ where });
+  // Comptages pour les filtres (sans pagination)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const baseWhere: any = {};
+  if (dateFrom || dateTo) {
+    baseWhere.sentAt = where.sentAt;
+  }
 
-  // Récupérer les logs avec pagination
+  const [total, totalFiltered, sent, failed, pending, bounced] = await Promise.all([
+    prisma.notificationLog.count({ where: baseWhere }),
+    prisma.notificationLog.count({ where }),
+    prisma.notificationLog.count({ where: { ...baseWhere, status: "SENT" } }),
+    prisma.notificationLog.count({ where: { ...baseWhere, status: "FAILED" } }),
+    prisma.notificationLog.count({ where: { ...baseWhere, status: "PENDING" } }),
+    prisma.notificationLog.count({ where: { ...baseWhere, status: "BOUNCED" } }),
+  ]);
+
+  // Stats par canal
+  const byChannelRaw = await prisma.notificationLog.groupBy({
+    by: ["channel"],
+    where: baseWhere,
+    _count: { channel: true },
+  });
+  const byChannel = byChannelRaw.reduce(
+    (acc, s) => ({ ...acc, [s.channel]: s._count.channel }),
+    {} as Record<string, number>
+  );
+
+  // Stats par type (top 10)
+  const byTypeRaw = await prisma.notificationLog.groupBy({
+    by: ["type"],
+    where: baseWhere,
+    _count: { type: true },
+    orderBy: { _count: { type: "desc" } },
+    take: 10,
+  });
+  const byType = byTypeRaw.map((t) => ({ type: t.type, count: t._count.type }));
+
+  // Récupération paginée
   const logs = await prisma.notificationLog.findMany({
     where,
     include: {
@@ -63,34 +118,22 @@ export async function GET(request: NextRequest) {
     take: limit,
   });
 
-  // Statistiques globales
-  const stats = await prisma.notificationLog.groupBy({
-    by: ["status"],
-    _count: { status: true },
-  });
-
-  const statsByChannel = await prisma.notificationLog.groupBy({
-    by: ["channel"],
-    _count: { channel: true },
-  });
-
   return NextResponse.json({
     logs,
     pagination: {
       page,
       limit,
-      total,
-      totalPages: Math.ceil(total / limit),
+      total: totalFiltered,
+      totalPages: Math.ceil(totalFiltered / limit),
     },
     stats: {
-      byStatus: stats.reduce(
-        (acc, s) => ({ ...acc, [s.status]: s._count.status }),
-        {} as Record<string, number>
-      ),
-      byChannel: statsByChannel.reduce(
-        (acc, s) => ({ ...acc, [s.channel]: s._count.channel }),
-        {} as Record<string, number>
-      ),
+      total,
+      sent,
+      failed,
+      pending,
+      bounced,
+      byChannel,
+      byType,
     },
   });
 }

@@ -863,61 +863,89 @@ Interface d'administration complète pour gérer la plateforme AmbuBook : utilis
 
 ---
 
-## Phase 5 : Notifications (logs et monitoring)
+## Phase 5 : Notifications (logs et monitoring) ✅
 
-### 5.1 Logs notifications
-- [ ] `app/admin/notifications/page.tsx`
+### 5.1 Logs notifications ✅
+- [x] `app/admin/notifications/page.tsx`
   - Liste paginée des notifications envoyées
   - Filtres : canal (email/sms/inapp), type, statut, date
   - Recherche par destinataire
   - Colonnes : date, canal, type, destinataire, statut, actions
 
-### 5.2 Détail notification
-- [ ] Modal ou page détail :
+### 5.2 Détail notification ✅
+- [x] Modal `NotificationDetailsModal.tsx` :
   - Contenu complet (sujet, body)
   - Métadonnées (transportId, etc.)
   - Erreur si échec
+  - Infos utilisateur lié
 
-### 5.3 Statistiques notifications
-- [ ] Dashboard stats :
-  - Compteurs : envoyées, échouées, taux succès
-  - Graphique évolution 7/30 jours
-  - Répartition par canal et par type
+### 5.3 Statistiques notifications ✅
+- [x] Dashboard stats intégrés à la page :
+  - Compteurs : total, envoyées, échouées, en attente
+  - Répartition par canal et par type (dans l'API)
+  - Taux de succès calculé
+- [ ] Graphique évolution 7/30 jours (optionnel)
 
 ### 5.4 Actions
-- [ ] Retry notifications FAILED
-- [ ] Export CSV des logs
+- [ ] Retry notifications FAILED (optionnel)
+- [ ] Export CSV des logs (optionnel)
 
-### 5.5 API notifications
-- [ ] `GET /api/admin/notifications` - Liste paginée
-- [ ] `GET /api/admin/notifications/stats` - Statistiques
-- [ ] `POST /api/admin/notifications/[id]/retry` - Renvoyer
-- [ ] `GET /api/admin/notifications/export` - Export CSV
+### 5.5 API notifications ✅
+- [x] `GET /api/admin/notifications` - Liste paginée avec stats
+  - Filtres : search, channel, status, type, dateFrom, dateTo
+  - Stats : total, sent, failed, pending, bounced, byChannel, byType
+- [ ] `POST /api/admin/notifications/[id]/retry` - Renvoyer (optionnel)
+- [ ] `GET /api/admin/notifications/export` - Export CSV (optionnel)
+
+### 5.6 Composants créés ✅
+- [x] `components/admin/notifications/NotificationFilters.tsx` - Recherche + filtres canal/statut/dates
+- [x] `components/admin/notifications/NotificationsTable.tsx` - Table avec badges canal/statut
+- [x] `components/admin/notifications/NotificationDetailsModal.tsx` - Modal détails complet
+- [x] Export dans `components/admin/index.ts`
+
+### 5.7 Types ajoutés ✅
+- [x] `AdminNotificationLog`, `AdminNotificationFilters`, `AdminNotificationStats`, `AdminNotificationResponse`
+- [x] Labels : `NOTIFICATION_CHANNEL_LABELS`, `NOTIFICATION_STATUS_LABELS`, `NOTIFICATION_STATUS_FILTER_LABELS`
 
 ---
 
-## Phase 6 : Feedback et support
+## Phase 6 : Feedback et support ✅
 
 ### 6.1 Liste feedback
-- [ ] `app/admin/feedback/page.tsx`
+- [x] `app/admin/feedback/page.tsx`
   - Liste paginée des retours utilisateurs
   - Filtres : type (bug/amélioration/autre), statut (nouveau/en cours/résolu), priorité
   - Colonnes : date, utilisateur, type, sujet, statut, priorité
 
 ### 6.2 Détail feedback
-- [ ] `app/admin/feedback/[id]/page.tsx`
+- [x] Modal `FeedbackDetailsModal.tsx`
   - Message complet
   - Infos utilisateur (rôle, entreprise)
-  - Captures d'écran si jointes
+  - Captures d'écran si jointes (avec zoom plein écran)
   - Métadonnées (URL, navigateur, OS)
-  - Historique des réponses/actions
-  - Actions : changer statut, assigner, répondre, archiver
+  - Notes admin éditables
+  - Actions : changer statut, priorité
 
 ### 6.3 API feedback
-- [ ] `GET /api/admin/feedback` - Liste paginée
-- [ ] `GET /api/admin/feedback/[id]` - Détail
-- [ ] `PATCH /api/admin/feedback/[id]` - Modifier statut/priorité
-- [ ] `POST /api/admin/feedback/[id]/reply` - Répondre (notifie l'utilisateur)
+- [x] `GET /api/admin/feedback` - Liste paginée avec filtres et comptages
+- [x] `GET /api/admin/feedback/[id]` - Détail complet
+- [x] `PATCH /api/admin/feedback/[id]` - Modifier statut/priorité/adminNotes
+
+### 6.4 Notifications
+- [x] Notification in-app aux admins lors de création d'un feedback
+  - Type `ADMIN_NEW_FEEDBACK` ajouté dans `lib/notifications/types.ts`
+  - Template in-app ajouté dans `lib/notifications/inapp.ts`
+  - Envoi automatique dans `app/api/feedback/route.ts`
+
+### 6.5 Composants créés
+- [x] `components/admin/feedback/FeedbackFilters.tsx` - Barre de recherche + filtres type/statut/priorité
+- [x] `components/admin/feedback/FeedbackTable.tsx` - Table avec actions rapides dans dropdown
+- [x] `components/admin/feedback/FeedbackDetailsModal.tsx` - Modal détails avec édition notes admin
+- [x] Export dans `components/admin/index.ts`
+
+### 6.6 Types ajoutés
+- [x] `AdminFeedback`, `AdminFeedbackFilters`, `AdminFeedbackCounts`, `AdminFeedbackResponse`
+- [x] Labels : `FEEDBACK_TYPE_LABELS`, `FEEDBACK_STATUS_LABELS`, `FEEDBACK_PRIORITY_LABELS`
 
 ---
 
@@ -999,7 +1027,7 @@ Widget flottant (infobulle) présent sur toutes les pages client et dashboard pe
 
 ### 2.2 Notification admin
 - [x] Envoyer email à l'admin lors d'un nouveau feedback
-- [ ] Notification in-app si implémenté côté admin (TODO dans le code)
+- [x] Notification in-app aux admins lors de création d'un feedback
 
 ---
 

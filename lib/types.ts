@@ -672,3 +672,160 @@ export interface AdminErrorsResponse {
     severityCounts: { severity: ErrorSeverityType; count: number }[];
   };
 }
+
+// ============================================
+// Feedback Admin
+// ============================================
+
+export type AdminFeedbackType = "BUG" | "IMPROVEMENT" | "QUESTION" | "OTHER";
+export type AdminFeedbackStatus = "NEW" | "IN_PROGRESS" | "RESOLVED" | "WONT_FIX";
+export type AdminFeedbackPriority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+
+export interface AdminFeedback {
+  id: string;
+  type: AdminFeedbackType;
+  subject: string;
+  message: string;
+  screenshot: string | null;
+  pageUrl: string;
+  userAgent: string | null;
+  status: AdminFeedbackStatus;
+  priority: AdminFeedbackPriority;
+  adminNotes: string | null;
+  resolvedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  userId: string | null;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    role: UserRole;
+    company: {
+      id: string;
+      name: string;
+    } | null;
+  } | null;
+}
+
+export type AdminFeedbackTypeFilter = "ALL" | AdminFeedbackType;
+export type AdminFeedbackStatusFilter = "ALL" | AdminFeedbackStatus;
+export type AdminFeedbackPriorityFilter = "ALL" | AdminFeedbackPriority;
+
+export interface AdminFeedbackFilters {
+  search: string;
+  type: AdminFeedbackTypeFilter;
+  status: AdminFeedbackStatusFilter;
+  priority: AdminFeedbackPriorityFilter;
+}
+
+export interface AdminFeedbackCounts {
+  total: number;
+  new: number;
+  inProgress: number;
+  resolved: number;
+  bugs: number;
+  critical: number;
+}
+
+export interface AdminFeedbackResponse {
+  feedbacks: AdminFeedback[];
+  pagination: AdminPagination;
+  counts: AdminFeedbackCounts;
+}
+
+export const FEEDBACK_TYPE_LABELS: Record<AdminFeedbackType, string> = {
+  BUG: "Bug",
+  IMPROVEMENT: "Amélioration",
+  QUESTION: "Question",
+  OTHER: "Autre",
+};
+
+export const FEEDBACK_STATUS_LABELS: Record<AdminFeedbackStatus, string> = {
+  NEW: "Nouveau",
+  IN_PROGRESS: "En cours",
+  RESOLVED: "Résolu",
+  WONT_FIX: "Ne sera pas corrigé",
+};
+
+export const FEEDBACK_PRIORITY_LABELS: Record<AdminFeedbackPriority, string> = {
+  LOW: "Basse",
+  MEDIUM: "Moyenne",
+  HIGH: "Haute",
+  CRITICAL: "Critique",
+};
+
+// ============================================
+// Notification Logs Admin
+// ============================================
+
+export type NotificationChannel = "EMAIL" | "SMS" | "INAPP";
+export type NotificationStatus = "PENDING" | "SENT" | "FAILED" | "BOUNCED";
+
+export interface AdminNotificationLog {
+  id: string;
+  channel: NotificationChannel;
+  type: string;
+  recipient: string;
+  subject: string | null;
+  content: string | null;
+  status: NotificationStatus;
+  errorMsg: string | null;
+  metadata: Record<string, unknown> | null;
+  sentAt: string;
+  userId: string | null;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
+}
+
+export type AdminNotificationChannelFilter = "ALL" | NotificationChannel;
+export type AdminNotificationStatusFilter = "ALL" | NotificationStatus;
+
+export interface AdminNotificationFilters {
+  search: string;
+  channel: AdminNotificationChannelFilter;
+  status: AdminNotificationStatusFilter;
+  type: string;
+  dateFrom: string;
+  dateTo: string;
+}
+
+export interface AdminNotificationStats {
+  total: number;
+  sent: number;
+  failed: number;
+  pending: number;
+  bounced: number;
+  byChannel: Record<string, number>;
+  byType: { type: string; count: number }[];
+}
+
+export interface AdminNotificationResponse {
+  logs: AdminNotificationLog[];
+  pagination: AdminPagination;
+  stats: AdminNotificationStats;
+}
+
+export const NOTIFICATION_CHANNEL_LABELS: Record<NotificationChannel, string> = {
+  EMAIL: "Email",
+  SMS: "SMS",
+  INAPP: "In-app",
+};
+
+export const NOTIFICATION_STATUS_LABELS: Record<NotificationStatus, string> = {
+  PENDING: "En attente",
+  SENT: "Envoyé",
+  FAILED: "Échec",
+  BOUNCED: "Rejeté",
+};
+
+export const NOTIFICATION_STATUS_FILTER_LABELS: Record<AdminNotificationStatusFilter, string> = {
+  ALL: "Tous les statuts",
+  PENDING: "En attente",
+  SENT: "Envoyé",
+  FAILED: "Échec",
+  BOUNCED: "Rejeté",
+};

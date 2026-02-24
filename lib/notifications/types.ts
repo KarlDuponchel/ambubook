@@ -24,6 +24,7 @@ export type NotificationType =
 
   // Admin
   | "ADMIN_NEW_SIGNUP" // Nouvelle inscription en attente
+  | "ADMIN_NEW_FEEDBACK" // Nouveau feedback reçu
 
   // Système
   | "VERIFICATION_CODE" // Code de vérification
@@ -90,6 +91,7 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   WELCOME_AMBULANCIER: "Bienvenue ambulancier",
   ACCOUNT_ACTIVATED: "Compte activé",
   ADMIN_NEW_SIGNUP: "Nouvelle inscription",
+  ADMIN_NEW_FEEDBACK: "Nouveau feedback",
   VERIFICATION_CODE: "Code de vérification",
   PASSWORD_RESET_REQUEST: "Réinitialisation mot de passe",
 };

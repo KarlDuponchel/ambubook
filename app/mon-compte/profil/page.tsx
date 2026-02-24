@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { ChangePasswordModal } from "@/components/auth";
+import Image from "next/image";
 
 interface UserProfile {
   name: string;
@@ -143,10 +144,12 @@ export default function ProfilClientPage() {
         <div className="flex items-center gap-5">
           <div className="relative shrink-0">
             {imageUrl ? (
-              <img
+              <Image
                 src={imageUrl}
                 alt="Photo de profil"
                 className="h-20 w-20 rounded-full object-cover"
+                width={80}
+                height={80}
               />
             ) : (
               <div className="h-20 w-20 rounded-full bg-linear-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-xl font-semibold shadow-sm">

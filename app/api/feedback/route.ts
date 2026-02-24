@@ -4,8 +4,9 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
-import { uploadToS3, isS3Configured } from "@/lib/s3";
+import { uploadToS3, isS3Configured, getSignedDownloadUrl } from "@/lib/s3";
 import { sendEmail } from "@/lib/email";
+import { createInAppNotification } from "@/lib/notifications/inapp";
 
 // Schema de validation
 const feedbackSchema = z.object({
@@ -52,8 +53,8 @@ export async function POST(request: NextRequest) {
     const headersList = await headers();
     const userAgent = headersList.get("user-agent") || null;
 
-    // Upload screenshot si fourni
-    let screenshotUrl: string | null = null;
+    // Upload screenshot si fourni (on stocke la clé S3, pas l'URL)
+    let screenshotKey: string | null = null;
     if (validatedData.screenshot && isS3Configured()) {
       try {
         // Décoder le base64
@@ -75,13 +76,10 @@ export async function POST(request: NextRequest) {
           const timestamp = Date.now();
           const randomSuffix = Math.random().toString(36).substring(2, 8);
           const extension = matches[1] === "jpeg" ? "jpg" : matches[1];
-          const fileKey = `feedbacks/${timestamp}-${randomSuffix}.${extension}`;
+          screenshotKey = `feedbacks/${timestamp}-${randomSuffix}.${extension}`;
 
           // Upload
-          await uploadToS3(fileKey, buffer, mimeType);
-
-          // URL publique (ou signée selon config)
-          screenshotUrl = `${process.env.S3_PUBLIC_URL || `https://${process.env.S3_BUCKET}.s3.${process.env.S3_REGION}.scw.cloud`}/${fileKey}`;
+          await uploadToS3(screenshotKey, buffer, mimeType);
         }
       } catch (error) {
         console.error("Erreur upload screenshot:", error);
@@ -89,13 +87,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Créer le feedback en base
+    // Créer le feedback en base (on stocke la clé S3, pas l'URL)
     const feedback = await prisma.feedback.create({
       data: {
         type: validatedData.type,
         subject: validatedData.subject,
         message: validatedData.message,
-        screenshot: screenshotUrl,
+        screenshot: screenshotKey,
         pageUrl: validatedData.pageUrl,
         userAgent,
         userId: session.user.id,
@@ -121,6 +119,16 @@ export async function POST(request: NextRequest) {
       const userName = session.user.name;
       const userEmail = session.user.email;
 
+      // Générer une URL signée pour l'email (1h de validité)
+      let screenshotUrl: string | null = null;
+      if (screenshotKey) {
+        try {
+          screenshotUrl = await getSignedDownloadUrl(screenshotKey, 3600);
+        } catch {
+          // Ignorer l'erreur si on ne peut pas générer l'URL
+        }
+      }
+
       void sendEmail({
         to: adminEmail,
         subject: `[Feedback] ${typeLabels[validatedData.type]} : ${validatedData.subject}`,
@@ -142,7 +150,34 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // TODO: Notification in-app pour les admins (quand le dashboard admin sera implémenté)
+    // Notification in-app pour tous les admins
+    const typeLabelsInApp: Record<string, string> = {
+      BUG: "bug",
+      IMPROVEMENT: "amélioration",
+      QUESTION: "question",
+      OTHER: "feedback",
+    };
+
+    const admins = await prisma.user.findMany({
+      where: { role: "ADMIN", isActive: true },
+      select: { id: true },
+    });
+
+    // Créer une notification pour chaque admin
+    await Promise.all(
+      admins.map((admin) =>
+        createInAppNotification({
+          userId: admin.id,
+          type: "ADMIN_NEW_FEEDBACK",
+          data: {
+            userName: session.user.name,
+            typeLabel: typeLabelsInApp[validatedData.type],
+            subject: validatedData.subject,
+            feedbackId: feedback.id,
+          },
+        })
+      )
+    );
 
     return NextResponse.json({
       success: true,

@@ -126,6 +126,13 @@ export function getInAppContent(
         link: "/admin/utilisateurs",
       };
 
+    case "ADMIN_NEW_FEEDBACK":
+      return {
+        title: "Nouveau feedback",
+        message: `${data.userName} a soumis un ${data.typeLabel} : ${data.subject}`,
+        link: "/admin/feedback",
+      };
+
     // Par défaut
     default:
       return {

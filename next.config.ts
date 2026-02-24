@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         hostname: "s3.fr-par.scw.cloud",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "*.s3.fr-par.scw.cloud",
+        pathname: "/**",
+      },
     ],
   },
 };

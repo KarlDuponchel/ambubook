@@ -11,6 +11,7 @@ import {
   Loader2,
   Truck,
 } from "lucide-react";
+import Image from "next/image";
 
 interface UserInfo {
   name: string;
@@ -84,10 +85,12 @@ export default function MonComptePage() {
             <div className="flex items-center gap-4">
               <div className="relative shrink-0">
                 {user.imageUrl ? (
-                  <img
+                  <Image
                     src={user.imageUrl}
                     alt="Photo de profil"
                     className="w-14 h-14 rounded-full object-cover shadow-sm"
+                    width={56}
+                    height={56}
                   />
                 ) : (
                   <div className="w-14 h-14 rounded-full bg-linear-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-xl font-semibold shadow-sm">

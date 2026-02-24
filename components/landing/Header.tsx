@@ -6,6 +6,7 @@ import useSWR from "swr";
 import { LogOut, Truck, ChevronDown, Calendar, User, LayoutDashboard, Building2, Search, Settings } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
 import { NotificationBell } from "@/components/notifications";
+import Image from "next/image";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.ok ? r.json() : null);
 
@@ -21,10 +22,12 @@ function UserAvatar({ name, imageUrl, size = "md" }: { name: string; imageUrl?: 
 
   if (imageUrl) {
     return (
-      <img
+      <Image
         src={imageUrl}
         alt={name}
         className={`${sizeClasses} rounded-full object-cover shadow-sm`}
+        width={size === "sm" ? 32 : 36}
+        height={size === "sm" ? 32 : 36}
       />
     );
   }

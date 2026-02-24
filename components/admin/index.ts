@@ -11,3 +11,13 @@ export { CompanyFilters } from "./companies/CompanyFilters";
 export { CompaniesTable } from "./companies/CompaniesTable";
 export { CompanyDetailsModal } from "./companies/CompanyDetailsModal";
 export { DeleteCompanyModal } from "./companies/DeleteCompanyModal";
+
+// Feedback
+export { FeedbackFilters } from "./feedback/FeedbackFilters";
+export { FeedbackTable } from "./feedback/FeedbackTable";
+export { FeedbackDetailsModal } from "./feedback/FeedbackDetailsModal";
+
+// Notifications
+export { NotificationFilters } from "./notifications/NotificationFilters";
+export { NotificationsTable } from "./notifications/NotificationsTable";
+export { NotificationDetailsModal } from "./notifications/NotificationDetailsModal";

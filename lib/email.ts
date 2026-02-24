@@ -29,13 +29,16 @@ export async function sendEmail({ to, subject, html, text }: SendEmailParams) {
 
     if (error) {
       console.error("Erreur envoi email:", error);
-      return { success: false, error };
+      // Convertir l'erreur Resend en string
+      const errorMsg = error.message || JSON.stringify(error);
+      return { success: false, error: errorMsg };
     }
 
     return { success: true, data };
   } catch (error) {
     console.error("Erreur envoi email:", error);
-    return { success: false, error };
+    const errorMsg = error instanceof Error ? error.message : "Erreur inconnue";
+    return { success: false, error: errorMsg };
   }
 }
 

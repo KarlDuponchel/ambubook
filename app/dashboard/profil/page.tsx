@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { User, Mail, Phone, Lock, Save, Camera, Loader2 } from "lucide-react";
 import { PageHeader, Card, CardHeader, CardContent, LoadingSpinner, useToast } from "@/components/ui";
 import { ChangePasswordModal } from "@/components/auth";
+import Image from "next/image";
 
 export default function ProfilPage() {
   const toast = useToast();
@@ -127,10 +128,12 @@ export default function ProfilPage() {
           <div className="flex items-center gap-6">
             <div className="relative">
               {imageUrl ? (
-                <img
+                <Image
                   src={imageUrl}
                   alt="Photo de profil"
                   className="h-24 w-24 rounded-full object-cover"
+                  width={96}
+                  height={96}
                 />
               ) : (
                 <div className="h-24 w-24 rounded-full bg-primary-100 flex items-center justify-center">
