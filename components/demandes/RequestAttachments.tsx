@@ -207,7 +207,8 @@ export function RequestAttachments({
     // Les ambulanciers peuvent tout supprimer
     if (context === "ambulancier") return true;
     // Les clients ne peuvent supprimer que leurs propres fichiers
-    return currentUserId === attachment.uploadedBy.id;
+    // Les fichiers uploadés par des visiteurs (uploadedBy === null) ne peuvent pas être supprimés par les clients
+    return currentUserId != null && attachment.uploadedBy != null && currentUserId === attachment.uploadedBy.id;
   };
 
   return (
@@ -236,7 +237,8 @@ export function RequestAttachments({
                   ref={fileInputRef}
                   type="file"
                   onChange={handleFileSelect}
-                  accept=".pdf,.jpg,.jpeg,.png,.webp"
+                  accept="image/*,.pdf"
+                  capture="environment"
                   className="hidden"
                   id="file-upload"
                 />
@@ -355,7 +357,7 @@ export function RequestAttachments({
                         {ATTACHMENT_TYPE_LABELS[attachment.fileType]}
                       </span>
                       <span>{formatFileSize(attachment.fileSizeKb)}</span>
-                      <span>par {attachment.uploadedBy.name}</span>
+                      <span>par {attachment.uploadedBy?.name || "Visiteur"}</span>
                     </div>
                     <p className="text-xs text-neutral-400 mt-0.5">
                       {formatDateTime(attachment.createdAt)}

@@ -1,5 +1,7 @@
 "use client";
 
+import { useRef } from "react";
+import { Camera, X, FileText } from "lucide-react";
 import { Input, Checkbox, Textarea } from "@/components/ui";
 import { StepProps, BookingFormData, Company } from "../types";
 
@@ -19,11 +21,27 @@ const MOBILITY_LABELS = {
 };
 
 export function ScheduleStep({ formData, setFormData, errors, company }: ScheduleStepProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleChange = <K extends keyof BookingFormData>(
     field: K,
     value: BookingFormData[K]
   ) => {
     setFormData({ ...formData, [field]: value });
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData({ ...formData, transportVoucherFile: file });
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setFormData({ ...formData, transportVoucherFile: null });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   // Date minimum : aujourd'hui
@@ -84,12 +102,73 @@ export function ScheduleStep({ formData, setFormData, errors, company }: Schedul
       )}
 
       {/* Bon de transport */}
-      <Checkbox
-        label="J'ai un bon de transport"
-        description="Prescription médicale de transport"
-        checked={formData.hasTransportVoucher}
-        onChange={(checked) => handleChange("hasTransportVoucher", checked)}
-      />
+      <div className="space-y-3">
+        <Checkbox
+          label="J'ai un bon de transport"
+          description="Prescription médicale de transport"
+          checked={formData.hasTransportVoucher}
+          onChange={(checked) => {
+            handleChange("hasTransportVoucher", checked);
+            if (!checked) {
+              handleRemoveFile();
+            }
+          }}
+        />
+
+        {/* Upload du bon de transport */}
+        {formData.hasTransportVoucher && (
+          <div className="ml-6 p-4 bg-neutral-50 rounded-xl border border-neutral-200">
+            <p className="text-sm font-medium text-neutral-700 mb-2">
+              Joindre le bon de transport (optionnel)
+            </p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              onChange={handleFileSelect}
+              accept="image/*,.pdf"
+              capture="environment"
+              className="hidden"
+              id="transport-voucher-upload"
+            />
+
+            {formData.transportVoucherFile ? (
+              <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-neutral-200">
+                <div className="p-2 rounded-lg bg-success-50">
+                  <FileText className="h-5 w-5 text-success-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-neutral-900 truncate">
+                    {formData.transportVoucherFile.name}
+                  </p>
+                  <p className="text-xs text-neutral-500">
+                    {(formData.transportVoucherFile.size / 1024).toFixed(0)} Ko
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRemoveFile}
+                  className="p-1.5 text-neutral-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <label
+                htmlFor="transport-voucher-upload"
+                className="flex items-center justify-center gap-2 w-full px-4 py-3 border-2 border-dashed border-neutral-300 rounded-lg cursor-pointer hover:border-primary-400 hover:bg-primary-50/50 transition-colors"
+              >
+                <Camera className="h-5 w-5 text-neutral-400" />
+                <span className="text-sm text-neutral-600">
+                  Photographier ou sélectionner
+                </span>
+              </label>
+            )}
+            <p className="text-xs text-neutral-500 mt-2">
+              Photo ou PDF - Max 10 Mo
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* Motif et notes */}
       <div className="space-y-4">

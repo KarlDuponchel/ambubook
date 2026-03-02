@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma, RequestStatus, HistoryEventType } from "@/generated/prisma/client";
+import { Prisma, RequestStatus, HistoryEventType, AttachmentType } from "@/generated/prisma/client";
 import { transportRequestSchema } from "@/lib/validations/transport-request";
 import { ZodError } from "zod";
 import {
@@ -11,6 +11,16 @@ import {
 } from "@/lib/notifications";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { AuditHelpers } from "@/lib/audit-log";
+import { uploadToS3, generateFileKey, isS3Configured } from "@/lib/s3";
+
+// Configuration pour l'upload du bon de transport
+const ALLOWED_MIME_TYPES = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+];
+const MAX_FILE_SIZE_KB = 10240; // 10 Mo
 
 // POST - Créer une nouvelle demande de transport
 export async function POST(request: NextRequest) {
@@ -27,7 +37,19 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
+    // Supporter JSON ou FormData
+    const contentType = request.headers.get("content-type") || "";
+    let body: Record<string, unknown>;
+    let transportVoucherFile: File | null = null;
+
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      const dataJson = formData.get("data") as string;
+      body = JSON.parse(dataJson);
+      transportVoucherFile = formData.get("transportVoucherFile") as File | null;
+    } else {
+      body = await request.json();
+    }
 
     // Validation avec Zod
     const validatedData = transportRequestSchema.parse(body);
@@ -165,6 +187,62 @@ export async function POST(request: NextRequest) {
 
       return request;
     });
+
+    // Upload du bon de transport si présent
+    if (transportVoucherFile && transportVoucherFile.size > 0) {
+      // Vérifier le type MIME
+      if (!ALLOWED_MIME_TYPES.includes(transportVoucherFile.type)) {
+        // On ne bloque pas la demande, on log juste l'erreur
+        console.warn("Type de fichier non autorisé pour le bon de transport:", transportVoucherFile.type);
+      } else {
+        const fileSizeKb = Math.ceil(transportVoucherFile.size / 1024);
+        if (fileSizeKb <= MAX_FILE_SIZE_KB) {
+          try {
+            const bytes = await transportVoucherFile.arrayBuffer();
+            const buffer = Buffer.from(bytes);
+
+            let fileUrl = "";
+            let fileKey: string | null = null;
+
+            if (isS3Configured()) {
+              fileKey = generateFileKey(transportRequest.id, transportVoucherFile.name);
+              await uploadToS3(fileKey, buffer, transportVoucherFile.type);
+            } else {
+              // Fallback base64 pour dev local
+              const base64 = buffer.toString("base64");
+              fileUrl = `data:${transportVoucherFile.type};base64,${base64}`;
+            }
+
+            // Créer l'attachment
+            await prisma.$transaction([
+              prisma.requestAttachment.create({
+                data: {
+                  fileName: transportVoucherFile.name,
+                  fileType: AttachmentType.TRANSPORT_VOUCHER,
+                  fileUrl,
+                  fileKey,
+                  fileSizeKb,
+                  mimeType: transportVoucherFile.type,
+                  request: { connect: { id: transportRequest.id } },
+                  ...(userId && { uploadedBy: { connect: { id: userId } } }),
+                },
+              }),
+              prisma.requestHistory.create({
+                data: {
+                  eventType: HistoryEventType.ATTACHMENT_ADDED,
+                  comment: `Bon de transport joint à la demande`,
+                  request: { connect: { id: transportRequest.id } },
+                  ...(userId && { user: { connect: { id: userId } } }),
+                },
+              }),
+            ]);
+          } catch (uploadError) {
+            // On ne bloque pas la demande si l'upload échoue
+            console.error("Erreur upload bon de transport:", uploadError);
+          }
+        }
+      }
+    }
 
     // Logger la création de la demande
     AuditHelpers.transportCreated(userId, transportRequest.id);

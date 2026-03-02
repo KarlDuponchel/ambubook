@@ -402,9 +402,9 @@ model RequestAttachment {
   request   TransportRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
   requestId String
 
-  // Qui a uploadé le fichier
-  uploadedBy   User   @relation("UserAttachments", fields: [uploadedById], references: [id])
-  uploadedById String
+  // Qui a uploadé le fichier (optionnel pour les visiteurs non connectés)
+  uploadedBy   User?   @relation("UserAttachments", fields: [uploadedById], references: [id])
+  uploadedById String?
 
   @@index([requestId])
   @@index([uploadedById])

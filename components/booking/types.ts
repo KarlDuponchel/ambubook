@@ -38,6 +38,7 @@ export interface BookingFormData {
   returnDate: string;
   returnTime: string;
   hasTransportVoucher: boolean;
+  transportVoucherFile: File | null;
   reason: string;
   notes: string;
 }
@@ -69,6 +70,7 @@ export const initialFormData: BookingFormData = {
   returnDate: "",
   returnTime: "",
   hasTransportVoucher: false,
+  transportVoucherFile: null,
   reason: "",
   notes: "",
 };

@@ -145,14 +145,34 @@ export function BookingModal({ isOpen, onClose, company }: BookingModalProps) {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/customer/transports", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
+      const { transportVoucherFile, ...jsonData } = formData;
+
+      let response: Response;
+
+      // Si un fichier est présent, envoyer en FormData
+      if (transportVoucherFile) {
+        const submitFormData = new FormData();
+        submitFormData.append("data", JSON.stringify({
+          ...jsonData,
           companyId: company.id,
-        }),
-      });
+        }));
+        submitFormData.append("transportVoucherFile", transportVoucherFile);
+
+        response = await fetch("/api/customer/transports", {
+          method: "POST",
+          body: submitFormData,
+        });
+      } else {
+        // Sinon, envoyer en JSON classique
+        response = await fetch("/api/customer/transports", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...jsonData,
+            companyId: company.id,
+          }),
+        });
+      }
 
       const data = await response.json();
 

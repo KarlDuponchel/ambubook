@@ -423,7 +423,7 @@ export interface RequestAttachment {
   uploadedBy: {
     id: string;
     name: string;
-  };
+  } | null;
 }
 
 export const HISTORY_EVENT_LABELS: Record<HistoryEventType, string> = {
