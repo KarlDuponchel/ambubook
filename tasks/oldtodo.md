@@ -988,7 +988,7 @@ Interface d'administration complète pour gérer la plateforme AmbuBook : utilis
 
 ## Checklist Admin
 
-- [ ] Toutes les pages protégées (ADMIN only)
+- [x] Toutes les pages protégées (ADMIN only)
 - [ ] Design cohérent (sidebar, tables, filtres)
 - [ ] Pagination performante
 - [ ] Filtres persistés dans URL

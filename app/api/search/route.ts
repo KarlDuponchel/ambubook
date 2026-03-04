@@ -198,34 +198,96 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // 3. Recherche par ville (match partiel sur city)
-  const cityResults: CompanyWithDistance[] = allCompanies
-    .filter((company) => {
-      if (!company.city) return false;
-      return company.city.toLowerCase().includes(queryLower) ||
-             queryLower.includes(company.city.toLowerCase());
-    })
-    .map((company) => ({
-      id: company.id,
-      name: company.name,
-      slug: company.slug,
-      address: company.address,
-      city: company.city,
-      postalCode: company.postalCode,
-      phone: company.phone,
-      logoUrl: company.logoUrl,
-      acceptsOnlineBooking: company.acceptsOnlineBooking,
-      coverageRadius: company.coverageRadius,
-      hasAmbulance: company.hasAmbulance,
-      hasVSL: company.hasVSL,
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name, "fr"))
-    .slice(0, limit);
+  // 3. Recherche par ville + rayon géographique
+  // On cherche les entreprises dans la ville ET celles dans un rayon autour
+  const CITY_SEARCH_RADIUS_KM = 20;
 
-  if (cityResults.length > 0) {
+  // Entreprises dans la ville exacte
+  const cityExactMatches = allCompanies.filter((company) => {
+    if (!company.city) return false;
+    const cityLower = company.city.toLowerCase();
+    return cityLower === queryLower ||
+           cityLower.includes(queryLower) ||
+           queryLower.includes(cityLower);
+  });
+
+  // Si on a des résultats dans la ville, on enrichit avec les entreprises proches
+  if (cityExactMatches.length > 0) {
+    // Géocoder la ville pour trouver les entreprises proches
+    const geocoded = await geocodeAddress(query);
+
+    let nearbyCompanies: typeof allCompanies = [];
+
+    if (geocoded) {
+      // Trouver les entreprises dans un rayon de 20km (qui ne sont pas déjà dans cityExactMatches)
+      const cityMatchIds = new Set(cityExactMatches.map(c => c.id));
+
+      nearbyCompanies = allCompanies.filter((company) => {
+        // Exclure celles déjà dans la ville
+        if (cityMatchIds.has(company.id)) return false;
+        // Doit avoir des coordonnées
+        if (company.latitude === null || company.longitude === null) return false;
+
+        const distance = haversineDistance(
+          geocoded.latitude,
+          geocoded.longitude,
+          company.latitude,
+          company.longitude
+        );
+
+        return distance <= CITY_SEARCH_RADIUS_KM;
+      });
+    }
+
+    // Construire les résultats : ville d'abord (distance 0), puis proches (avec distance)
+    const cityResults: CompanyWithDistance[] = [
+      // Entreprises de la ville (distance = 0 pour le tri)
+      ...cityExactMatches.map((company) => ({
+        id: company.id,
+        name: company.name,
+        slug: company.slug,
+        address: company.address,
+        city: company.city,
+        postalCode: company.postalCode,
+        phone: company.phone,
+        distance: 0,
+        logoUrl: company.logoUrl,
+        acceptsOnlineBooking: company.acceptsOnlineBooking,
+        coverageRadius: company.coverageRadius,
+        hasAmbulance: company.hasAmbulance,
+        hasVSL: company.hasVSL,
+      })),
+      // Entreprises proches (avec leur distance réelle)
+      ...nearbyCompanies.map((company) => {
+        const distance = geocoded
+          ? haversineDistance(geocoded.latitude, geocoded.longitude, company.latitude!, company.longitude!)
+          : 0;
+        return {
+          id: company.id,
+          name: company.name,
+          slug: company.slug,
+          address: company.address,
+          city: company.city,
+          postalCode: company.postalCode,
+          phone: company.phone,
+          distance,
+          logoUrl: company.logoUrl,
+          acceptsOnlineBooking: company.acceptsOnlineBooking,
+          coverageRadius: company.coverageRadius,
+          hasAmbulance: company.hasAmbulance,
+          hasVSL: company.hasVSL,
+        };
+      }).sort((a, b) => a.distance - b.distance),
+    ].slice(0, limit);
+
     return NextResponse.json({
       type: "city",
       query,
+      coordinates: geocoded ? {
+        latitude: geocoded.latitude,
+        longitude: geocoded.longitude,
+      } : null,
+      radius: CITY_SEARCH_RADIUS_KM,
       results: cityResults,
     });
   }

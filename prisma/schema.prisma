@@ -725,3 +725,33 @@ model ErrorLog {
   @@index([createdAt])
   @@map("error_logs")
 }
+
+// ============================================
+// CONFIGURATION PLATEFORME
+// ============================================
+
+model SiteConfig {
+  id        String   @id @default("default") // Singleton - une seule ligne
+
+  // Paramètres généraux
+  siteName      String  @default("AmbuBook")
+  siteLogoUrl   String?
+  contactEmail  String  @default("contact@ambubook.fr")
+  supportEmail  String  @default("support@ambubook.fr")
+
+  // Mode maintenance
+  maintenanceMode    Boolean @default(false)
+  maintenanceMessage String? @db.Text
+
+  // Feature flags
+  registrationEnabled Boolean @default(true)  // Inscriptions ouvertes
+  bookingEnabled      Boolean @default(true)  // Réservations en ligne
+  smsEnabled          Boolean @default(true)  // Notifications SMS
+  emailEnabled        Boolean @default(true)  // Notifications Email
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("site_config")
+}

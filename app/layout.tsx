@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { ToastProvider } from "@/components/ui";
 import { AuthenticatedFeedbackWidget } from "@/components/feedback";
+import { Axeptio } from "@/components/common/Axeptio";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -29,6 +30,7 @@ export default function RootLayout({
           {children}
           <AuthenticatedFeedbackWidget />
         </ToastProvider>
+        <Axeptio />
       </body>
     </html>
   );

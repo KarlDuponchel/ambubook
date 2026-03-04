@@ -17,9 +17,10 @@
 ## Admin
 
 ### Dashboard principal
-- [ ] `app/admin/page.tsx` - Vue d'ensemble avec KPIs, graphiques, alertes
-- [ ] Dashboard stats transports (volume, taux acceptation/refus, top entreprises)
-- [ ] Graphique évolution 7/30 jours
+- [x] `app/admin/page.tsx` - Vue d'ensemble avec KPIs, graphiques, alertes
+- [x] Dashboard stats transports (volume, taux acceptation/refus, top entreprises)
+- [x] Graphique évolution 7/30 jours
+- [x] `GET /api/admin/dashboard/stats` - API statistiques globales
 
 ### Utilisateurs
 - [ ] `app/admin/utilisateurs/[id]/page.tsx` - Page détail dédiée
@@ -28,20 +29,24 @@
 - [ ] Notification automatique à la validation ambulancier
 
 ### Entreprises
-- [ ] `app/admin/entreprises/[id]/page.tsx` - Page détail avec employés, stats, galerie
+- [x] `app/admin/entreprises/[id]/page.tsx` - Page détail avec employés, stats, galerie
 
 ### Transports
-- [ ] `GET /api/admin/transports/stats` - Statistiques globales
+- [x] `GET /api/admin/transports/stats` - Statistiques globales
 
 ### Notifications
-- [ ] Page admin pour voir les notifications envoyées (déjà fait via logs)
-- [ ] `POST /api/admin/notifications/[id]/retry` - Renvoyer (optionnel)
+- [x] Page admin pour voir les notifications envoyées (déjà fait via logs)
+- [x] `POST /api/admin/notifications/[id]/retry` - Renvoyer (optionnel)
 - [ ] `GET /api/admin/notifications/export` - Export CSV (optionnel)
 
 ### Configuration
-- [ ] `app/admin/configuration/page.tsx` - Paramètres généraux, maintenance mode
+- [x] `app/admin/configuration/page.tsx` - Paramètres généraux, maintenance mode
+- [x] `GET/PATCH /api/admin/config` - API configuration admin
+- [x] `GET /api/config` - API configuration publique
+- [x] `lib/site-config.ts` - Helper serveur pour récupérer la config
+- [x] Model `SiteConfig` en base de données
 - [ ] Édition des templates email/SMS (optionnel, avancé)
-- [ ] Feature flags (inscriptions, réservations, SMS)
+- [x] Feature flags (inscriptions, réservations, SMS, emails)
 
 ### Améliorations générales
 - [ ] Breadcrumbs pour navigation
