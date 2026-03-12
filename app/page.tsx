@@ -18,7 +18,7 @@ import { CitiesSection } from "@/components/landing/CitiesSection";
 export const metadata: Metadata = {
   title: "Ambubook | Réservation de transport médical en ligne - Ambulance & VSL",
   description:
-    "Réservez votre transport sanitaire en ligne : ambulance, VSL, transport médicalisé. Trouvez un ambulancier près de chez vous et réservez en quelques clics. Service gratuit, disponible 24h/24.",
+    "Réservez votre transport sanitaire en ligne : ambulance, VSL, transport médicalisé. Trouvez un ambulancier près de chez vous et réservez en quelques clics.",
   keywords: [
     "ambulance",
     "VSL",
@@ -181,7 +181,7 @@ const breadcrumbSchema = {
 
 function HeroSkeleton() {
   return (
-    <section className="relative bg-primary-950 pt-28 pb-20 lg:pt-36 lg:pb-28">
+    <section className="relative bg-primary-900 pt-28 pb-20 lg:pt-36 lg:pb-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center animate-pulse">
           <div className="h-6 bg-white/10 rounded-full w-72 mx-auto mb-8" />

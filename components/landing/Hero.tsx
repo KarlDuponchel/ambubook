@@ -113,49 +113,115 @@ export function Hero() {
 
   return (
     <>
-      <section className="relative bg-primary-950 overflow-hidden pt-28 pb-20 lg:pt-36 lg:pb-28">
-        {/* Ambient gradient blobs */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary-600/25 rounded-full blur-[120px]" />
-          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-accent-600/15 rounded-full blur-[100px]" />
-          <div className="absolute top-1/2 -right-20 w-72 h-72 bg-secondary-500/10 rounded-full blur-3xl" />
-        </div>
-
-        {/* Subtle grid overlay */}
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+        {/* Background gradient - Deep medical blue to dark */}
         <div
-          className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          className="absolute inset-0"
           style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
-            backgroundSize: "56px 56px",
+            background: `
+              linear-gradient(135deg,
+                #001429 0%,
+                #002952 25%,
+                #003d7a 50%,
+                #0052a3 75%,
+                #0066cc 100%
+              )
+            `,
           }}
         />
 
-        <Container className="relative">
-          <div className="max-w-3xl mx-auto text-center">
+        {/* Animated gradient orbs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Primary blue glow - top left */}
+          <div
+            className="absolute -top-32 -left-32 w-[600px] h-[600px] rounded-full opacity-40 animate-pulse"
+            style={{
+              background: "radial-gradient(circle, rgba(0, 102, 204, 0.6) 0%, transparent 70%)",
+              filter: "blur(80px)",
+            }}
+          />
+          {/* Teal accent - bottom right */}
+          <div
+            className="absolute -bottom-48 -right-48 w-[700px] h-[700px] rounded-full opacity-30"
+            style={{
+              background: "radial-gradient(circle, rgba(20, 184, 166, 0.5) 0%, transparent 70%)",
+              filter: "blur(100px)",
+            }}
+          />
+          {/* Success green hint - center */}
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-full opacity-20"
+            style={{
+              background: "radial-gradient(ellipse, rgba(16, 185, 129, 0.3) 0%, transparent 60%)",
+              filter: "blur(120px)",
+            }}
+          />
+        </div>
+
+        {/* Floating particles effect */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-20 left-[10%] w-2 h-2 bg-white/20 rounded-full animate-bounce" style={{ animationDelay: "0s", animationDuration: "3s" }} />
+          <div className="absolute top-40 left-[25%] w-1.5 h-1.5 bg-secondary-400/30 rounded-full animate-bounce" style={{ animationDelay: "0.5s", animationDuration: "4s" }} />
+          <div className="absolute top-32 right-[20%] w-2.5 h-2.5 bg-primary-300/25 rounded-full animate-bounce" style={{ animationDelay: "1s", animationDuration: "3.5s" }} />
+          <div className="absolute bottom-40 left-[15%] w-1.5 h-1.5 bg-white/15 rounded-full animate-bounce" style={{ animationDelay: "1.5s", animationDuration: "4.5s" }} />
+          <div className="absolute bottom-32 right-[30%] w-2 h-2 bg-secondary-300/20 rounded-full animate-bounce" style={{ animationDelay: "2s", animationDuration: "3s" }} />
+        </div>
+
+        {/* Grid pattern overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.03] pointer-events-none"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(255,255,255,1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)
+            `,
+            backgroundSize: "60px 60px",
+          }}
+        />
+
+        {/* Radial vignette */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse at center, transparent 0%, rgba(0, 20, 41, 0.4) 100%)",
+          }}
+        />
+
+        <Container className="relative z-10 py-20 lg:py-28">
+          <div className="max-w-4xl mx-auto text-center">
             {/* Status badge */}
-            <div className="inline-flex items-center gap-2.5 px-4 py-2 bg-white/8 backdrop-blur-sm border border-white/12 rounded-full mb-8">
-              <span className="w-2 h-2 bg-primary-400 rounded-full animate-pulse" />
-              <span className="text-primary-300 text-sm font-medium tracking-wide">
+            <div className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full mb-10 shadow-lg shadow-black/10">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary-400"></span>
+              </span>
+              <span className="text-white/90 text-sm font-medium tracking-wide">
                 Réservation 100&nbsp;% en ligne — sans appel téléphonique
               </span>
             </div>
 
-            {/* H1 */}
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-[1.08] tracking-tight">
-              Votre{" "}
-              <span className="text-primary-400">transport médical</span>
+            {/* H1 with gradient text */}
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight">
+              <span className="text-white">Votre </span>
+              <span
+                className="bg-clip-text text-transparent"
+                style={{
+                  backgroundImage: "linear-gradient(135deg, #60a5fa 0%, #2dd4bf 50%, #4ade80 100%)",
+                }}
+              >
+                transport médical
+              </span>
               <br />
-              réservé en quelques clics
+              <span className="text-white">réservé en quelques clics</span>
             </h1>
 
-            <p className="mt-6 text-lg sm:text-xl text-primary-200/80 max-w-2xl mx-auto leading-relaxed">
+            <p className="mt-8 text-lg sm:text-xl text-white/70 max-w-2xl mx-auto leading-relaxed">
               Ambulance ou VSL — trouvez un transporteur agréé près de chez vous
-              et réservez en ligne, 24h/24.
+              et réservez en ligne, <span className="text-secondary-400 font-medium">24h/24</span>.
             </p>
 
-            {/* Search card */}
-            <div className="mt-10 bg-white rounded-2xl p-2 shadow-2xl shadow-primary-950/60 max-w-xl mx-auto">
+            {/* Search card - Glassmorphism */}
+            <div className="mt-12 bg-white/95 backdrop-blur-xl rounded-2xl p-2.5 shadow-2xl shadow-black/20 max-w-xl mx-auto ring-1 ring-white/20">
               <div className="flex flex-col sm:flex-row gap-2">
                 <Autocomplete
                   placeholder="Ville ou nom d'ambulancier..."
@@ -174,7 +240,7 @@ export function Hero() {
                       handleSearch(input.value.trim());
                     }
                   }}
-                  className="px-7 py-3.5 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-500 active:bg-primary-700 transition-all duration-200 shadow-lg shadow-primary-600/30 whitespace-nowrap"
+                  className="px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-400 hover:to-primary-500 active:from-primary-600 active:to-primary-700 transition-all duration-200 shadow-lg shadow-primary-500/30 whitespace-nowrap"
                 >
                   Rechercher
                 </button>
@@ -182,11 +248,11 @@ export function Hero() {
             </div>
 
             {/* Alternative link */}
-            <p className="mt-5 text-primary-400/70 text-sm">
+            <p className="mt-6 text-white/50 text-sm">
               Vous avez déjà un lien de votre ambulancier ?{" "}
               <button
                 type="button"
-                className="text-primary-300 hover:text-white font-medium underline underline-offset-2 cursor-pointer transition-colors"
+                className="text-secondary-400 hover:text-secondary-300 font-medium underline underline-offset-2 cursor-pointer transition-colors"
                 onClick={openModal}
               >
                 Accédez directement
@@ -195,23 +261,31 @@ export function Hero() {
           </div>
 
           {/* Stats strip */}
-          <div className="mt-16 pt-10 border-t border-white/10 max-w-2xl mx-auto">
-            <div className="grid grid-cols-3 gap-6 text-center">
+          <div className="mt-20 pt-12 border-t border-white/10 max-w-3xl mx-auto">
+            <div className="grid grid-cols-3 gap-8 text-center">
               {[
                 { value: "500+", label: "Ambulanciers partenaires" },
                 { value: "15 000+", label: "Transports réservés" },
                 { value: "4.8 / 5", label: "Satisfaction patients" },
               ].map((stat) => (
-                <div key={stat.label}>
-                  <div className="text-3xl sm:text-4xl font-bold text-white tabular-nums">
+                <div key={stat.label} className="group">
+                  <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tabular-nums group-hover:scale-105 transition-transform">
                     {stat.value}
                   </div>
-                  <div className="mt-1 text-sm text-primary-400/80">{stat.label}</div>
+                  <div className="mt-2 text-sm text-white/60">{stat.label}</div>
                 </div>
               ))}
             </div>
           </div>
         </Container>
+
+        {/* Bottom fade to white */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+          style={{
+            background: "linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)",
+          }}
+        />
       </section>
 
       {/* Modal de réservation */}

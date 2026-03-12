@@ -27,7 +27,7 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section id="comment-ca-marche" className="py-20 lg:py-28 bg-primary-950 overflow-hidden">
+    <section id="comment-ca-marche" className="py-20 lg:py-28 bg-primary-900 overflow-hidden">
       {/* Ambient decoration */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 left-0 w-96 h-96 bg-primary-700/20 rounded-full blur-3xl -translate-x-1/2" />

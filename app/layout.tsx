@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Inter } from "next/font/google";
 import { ToastProvider } from "@/components/ui";
 import { AuthenticatedFeedbackWidget } from "@/components/feedback";
 import { Axeptio } from "@/components/common/Axeptio";
 import "./globals.css";
 
-const poppins = Poppins({
+const inter = Inter({
   weight: ["300", "400", "500", "600", "700"],
   subsets: ["latin"],
 });
@@ -23,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className="light" suppressHydrationWarning>
       <body
-        className={`${poppins.className} antialiased bg-background text-foreground`}
+        className={`${inter.className} antialiased bg-background text-foreground`}
         suppressHydrationWarning
       >
         <ToastProvider>
