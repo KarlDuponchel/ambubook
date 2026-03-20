@@ -111,8 +111,19 @@ export const auth = betterAuth({
 
   // Configuration des sessions
   session: {
-    // Durée de vie : 7 jours
+    // Durée de vie : 24 heures
     expiresIn: 60 * 60 * 24,
+    updateAge: 60 * 60, // Refresh si session > 1h d'ancienneté
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60, // Cache 5 minutes pour éviter les appels DB
+    },
+  },
+
+  // Configuration avancée des cookies
+  advanced: {
+    useSecureCookies: process.env.NODE_ENV === "production",
+    cookiePrefix: "ambubook",
   },
 });
 

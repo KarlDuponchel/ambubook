@@ -3,6 +3,7 @@
  */
 
 import { NotificationType } from "./types";
+import { sanitizeData } from "@/lib/utils";
 
 interface NotificationTemplates {
   emailSubject: string;
@@ -15,44 +16,48 @@ const BASE_URL = process.env.BETTER_AUTH_URL || "http://localhost:3000";
 
 /**
  * Génère les templates pour un type de notification donné
+ * Les données sont automatiquement sanitizées pour prévenir les injections XSS
  */
 export function getNotificationTemplates(
   type: NotificationType,
   data: Record<string, unknown>
 ): NotificationTemplates {
+  // Sanitize toutes les données string pour éviter les injections XSS dans les emails
+  const safeData = sanitizeData(data);
+
   switch (type) {
     case "TRANSPORT_REQUEST_CREATED":
-      return transportRequestCreatedTemplates(data);
+      return transportRequestCreatedTemplates(safeData);
     case "TRANSPORT_ACCEPTED":
-      return transportAcceptedTemplates(data);
+      return transportAcceptedTemplates(safeData);
     case "TRANSPORT_REFUSED":
-      return transportRefusedTemplates(data);
+      return transportRefusedTemplates(safeData);
     case "TRANSPORT_COUNTER_PROPOSAL":
-      return transportCounterProposalTemplates(data);
+      return transportCounterProposalTemplates(safeData);
     case "TRANSPORT_NEW_REQUEST":
-      return transportNewRequestTemplates(data);
+      return transportNewRequestTemplates(safeData);
     case "TRANSPORT_REMINDER":
-      return transportReminderTemplates(data);
+      return transportReminderTemplates(safeData);
     case "TRANSPORT_COMPLETED":
-      return transportCompletedTemplates(data);
+      return transportCompletedTemplates(safeData);
     case "TRANSPORT_CUSTOMER_RESPONSE":
-      return transportCustomerResponseTemplates(data);
+      return transportCustomerResponseTemplates(safeData);
     case "WELCOME_CUSTOMER":
-      return welcomeCustomerTemplates(data);
+      return welcomeCustomerTemplates(safeData);
     case "WELCOME_AMBULANCIER":
-      return welcomeAmbulancierTemplates(data);
+      return welcomeAmbulancierTemplates(safeData);
     case "ACCOUNT_ACTIVATED":
-      return accountActivatedTemplates(data);
+      return accountActivatedTemplates(safeData);
     case "VERIFICATION_CODE":
-      return verificationCodeTemplates(data);
+      return verificationCodeTemplates(safeData);
     case "TRANSPORT_ATTACHMENT_ADDED":
-      return transportAttachmentAddedTemplates(data);
+      return transportAttachmentAddedTemplates(safeData);
     case "ADMIN_NEW_SIGNUP":
-      return adminNewSignupTemplates(data);
+      return adminNewSignupTemplates(safeData);
     case "PASSWORD_RESET_REQUEST":
-      return passwordResetRequestTemplates(data);
+      return passwordResetRequestTemplates(safeData);
     default:
-      return defaultTemplates(data);
+      return defaultTemplates(safeData);
   }
 }
 

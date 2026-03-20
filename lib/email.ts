@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { escapeHtml } from "@/lib/utils";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -50,7 +51,10 @@ export async function notifyAdminNewSignup(params: {
   userEmail: string;
   companyName: string;
 }) {
-  const { userName, userEmail, companyName } = params;
+  // Sanitize les données utilisateur pour éviter les injections XSS
+  const userName = escapeHtml(params.userName);
+  const userEmail = escapeHtml(params.userEmail);
+  const companyName = escapeHtml(params.companyName);
 
   return sendEmail({
     to: ADMIN_EMAIL,
@@ -65,7 +69,7 @@ export async function notifyAdminNewSignup(params: {
       </ul>
       <p>Connectez-vous au dashboard admin pour valider ce compte.</p>
     `,
-    text: `Nouvelle inscription AmbuBook\n\nNom: ${userName}\nEmail: ${userEmail}\nSociété: ${companyName}\n\nConnectez-vous au dashboard admin pour valider ce compte.`,
+    text: `Nouvelle inscription AmbuBook\n\nNom: ${params.userName}\nEmail: ${params.userEmail}\nSociété: ${params.companyName}\n\nConnectez-vous au dashboard admin pour valider ce compte.`,
   });
 }
 
@@ -77,10 +81,12 @@ export async function notifyUserSignupPending(params: {
   userEmail: string;
   companyName: string;
 }) {
-  const { userName, userEmail, companyName } = params;
+  // Sanitize les données utilisateur pour éviter les injections XSS
+  const userName = escapeHtml(params.userName);
+  const companyName = escapeHtml(params.companyName);
 
   return sendEmail({
-    to: userEmail,
+    to: params.userEmail, // Email non échappé car utilisé comme destinataire
     subject: "Votre inscription sur AmbuBook - En attente de validation",
     html: `
       <h2>Bienvenue sur AmbuBook, ${userName} !</h2>
@@ -91,7 +97,7 @@ export async function notifyUserSignupPending(params: {
       <p>À très bientôt,</p>
       <p>L'équipe AmbuBook</p>
     `,
-    text: `Bienvenue sur AmbuBook, ${userName} !\n\nVotre compte pour la société "${companyName}" a bien été créé.\n\nIl est actuellement en cours de vérification par notre équipe.\nVous recevrez un email dès que votre compte sera activé.\n\nÀ très bientôt,\nL'équipe AmbuBook`,
+    text: `Bienvenue sur AmbuBook, ${params.userName} !\n\nVotre compte pour la société "${params.companyName}" a bien été créé.\n\nIl est actuellement en cours de vérification par notre équipe.\nVous recevrez un email dès que votre compte sera activé.\n\nÀ très bientôt,\nL'équipe AmbuBook`,
   });
 }
 
@@ -102,21 +108,22 @@ export async function notifyUserAccountActivated(params: {
   userName: string;
   userEmail: string;
 }) {
-  const { userName, userEmail } = params;
+  // Sanitize les données utilisateur pour éviter les injections XSS
+  const userName = escapeHtml(params.userName);
+  const loginUrl = `${process.env.BETTER_AUTH_URL || "http://localhost:3000"}/connexion`;
 
   return sendEmail({
-    to: userEmail,
+    to: params.userEmail,
     subject: "Votre compte AmbuBook est activé !",
     html: `
       <h2>Bonne nouvelle, ${userName} !</h2>
       <p>Votre compte AmbuBook a été <strong>validé et activé</strong>.</p>
       <p>Vous pouvez maintenant vous connecter et commencer à utiliser la plateforme.</p>
-      <p><a href="${process.env.BETTER_AUTH_URL || "http://localhost:3000"}/connexion">Se connecter à AmbuBook</Link>
-</p>
+      <p><a href="${loginUrl}">Se connecter à AmbuBook</a></p>
       <br>
       <p>À très bientôt,</p>
       <p>L'équipe AmbuBook</p>
     `,
-    text: `Bonne nouvelle, ${userName} !\n\nVotre compte AmbuBook a été validé et activé.\n\nVous pouvez maintenant vous connecter et commencer à utiliser la plateforme.\n\nÀ très bientôt,\nL'équipe AmbuBook`,
+    text: `Bonne nouvelle, ${params.userName} !\n\nVotre compte AmbuBook a été validé et activé.\n\nVous pouvez maintenant vous connecter et commencer à utiliser la plateforme.\n\nÀ très bientôt,\nL'équipe AmbuBook`,
   });
 }

@@ -573,6 +573,7 @@ export type AuditActionType =
   | "LOGIN"
   | "LOGOUT"
   | "LOGIN_FAILED"
+  | "ACCESS_DENIED"
   | "PASSWORD_RESET"
   | "PASSWORD_CHANGED"
   | "USER_CREATED"

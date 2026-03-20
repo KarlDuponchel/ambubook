@@ -42,3 +42,33 @@ export function generateInviteCode(): string {
   }
   return code;
 }
+
+/**
+ * Échappe les caractères HTML pour prévenir les injections XSS
+ * À utiliser pour toute donnée utilisateur insérée dans du HTML (emails, etc.)
+ */
+export function escapeHtml(str: string): string {
+  const htmlEscapes: Record<string, string> = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  };
+  return str.replace(/[&<>"']/g, (char) => htmlEscapes[char]);
+}
+
+/**
+ * Sanitize un objet de données en échappant toutes les valeurs string
+ * Utile pour les templates de notifications
+ */
+export function sanitizeData<T extends Record<string, unknown>>(data: T): T {
+  const sanitized = { ...data };
+  for (const key in sanitized) {
+    const value = sanitized[key];
+    if (typeof value === "string") {
+      (sanitized as Record<string, unknown>)[key] = escapeHtml(value);
+    }
+  }
+  return sanitized;
+}

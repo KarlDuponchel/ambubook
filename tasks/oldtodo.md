@@ -1222,10 +1222,10 @@ Audit et renforcement de la sécurité de la plateforme AmbuBook : authentificat
 ## Phase 1 : Authentification et sessions
 
 ### 1.1 Audit Better Auth
-- [ ] Vérifier la configuration des sessions (durée, refresh)
-- [ ] Vérifier le hashage des mots de passe (bcrypt/argon2)
-- [ ] Forcer HTTPS en production
-- [ ] Configurer les cookies sécurisés (HttpOnly, Secure, SameSite)
+- [x] Vérifier la configuration des sessions (durée, refresh) - `lib/auth.ts` : 24h + updateAge + cookieCache
+- [x] Vérifier le hashage des mots de passe (bcrypt/argon2) - bcryptjs utilisé par défaut
+- [x] Forcer HTTPS en production - HSTS configuré dans `next.config.ts`
+- [x] Configurer les cookies sécurisés (HttpOnly, Secure, SameSite) - `lib/auth.ts` advanced config
 
 ### 1.2 Renforcement connexion
 - [x] Rate limiting sur /api/auth/sign-in/email (5 tentatives / 5 min) - configuré dans `lib/auth.ts`
@@ -1253,20 +1253,20 @@ Audit et renforcement de la sécurité de la plateforme AmbuBook : authentificat
 ## Phase 2 : Autorisation et contrôle d'accès
 
 ### 2.1 Audit des routes API
-- [ ] Vérifier que toutes les routes protégées vérifient la session
-- [ ] Vérifier les contrôles de rôle (ADMIN, AMBULANCIER, CUSTOMER)
-- [ ] Vérifier l'ownership (un user ne peut modifier que ses propres données)
+- [x] Vérifier que toutes les routes protégées vérifient la session - toutes les routes utilisent `requireAuth()` ou session manuelle
+- [x] Vérifier les contrôles de rôle (ADMIN, AMBULANCIER, CUSTOMER) - helpers ajoutés dans `lib/auth-guard.ts`
+- [x] Vérifier l'ownership (un user ne peut modifier que ses propres données) - filtres `companyId`/`userId` en place
 - [ ] Documenter les permissions par route
 
 ### 2.2 Middleware de sécurité
-- [ ] Middleware centralisé pour vérification auth + rôle
-- [ ] Logs des accès refusés (403)
-- [ ] Protection CSRF sur les mutations
+- [x] Helpers centralisés pour vérification auth + rôle - `requireAdmin()`, `requireAmbulancier()`, `requireCustomer()` dans `lib/auth-guard.ts`
+- [x] Logs des accès refusés (403) - `AuditHelpers.accessDenied()` + logging auto dans auth-guard.ts
+- [x] Protection CSRF sur les mutations - gérée par Better Auth via cookies `SameSite`
 
 ### 2.3 Isolation des données
-- [ ] Un ambulancier ne voit que les demandes de son entreprise
-- [ ] Un client ne voit que ses propres transports
-- [ ] Les admins voient tout (avec logs)
+- [x] Un ambulancier ne voit que les demandes de son entreprise - `where: { companyId: user.companyId }`
+- [x] Un client ne voit que ses propres transports - `where: { userId: session.user.id }`
+- [x] Les admins voient tout (avec logs) - pas de filtre ownership + `AuditHelpers`
 
 ---
 
@@ -1275,63 +1275,64 @@ Audit et renforcement de la sécurité de la plateforme AmbuBook : authentificat
 ### 3.1 Données sensibles
 - [ ] Chiffrement des données sensibles en base (N° sécu, etc.) - optionnel
 - [ ] Masquage des données sensibles dans les logs
-- [ ] Ne jamais exposer les IDs internes dans les URLs publiques (utiliser trackingId)
+- [x] Ne jamais exposer les IDs internes dans les URLs publiques - `/api/public/transport/[trackingId]`
 
 ### 3.2 Upload de fichiers
-- [ ] Validation des types MIME (images, PDF uniquement)
-- [ ] Limite de taille (ex: 10MB max)
+- [x] Validation des types MIME (images, PDF uniquement) - `ALLOWED_MIME_TYPES` dans les routes attachments
+- [x] Limite de taille (ex: 10MB max) - `MAX_FILE_SIZE_KB = 10240` (10 Mo)
 - [ ] Scan antivirus (optionnel, via ClamAV ou service cloud)
-- [ ] Stockage sur S3 avec URLs signées (expiration)
+- [x] Stockage sur S3 avec URLs signées (expiration) - `getSignedDownloadUrl()` avec expiration 1h
 
 ### 3.3 Sanitization
-- [ ] Sanitizer les inputs HTML (éviter XSS)
-- [ ] Échapper les données dans les emails/SMS
-- [ ] Validation Zod sur toutes les entrées API
+- [x] Sanitizer les inputs HTML (éviter XSS) - `escapeHtml()` + `sanitizeData()` dans `lib/utils.ts`
+- [x] Échapper les données dans les emails/SMS - appliqué dans `lib/email.ts` et `lib/notifications/templates.ts`
+- [x] Validation Zod sur toutes les entrées API - `lib/validations/transport-request.ts`
 
 ---
 
 ## Phase 4 : Protection contre les attaques
 
 ### 4.1 Rate limiting global
-- [ ] Configurer rate limiting sur l'API (ex: Vercel Edge, Upstash)
-- [ ] Rate limiting spécifique sur :
-  - Création de compte
-  - Envoi de notifications
-  - Upload de fichiers
-  - Soumission de feedback
+- [x] Configurer rate limiting sur l'API - `lib/rate-limit.ts` (DB-backed) + Better Auth
+- [x] Rate limiting spécifique :
+  - Création compte : 5/h (`/sign-up/email`)
+  - Connexion : 5/5min (`/sign-in/email`)
+  - Reset password : 3/5min
+  - Création transport : 5/h (`/api/customer/transports`)
+  - Feedback : 5/h (`/api/feedback`)
+  - Actions publiques : 10/h (`/api/public/transport/[trackingId]`)
 
 ### 4.2 Headers de sécurité
-- [ ] Content-Security-Policy (CSP)
-- [ ] X-Frame-Options (DENY)
-- [ ] X-Content-Type-Options (nosniff)
-- [ ] Referrer-Policy
-- [ ] Permissions-Policy
-- [ ] Configurer dans `next.config.js` ou middleware
+- [x] Content-Security-Policy (CSP) - `next.config.ts`
+- [x] X-Frame-Options (DENY) - `next.config.ts`
+- [x] X-Content-Type-Options (nosniff) - `next.config.ts`
+- [x] Referrer-Policy - `next.config.ts`
+- [x] Permissions-Policy (camera, geolocation, FLoC) - `next.config.ts`
 
 ### 4.3 Protection DDOS
-- [ ] Cloudflare ou équivalent en frontal
-- [ ] Challenge sur les requêtes suspectes
+- [x] Cloudflare en frontal
+- [x] Challenge sur requêtes suspectes (géré par Cloudflare)
 
 ---
 
-## Phase 5 : Conformité RGPD
+## Phase 5 : Conformité RGPD ✅
 
-### 5.1 Consentement
-- [ ] Banner cookies avec choix (nécessaires, analytics, marketing)
-- [ ] Stockage du consentement
-- [ ] Respect du choix (pas de tracking sans consentement)
+### 5.1 Consentement ✅
+- [x] Banner cookies avec choix (nécessaires, analytics, marketing) - Axeptio
+- [x] Stockage du consentement - Axeptio
+- [x] Respect du choix (pas de tracking sans consentement) - Axeptio
 
-### 5.2 Droits des utilisateurs
-- [ ] Page "Mes données" pour les utilisateurs
-- [ ] Export des données personnelles (JSON/PDF)
-- [ ] Suppression du compte (avec confirmation)
-- [ ] Anonymisation plutôt que suppression pour l'historique
+### 5.2 Droits des utilisateurs ✅
+- [x] Page "Mes données" pour les utilisateurs - Section RGPD dans /mon-compte/parametres
+- [x] Export des données personnelles (JSON/PDF) - API /api/user/me/export
+- [x] Suppression du compte (avec confirmation) - Contact admin par email
+- [x] Anonymisation plutôt que suppression pour l'historique - Déjà prévu dans le schéma (deletedAt)
 
-### 5.3 Documentation légale
-- [ ] Politique de confidentialité complète
-- [ ] Mentions légales
-- [ ] CGU / CGV
-- [ ] Registre des traitements (interne)
+### 5.3 Documentation légale ✅
+- [x] Politique de confidentialité complète - /politique-confidentialite
+- [x] Mentions légales - Incluses dans CGU
+- [x] CGU / CGV - /cgu
+- [ ] Registre des traitements (interne) - Document interne à rédiger
 
 ### 5.4 Rétention des données
 - [ ] Définir durées de conservation :

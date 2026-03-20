@@ -68,15 +68,6 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
             </div>
           )}
           <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
-
-          {/* Bouton retour */}
-          <Link
-            href="/recherche"
-            className="absolute top-4 left-4 flex items-center gap-2 px-4 py-2 bg-white/90 hover:bg-white text-neutral-700 rounded-lg backdrop-blur-sm transition-colors"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Retour
-          </Link>
         </div>
 
         {/* Contenu principal */}

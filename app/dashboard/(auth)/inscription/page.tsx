@@ -114,7 +114,7 @@ function SignUpForm() {
   };
 
   return (
-    <div className="w-full max-w-md px-4">
+    <div className="w-full max-w-full md:max-w-2/3 lg:max-w-1/2 xl:max-w-1/3 px-4">
       <div className="bg-white rounded-xl shadow-md p-8 border border-neutral-200">
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-neutral-900">Inscription Pro</h1>

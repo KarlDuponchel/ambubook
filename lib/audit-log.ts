@@ -161,6 +161,22 @@ export const AuditHelpers = {
       userAgent,
     }),
 
+  accessDenied: (
+    userId: string | null,
+    path: string,
+    reason: string,
+    ipAddress?: string,
+    userAgent?: string
+  ) =>
+    logAuditAction({
+      action: "ACCESS_DENIED",
+      userId,
+      details: `Accès refusé : ${reason}`,
+      metadata: { path, reason },
+      ipAddress,
+      userAgent,
+    }),
+
   logout: (userId: string) =>
     logAuditAction({
       action: "LOGOUT",

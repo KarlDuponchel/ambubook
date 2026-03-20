@@ -16,7 +16,7 @@ export default function CustomerAuthLayout({
 
       {/* Contenu centré */}
       <main className="flex-1 flex items-center justify-center">
-        <div className="w-full max-w-md p-8">
+        <div className="w-full max-w-full md:max-w-2/3 lg:max-w-1/2 xl:max-w-1/3 p-8">
           {children}
         </div>
       </main>

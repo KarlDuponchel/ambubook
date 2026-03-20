@@ -39,9 +39,7 @@ export default function MentionsLegalesPage() {
               <li><strong>Raison sociale :</strong> Karl DUPONCHEL</li>
               <li><strong>Forme juridique :</strong> Micro entreprise</li>
               <li><strong>Siège social :</strong> 15 rue Paul Cezanne, 76120 Le Grand-Quevilly</li>
-              <li><strong>SIRET :</strong> [Numéro SIRET]</li>
-              <li><strong>RCS :</strong> [Ville] B [Numéro]</li>
-              <li><strong>Numéro de TVA :</strong> FR [Numéro]</li>
+              <li><strong>SIRET :</strong> 99189937800012</li>
             </ul>
           </section>
 

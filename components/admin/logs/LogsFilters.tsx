@@ -14,6 +14,7 @@ const actionOptions: { value: "ALL" | AuditActionType; label: string; group: str
   { value: "LOGIN", label: "Connexion", group: "Auth" },
   { value: "LOGOUT", label: "Déconnexion", group: "Auth" },
   { value: "LOGIN_FAILED", label: "Connexion échouée", group: "Auth" },
+  { value: "ACCESS_DENIED", label: "Accès refusé", group: "Auth" },
   { value: "PASSWORD_CHANGED", label: "Mot de passe changé", group: "Auth" },
   // Utilisateurs
   { value: "USER_CREATED", label: "Utilisateur créé", group: "Users" },

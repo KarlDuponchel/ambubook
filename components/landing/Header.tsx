@@ -136,19 +136,19 @@ export function Header() {
           <div className="hidden lg:flex items-center gap-1">
             <Link
               href="/recherche"
-              className="px-4 py-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 font-medium rounded-lg transition-all"
+              className="px-4 py-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 font-medium rounded-lg transition-all"
             >
               Trouver un ambulancier
             </Link>
             <Link
               href="/#comment-ca-marche"
-              className="px-4 py-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 font-medium rounded-lg transition-all"
+              className="px-4 py-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 font-medium rounded-lg transition-all"
             >
               Comment ça marche
             </Link>
             <Link
               href="/#faq"
-              className="px-4 py-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 font-medium rounded-lg transition-all"
+              className="px-4 py-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 font-medium rounded-lg transition-all"
             >
               FAQ
             </Link>
@@ -168,7 +168,7 @@ export function Header() {
                   className={`flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border transition-all ${
                     userMenuOpen
                       ? "border-primary-200 bg-primary-50"
-                      : "border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50"
+                      : "border-neutral-200 hover:border-neutral-300 hover:bg-neutral-100"
                   }`}
                 >
                   <UserAvatar name={session.user.name || "U"} imageUrl={profileImageUrl} size="sm" />
@@ -204,7 +204,7 @@ export function Header() {
                         <Link
                           href="/dashboard"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-50 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-100 transition-colors"
                         >
                           <LayoutDashboard className="w-4 h-4 text-neutral-400" />
                           <span>Tableau de bord</span>
@@ -212,7 +212,7 @@ export function Header() {
                         <Link
                           href="/dashboard/calendrier"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-50 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-100 transition-colors"
                         >
                           <Calendar className="w-4 h-4 text-neutral-400" />
                           <span>Calendrier</span>
@@ -220,7 +220,7 @@ export function Header() {
                         <Link
                           href="/dashboard/mon-entreprise"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-50 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-100 transition-colors"
                         >
                           <Building2 className="w-4 h-4 text-neutral-400" />
                           <span>Mon entreprise</span>
@@ -231,7 +231,7 @@ export function Header() {
                         <Link
                           href="/mes-transports"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-50 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-100 transition-colors"
                         >
                           <Calendar className="w-4 h-4 text-neutral-400" />
                           <span>Mes transports</span>
@@ -239,7 +239,7 @@ export function Header() {
                         <Link
                           href="/recherche"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-50 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-100 transition-colors"
                         >
                           <Search className="w-4 h-4 text-neutral-400" />
                           <span>Trouver un ambulancier</span>
@@ -247,7 +247,7 @@ export function Header() {
                         <Link
                           href="/mon-compte"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-50 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-100 transition-colors"
                         >
                           <User className="w-4 h-4 text-neutral-400" />
                           <span>Mon compte</span>
@@ -257,7 +257,7 @@ export function Header() {
                     <Link
                       href={isAmbulancier ? "/dashboard/parametres" : "/mon-compte/parametres"}
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-50 transition-colors"
+                      className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-100 transition-colors"
                     >
                       <Settings className="w-4 h-4 text-neutral-400" />
                       <span>Paramètres</span>
@@ -282,7 +282,7 @@ export function Header() {
               <>
                 <Link
                   href="/connexion"
-                  className="px-4 py-2 text-primary-600 hover:text-primary-700 font-medium rounded-lg hover:bg-neutral-50 transition-all"
+                  className="px-4 py-2 text-primary-600 hover:text-primary-700 font-medium rounded-lg hover:bg-neutral-100 transition-all"
                 >
                   Connexion
                 </Link>
@@ -376,21 +376,21 @@ export function Header() {
             <div className="space-y-1">
               <Link
                 href="/recherche"
-                className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Trouver un ambulancier
               </Link>
               <Link
                 href="/#comment-ca-marche"
-                className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Comment ça marche
               </Link>
               <Link
                 href="/#faq"
-                className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 FAQ
@@ -419,7 +419,7 @@ export function Header() {
                   <>
                     <Link
                       href="/dashboard"
-                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <LayoutDashboard className="w-5 h-5 text-neutral-400" />
@@ -427,7 +427,7 @@ export function Header() {
                     </Link>
                     <Link
                       href="/dashboard/calendrier"
-                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Calendar className="w-5 h-5 text-neutral-400" />
@@ -435,7 +435,7 @@ export function Header() {
                     </Link>
                     <Link
                       href="/dashboard/mon-entreprise"
-                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Building2 className="w-5 h-5 text-neutral-400" />
@@ -446,7 +446,7 @@ export function Header() {
                   <>
                     <Link
                       href="/mes-transports"
-                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Calendar className="w-5 h-5 text-neutral-400" />
@@ -454,7 +454,7 @@ export function Header() {
                     </Link>
                     <Link
                       href="/recherche"
-                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Search className="w-5 h-5 text-neutral-400" />
@@ -462,7 +462,7 @@ export function Header() {
                     </Link>
                     <Link
                       href="/mon-compte"
-                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Settings className="w-5 h-5 text-neutral-400" />
@@ -473,7 +473,7 @@ export function Header() {
 
                 <Link
                   href={isAmbulancier ? "/dashboard/profil" : "/mon-compte/profil"}
-                  className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <User className="w-5 h-5 text-neutral-400" />
@@ -496,7 +496,7 @@ export function Header() {
               <div className="space-y-2">
                 <Link
                   href="/connexion"
-                  className="flex items-center justify-center px-4 py-3 text-neutral-700 hover:bg-neutral-50 font-medium rounded-xl border border-neutral-200 transition-colors"
+                  className="flex items-center justify-center px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl border border-neutral-200 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Connexion patient
