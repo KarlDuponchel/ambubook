@@ -3,39 +3,39 @@ import { Container } from "@/components/ui";
 import { MapPin } from "lucide-react";
 
 const popularCities = [
-  { name: "Paris", postalCode: "75000" },
-  { name: "Marseille", postalCode: "13000" },
-  { name: "Lyon", postalCode: "69000" },
-  { name: "Toulouse", postalCode: "31000" },
-  { name: "Nice", postalCode: "06000" },
-  { name: "Nantes", postalCode: "44000" },
-  { name: "Strasbourg", postalCode: "67000" },
-  { name: "Montpellier", postalCode: "34000" },
-  { name: "Bordeaux", postalCode: "33000" },
-  { name: "Lille", postalCode: "59000" },
-  { name: "Rennes", postalCode: "35000" },
-  { name: "Reims", postalCode: "51100" },
-  { name: "Le Havre", postalCode: "76600" },
-  { name: "Saint-Étienne", postalCode: "42000" },
-  { name: "Toulon", postalCode: "83000" },
-  { name: "Grenoble", postalCode: "38000" },
-  { name: "Dijon", postalCode: "21000" },
-  { name: "Angers", postalCode: "49000" },
-  { name: "Nîmes", postalCode: "30000" },
-  { name: "Clermont-Ferrand", postalCode: "63000" },
+  { name: "Paris", slug: "paris" },
+  { name: "Marseille", slug: "marseille" },
+  { name: "Lyon", slug: "lyon" },
+  { name: "Toulouse", slug: "toulouse" },
+  { name: "Nice", slug: "nice" },
+  { name: "Nantes", slug: "nantes" },
+  { name: "Strasbourg", slug: "strasbourg" },
+  { name: "Montpellier", slug: "montpellier" },
+  { name: "Bordeaux", slug: "bordeaux" },
+  { name: "Lille", slug: "lille" },
+  { name: "Rennes", slug: "rennes" },
+  { name: "Reims", slug: "reims" },
+  { name: "Le Havre", slug: "le-havre" },
+  { name: "Saint-Étienne", slug: "saint-etienne" },
+  { name: "Toulon", slug: "toulon" },
+  { name: "Grenoble", slug: "grenoble" },
+  { name: "Dijon", slug: "dijon" },
+  { name: "Angers", slug: "angers" },
+  { name: "Nîmes", slug: "nimes" },
+  { name: "Clermont-Ferrand", slug: "clermont-ferrand" },
 ];
 
 const regions = [
-  "Île-de-France",
-  "Provence-Alpes-Côte d'Azur",
-  "Auvergne-Rhône-Alpes",
-  "Occitanie",
-  "Nouvelle-Aquitaine",
-  "Hauts-de-France",
-  "Grand Est",
-  "Bretagne",
-  "Pays de la Loire",
-  "Normandie",
+  { name: "Île-de-France", slug: "ile-de-france" },
+  { name: "Provence-Alpes-Côte d'Azur", slug: "provence-alpes-cote-d-azur" },
+  { name: "Auvergne-Rhône-Alpes", slug: "auvergne-rhone-alpes" },
+  { name: "Occitanie", slug: "occitanie" },
+  { name: "Nouvelle-Aquitaine", slug: "nouvelle-aquitaine" },
+  { name: "Hauts-de-France", slug: "hauts-de-france" },
+  { name: "Grand Est", slug: "grand-est" },
+  { name: "Bretagne", slug: "bretagne" },
+  { name: "Pays de la Loire", slug: "pays-de-la-loire" },
+  { name: "Normandie", slug: "normandie" },
 ];
 
 export function CitiesSection() {
@@ -66,8 +66,8 @@ export function CitiesSection() {
           <div className="flex flex-wrap justify-center gap-2.5">
             {popularCities.map((city) => (
               <Link
-                key={city.name}
-                href={`/recherche?q=${encodeURIComponent(city.name)}`}
+                key={city.slug}
+                href={`/ambulances/${city.slug}`}
                 className="px-4 py-2 bg-white border border-neutral-200 rounded-full text-neutral-700 hover:border-primary-400 hover:text-primary-700 hover:bg-primary-50 hover:shadow-sm transition-all duration-200 text-sm font-medium"
               >
                 Ambulance {city.name}
@@ -84,12 +84,12 @@ export function CitiesSection() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {regions.map((region) => (
               <Link
-                key={region}
-                href={`/recherche?q=${encodeURIComponent(region)}`}
+                key={region.slug}
+                href={`/region/${region.slug}`}
                 className="text-center px-3 py-2.5 rounded-xl border border-neutral-100 hover:border-primary-200 hover:bg-primary-50 transition-all duration-200 group"
               >
                 <span className="text-neutral-600 group-hover:text-primary-700 text-sm font-medium leading-snug block">
-                  {region}
+                  {region.name}
                 </span>
               </Link>
             ))}

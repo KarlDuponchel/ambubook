@@ -41,7 +41,7 @@ export function Reassurance() {
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary-900/30 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-primary-900/30 to-transparent" />
             </div>
 
             {/* Floating stat card */}
@@ -94,13 +94,13 @@ export function Reassurance() {
             </div>
 
             {/* Trust indicators */}
-            <div className="mt-8 pt-7 border-t border-neutral-100 flex flex-wrap items-center gap-6">
+            {/* <div className="mt-8 pt-7 border-t border-neutral-100 flex flex-wrap items-center gap-6">
               <div className="flex items-center gap-3">
                 <div className="flex -space-x-2.5">
                   {["EP", "ML", "JD", "AB"].map((initials, i) => (
                     <div
                       key={i}
-                      className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 border-2 border-white flex items-center justify-center text-white text-xs font-bold"
+                      className="w-8 h-8 rounded-full bg-linear-to-br from-primary-400 to-primary-600 border-2 border-white flex items-center justify-center text-white text-xs font-bold"
                     >
                       {initials}
                     </div>
@@ -110,7 +110,7 @@ export function Reassurance() {
                   +500 ambulanciers partenaires
                 </span>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </Container>

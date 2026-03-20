@@ -2,6 +2,15 @@ import Link from "next/link";
 import { Container } from "@/components/ui";
 
 const footerLinks = {
+  services: {
+    title: "Services",
+    links: [
+      { label: "Transport en ambulance", href: "/services/ambulance" },
+      { label: "Transport en VSL", href: "/services/vsl" },
+      { label: "Transport médical", href: "/services/transport-medical" },
+      { label: "Tous les services", href: "/services" },
+    ],
+  },
   patients: {
     title: "Patients",
     links: [
@@ -36,15 +45,15 @@ export function Footer() {
   return (
     <footer className="bg-neutral-950 text-neutral-400">
       {/* Top accent line */}
-      <div className="h-px bg-gradient-to-r from-transparent via-primary-700/60 to-transparent" />
+      <div className="h-px bg-linear-to-r from-transparent via-primary-700/60 to-transparent" />
 
       <Container>
         <div className="py-14 lg:py-16">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-12">
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
               <Link href="/" className="inline-flex items-center gap-2.5 mb-4 group">
-                <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-900/50 group-hover:shadow-primary-700/40 transition-shadow">
+                <div className="w-9 h-9 bg-linear-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-900/50 group-hover:shadow-primary-700/40 transition-shadow">
                   <svg
                     className="w-5 h-5 text-white"
                     fill="none"

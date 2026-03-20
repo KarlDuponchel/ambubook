@@ -245,7 +245,7 @@ export function Hero() {
       </div>
  
       {/* Bande de stats */}
-      <div className="mt-20 pt-12 border-t border-[#1B5EA6]/10 max-w-3xl mx-auto">
+      {/* <div className="mt-20 pt-12 border-t border-[#1B5EA6]/10 max-w-3xl mx-auto">
         <div className="grid grid-cols-3 gap-8 text-center">
           {[
             { value: "500+", label: "Ambulanciers partenaires" },
@@ -260,7 +260,7 @@ export function Hero() {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
     </Container>
  
     {/* Fondu bas vers blanc */}

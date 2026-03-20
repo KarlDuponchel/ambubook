@@ -1,3 +1,8 @@
+# ==================================================
+# Docker Compose - Développement local uniquement
+# En production, utiliser Dokploy avec le Dockerfile
+# ==================================================
+
 services:
   postgres:
     image: postgres:16-alpine

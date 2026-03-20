@@ -50,13 +50,13 @@ export function HowItWorks() {
 
         <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
           {steps.map((step, index) => (
-            <div key={step.step} className="relative">
+            <div key={step.step} className="relative h-full">
               {/* Connector */}
               {index < steps.length - 1 && (
-                <div className="hidden md:block absolute top-10 left-[calc(50%+4rem)] right-0 h-px bg-gradient-to-r from-primary-700 to-transparent z-0" />
+                <div className="hidden md:block absolute top-10 left-[calc(50%+4rem)] right-0 h-px bg-linear-to-r from-primary-700 to-transparent z-0" />
               )}
 
-              <div className="relative bg-white/6 border border-white/10 backdrop-blur-sm rounded-2xl p-7 hover:bg-white/10 hover:border-white/20 transition-all duration-300 group">
+              <div className="relative h-full flex flex-col bg-white/6 border border-white/10 backdrop-blur-sm rounded-2xl p-7 hover:bg-white/10 hover:border-white/20 transition-all duration-300 group">
                 {/* Step badge */}
                 <div className="absolute -top-3 left-6 px-3 py-1 bg-primary-600 text-white text-xs font-bold rounded-full tracking-widest">
                   {step.step}
@@ -68,7 +68,7 @@ export function HowItWorks() {
                 </div>
 
                 <h3 className="text-xl font-bold text-white mb-2">{step.title}</h3>
-                <p className="text-primary-300/80 leading-relaxed text-sm">{step.description}</p>
+                <p className="text-primary-300/80 leading-relaxed text-sm flex-1">{step.description}</p>
               </div>
             </div>
           ))}

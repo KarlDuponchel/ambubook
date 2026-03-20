@@ -1426,19 +1426,27 @@ Optimisation du référencement naturel (SEO) pour maximiser la visibilité d'Am
 ## Phase 3 : Pages de contenu SEO
 
 ### 3.1 Pages villes/régions
-- [ ] Créer pages dédiées : `/ambulances-[ville]`
-  - Ex: `/ambulances-paris`, `/ambulances-lyon`
-  - Contenu unique par ville
+- [x] Créer pages dédiées : `/ambulances/[ville]`
+  - Ex: `/ambulances/paris`, `/ambulances/lyon`
+  - Contenu unique par ville (70+ villes)
   - Liste des entreprises de la zone
   - Infos pratiques locales
-- [ ] Créer pages régions : `/ambulances-[region]`
-  - Ex: `/ambulances-ile-de-france`
+  - Villes proches et lien vers région
+- [x] Créer pages régions : `/region/[region]`
+  - Ex: `/region/ile-de-france`
+  - 13 régions françaises
+  - Statistiques, villes principales, départements
+- [x] Données centralisées dans `lib/seo-data.ts`
+- [x] Sitemap mis à jour avec toutes les pages
+- [x] Liens dans CitiesSection et Footer
 
 ### 3.2 Pages services
-- [ ] `/services/ambulance` - Page dédiée ambulance
-- [ ] `/services/vsl` - Page dédiée VSL
-- [ ] `/services/transport-medical` - Page générique
-- [ ] Contenu détaillé, FAQ, tarifs indicatifs
+- [x] `/services` - Index des services
+- [x] `/services/ambulance` - Page dédiée ambulance
+- [x] `/services/vsl` - Page dédiée VSL
+- [x] `/services/transport-medical` - Page générique
+- [x] Contenu détaillé, FAQ, tarifs indicatifs
+- [x] Schema.org (Service, FAQPage) pour chaque page
 
 ### 3.3 Blog / Articles (optionnel)
 - [ ] Section blog `/blog`

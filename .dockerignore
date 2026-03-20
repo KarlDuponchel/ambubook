@@ -1,0 +1,46 @@
+# Dependencies
+node_modules
+npm-debug.log*
+
+# Next.js
+.next
+out
+
+# Build
+dist
+build
+
+# Environment
+.env
+.env.local
+.env.development
+.env.test
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Misc
+README.md
+*.md
+!prisma/*.md
+.DS_Store
+Thumbs.db
+
+# Tests
+coverage
+.nyc_output
+
+# Tasks/docs (dev only)
+tasks/
