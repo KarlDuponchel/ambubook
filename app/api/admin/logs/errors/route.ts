@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, isAuthError } from "@/lib/auth-guard";
 import { ErrorSeverity } from "@/generated/prisma/client";
+import { z } from "zod";
+
+// Schéma de validation pour le marquage des erreurs comme résolues
+const patchErrorLogsSchema = z.object({
+  ids: z.array(z.string()).min(1),
+  resolved: z.boolean().optional(),
+});
 
 /**
  * GET /api/admin/logs/errors - Liste paginée des logs d'erreurs
@@ -123,15 +130,14 @@ export async function PATCH(request: NextRequest) {
     );
   }
 
-  const body = await request.json();
-  const { ids, resolved } = body;
-
-  if (!Array.isArray(ids) || ids.length === 0) {
+  const parsed = patchErrorLogsSchema.safeParse(await request.json());
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: "IDs requis" },
+      { error: "Données invalides", details: parsed.error.flatten() },
       { status: 400 }
     );
   }
+  const { ids, resolved } = parsed.data;
 
   await prisma.errorLog.updateMany({
     where: { id: { in: ids } },

@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export function Axeptio() {
-  const [isLoaded, setIsLoaded] = useState(false);
+  // Ref plutôt que state : la valeur ne sert qu'à garder le suivi du
+  // chargement, elle n'influence pas le rendu (le composant retourne null)
+  const isLoaded = useRef(false);
 
   useEffect(() => {
     // Éviter le double chargement
-    if (isLoaded || typeof window === "undefined") return;
+    if (isLoaded.current || typeof window === "undefined") return;
     if (document.getElementById("axeptio-sdk")) return;
 
     // Configurer Axeptio
@@ -32,8 +34,8 @@ export function Axeptio() {
     script.async = true;
     document.body.appendChild(script);
 
-    setIsLoaded(true);
-  }, [isLoaded]);
+    isLoaded.current = true;
+  }, []);
 
   return null;
 }

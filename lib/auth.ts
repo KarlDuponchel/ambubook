@@ -15,8 +15,9 @@ export const auth = betterAuth({
   // Méthodes d'authentification activées
   emailAndPassword: {
     enabled: true,
-    // Désactive la vérification email pour le dev (à activer en prod)
-    requireEmailVerification: false,
+    // Vérification email obligatoire : l'utilisateur doit confirmer son
+    // adresse avant de pouvoir se connecter (voir bloc emailVerification)
+    requireEmailVerification: true,
     // Fonction d'envoi d'email pour le reset password
     sendResetPassword: async ({ user, url }) => {
       // Import dynamique pour éviter les dépendances circulaires
@@ -49,6 +50,88 @@ export const auth = betterAuth({
     },
   },
 
+  // Vérification de l'adresse email
+  emailVerification: {
+    // Envoi automatique de l'email de vérification à l'inscription
+    sendOnSignUp: true,
+    // Connecte automatiquement l'utilisateur après vérification
+    autoSignInAfterVerification: true,
+    // Envoi du mail de bienvenue APRÈS la confirmation de l'email (et non à
+    // l'inscription, pour éviter le double envoi confirmation + bienvenue).
+    // On n'envoie qu'aux comptes actifs : les ambulanciers en attente de
+    // validation admin reçoivent ACCOUNT_ACTIVATED lors de leur activation.
+    afterEmailVerification: async (user) => {
+      const [{ notifyWelcomeCustomer, notifyWelcomeAmbulancier }, { prisma }] =
+        await Promise.all([
+          import("@/lib/notifications"),
+          import("@/lib/prisma"),
+        ]);
+
+      const dbUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: {
+          name: true,
+          email: true,
+          phone: true,
+          role: true,
+          companyId: true,
+          isActive: true,
+        },
+      });
+
+      if (!dbUser || !dbUser.isActive) return;
+
+      if (dbUser.role === "AMBULANCIER" && dbUser.companyId) {
+        const company = await prisma.company.findUnique({
+          where: { id: dbUser.companyId },
+          select: { name: true },
+        });
+        void notifyWelcomeAmbulancier({
+          userName: dbUser.name,
+          userEmail: dbUser.email,
+          userPhone: dbUser.phone || undefined,
+          companyName: company?.name || "votre société",
+          userId: user.id,
+        }).catch((err) => {
+          console.error("Erreur notification bienvenue ambulancier:", err);
+        });
+      } else if (dbUser.role === "CUSTOMER") {
+        void notifyWelcomeCustomer({
+          userName: dbUser.name,
+          userEmail: dbUser.email,
+          userPhone: dbUser.phone || undefined,
+          userId: user.id,
+        }).catch((err) => {
+          console.error("Erreur notification bienvenue client:", err);
+        });
+      }
+    },
+    sendVerificationEmail: async ({ user, url }) => {
+      // Import dynamique pour éviter les dépendances circulaires
+      const { sendEmail } = await import("@/lib/email");
+
+      const userName = user.name || "Utilisateur";
+
+      void sendEmail({
+        to: user.email,
+        subject: "Confirmez votre adresse email - AmbuBook",
+        html: `
+          <h2>Bonjour ${userName},</h2>
+          <p>Bienvenue sur AmbuBook ! Pour activer votre compte, veuillez confirmer votre adresse email.</p>
+          <p style="margin: 24px 0;">
+            <a href="${url}" style="display:inline-block;padding:12px 24px;background:#2563eb;color:white;text-decoration:none;border-radius:6px;font-weight:500;">
+              Confirmer mon adresse email
+            </a>
+          </p>
+          <p style="color:#666;font-size:14px;">Si vous n'êtes pas à l'origine de cette inscription, ignorez simplement cet email.</p>
+          <br>
+          <p>L'équipe AmbuBook</p>
+        `,
+        text: `Bonjour ${userName},\n\nBienvenue sur AmbuBook ! Pour activer votre compte, veuillez confirmer votre adresse email en cliquant sur ce lien : ${url}\n\nSi vous n'êtes pas à l'origine de cette inscription, ignorez simplement cet email.\n\nL'équipe AmbuBook`,
+      });
+    },
+  },
+
   // Rate limiting pour protéger contre le spam
   rateLimit: {
     enabled: true,
@@ -61,8 +144,8 @@ export const auth = betterAuth({
         max: 3, // Max 3 demandes de reset par 5 min
       },
       "/sign-in/email": {
-        window: 300, // 5 minutes
-        max: 5, // Max 5 tentatives de connexion par 5 min
+        window: 60, // 1 minute
+        max: 10, // Max 10 tentatives de connexion par minute (déblocage rapide)
       },
       "/sign-up/email": {
         window: 3600, // 1 heure

@@ -1,4 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+
+const addressSchema = z.object({
+  address: z.string().min(1),
+  city: z.string().min(1),
+  postalCode: z.string().min(1),
+});
+
+const distanceSchema = z.object({
+  companyAddress: addressSchema.nullish(),
+  pickupAddress: addressSchema,
+  destinationAddress: addressSchema,
+});
 
 interface GeocodingResult {
   features: Array<{
@@ -88,8 +102,27 @@ function formatDuration(seconds: number): string {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting : cette route relaie des requêtes vers des services
+    // externes (geocoding + routing), on empêche l'abus/amplification
+    const rateLimitResult = await rateLimit({
+      identifier: "distance",
+      window: 60, // 1 minute
+      max: 100, // large pour le tunnel de réservation, bloque le scraping
+    });
+    if (!rateLimitResult.success) {
+      const retryAfter = Math.ceil((rateLimitResult.reset - Date.now()) / 1000);
+      return rateLimitResponse(retryAfter);
+    }
+
     const body = await request.json();
-    const { companyAddress, pickupAddress, destinationAddress } = body;
+    const parsed = distanceSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Données invalides", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+    const { companyAddress, pickupAddress, destinationAddress } = parsed.data;
 
     const results: {
       companyToPickup?: {

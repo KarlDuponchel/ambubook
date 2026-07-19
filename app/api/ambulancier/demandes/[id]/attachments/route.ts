@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { AttachmentType, HistoryEventType } from "@/generated/prisma/client";
 import { uploadToS3, deleteFromS3, generateFileKey, getSignedDownloadUrl, isS3Configured } from "@/lib/s3";
+import { matchesAllowedSignature } from "@/lib/file-signature";
 
 // Configuration des types de fichiers autorisés
 const ALLOWED_MIME_TYPES = [
@@ -156,6 +157,14 @@ export async function POST(
     // Lire le contenu du fichier
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+
+    // Vérifier la signature réelle du fichier (magic bytes), pas seulement le type déclaré
+    if (!matchesAllowedSignature(buffer, ALLOWED_MIME_TYPES)) {
+      return NextResponse.json(
+        { error: "Le contenu du fichier ne correspond pas à un format autorisé (PDF, JPEG, PNG, WebP)." },
+        { status: 400 }
+      );
+    }
 
     let fileUrl: string;
     let fileKey: string | null = null;

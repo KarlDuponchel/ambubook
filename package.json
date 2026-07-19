@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:seed": "npx tsx prisma/seed.ts",
+    "create-admin": "npx tsx scripts/create-admin.ts",
     "db:reset": "npx prisma migrate reset",
     "db:studio": "npx prisma studio"
   },
@@ -25,6 +26,7 @@
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.4",
+    "isomorphic-dompurify": "^3.19.0",
     "lucide-react": "^0.564.0",
     "next": "16.1.6",
     "pg": "^8.18.0",

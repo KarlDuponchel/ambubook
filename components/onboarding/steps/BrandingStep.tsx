@@ -257,7 +257,7 @@ export function BrandingStep({ data, onChange, errors }: BrandingStepProps) {
       <div className="bg-primary-50 rounded-xl p-4 border border-primary-100">
         <p className="text-sm text-primary-800">
           <strong>Conseil :</strong> Une page avec un logo et une photo de couverture
-          attire davantage l'attention des patients et inspire confiance.
+          attire davantage l&apos;attention des patients et inspire confiance.
         </p>
       </div>
     </div>

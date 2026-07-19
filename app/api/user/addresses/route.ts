@@ -1,6 +1,16 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import { z } from "zod";
+
+// Schéma de validation pour la création d'une adresse
+const createAddressSchema = z.object({
+  type: z.enum(["HOME", "WORK", "MEDICAL", "OTHER"]).optional(),
+  address: z.string().min(1),
+  city: z.string().min(1),
+  postalCode: z.string().min(1),
+  details: z.string().optional().nullable(),
+});
 
 /**
  * GET /api/user/addresses
@@ -32,15 +42,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }
 
-  const body = await request.json();
-  const { type, address, city, postalCode, details } = body;
-
-  if (!address || !city || !postalCode) {
+  const parsed = createAddressSchema.safeParse(await request.json());
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: "Adresse, ville et code postal sont requis" },
+      { error: "Données invalides", details: parsed.error.flatten() },
       { status: 400 }
     );
   }
+  const { type, address, city, postalCode, details } = parsed.data;
 
   // Label basé sur le type
   const typeLabels: Record<string, string> = {
@@ -49,7 +58,7 @@ export async function POST(request: Request) {
     MEDICAL: "Centre médical",
     OTHER: "Autre",
   };
-  const label = typeLabels[type] || "Autre";
+  const label = (type && typeLabels[type]) || "Autre";
 
   const newAddress = await prisma.userAddress.create({
     data: {

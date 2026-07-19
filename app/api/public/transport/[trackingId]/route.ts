@@ -1,9 +1,30 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { getSignedDownloadUrl, isS3Configured } from "@/lib/s3";
 import { Prisma, RequestStatus, HistoryEventType } from "@/generated/prisma/client";
 import { notifyTransportCustomerResponse } from "@/lib/notifications";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { z } from "zod";
+
+// Schéma de validation pour la réponse publique à une contre-proposition
+const patchTransportSchema = z.object({
+  action: z.enum(["accept", "counter_proposal", "cancel"]),
+  responseNote: z.string().optional().nullable(),
+  proposedDate: z.string().optional().nullable(),
+  proposedTime: z.string().optional().nullable(),
+});
+
+/**
+ * Normalise un nom pour comparaison (minuscules, sans accents, sans espaces
+ * superflus). Sert de 2e facteur d'accès au suivi public (le nom du patient),
+ * en complément du trackingId (CUID non devinable).
+ */
+function normalizeName(value: string | null | undefined): string {
+  return (value || "")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .trim()
+    .toLowerCase();
+}
 
 // GET - Récupérer les détails d'un transport (public via trackingId)
 export async function GET(
@@ -20,6 +41,22 @@ export async function GET(
         { status: 400 }
       );
     }
+
+    // Rate limiting : limite les tentatives (brute-force du nom de vérification)
+    const rateLimitResult = await rateLimit({
+      identifier: `public-transport-view-${trackingId}`,
+      window: 3600,
+      max: 15,
+    });
+    if (!rateLimitResult.success) {
+      const retryAfter = Math.ceil((rateLimitResult.reset - Date.now()) / 1000);
+      return rateLimitResponse(retryAfter);
+    }
+
+    // 2e facteur d'accès : le nom du patient (passé en query ?nom=)
+    const verification = normalizeName(
+      new URL(request.url).searchParams.get("nom")
+    );
 
     const transport = await prisma.transportRequest.findUnique({
       where: { trackingId },
@@ -56,25 +93,6 @@ export async function GET(
             },
           },
         },
-        attachments: {
-          orderBy: { createdAt: "desc" },
-          select: {
-            id: true,
-            fileName: true,
-            fileType: true,
-            fileUrl: true,
-            fileKey: true,
-            fileSizeKb: true,
-            mimeType: true,
-            createdAt: true,
-            uploadedBy: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-        },
       },
     });
 
@@ -85,28 +103,20 @@ export async function GET(
       );
     }
 
-    // Générer des URLs signées pour les fichiers S3
-    const attachmentsWithSignedUrls = await Promise.all(
-      transport.attachments.map(async (attachment) => {
-        if (attachment.fileKey && isS3Configured()) {
-          try {
-            const signedUrl = await getSignedDownloadUrl(attachment.fileKey);
-            return { ...attachment, fileUrl: signedUrl };
-          } catch {
-            return attachment;
-          }
-        }
-        return attachment;
-      })
-    );
+    // Vérification du 2e facteur : le nom du patient doit correspondre
+    if (!verification || verification !== normalizeName(transport.patientLastName)) {
+      return NextResponse.json(
+        { error: "Vérification requise", requiresVerification: true },
+        { status: 401 }
+      );
+    }
 
-    // Ne pas exposer certaines données sensibles
+    // Ne pas exposer les données sensibles ni les documents médicaux :
+    // les documents (ordonnance, carte vitale...) ne sont accessibles que
+    // via l'espace client connecté (/mes-transports), pas par ce lien public.
     const { patientSocialSecurityNumber, ...safeTransport } = transport;
 
-    return NextResponse.json({
-      ...safeTransport,
-      attachments: attachmentsWithSignedUrls,
-    });
+    return NextResponse.json(safeTransport);
   } catch (error) {
     console.error("Erreur API GET /api/public/transport/[trackingId]:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
@@ -170,6 +180,20 @@ export async function PATCH(
       );
     }
 
+    // Vérification du 2e facteur : le nom du patient (query ?nom=)
+    const verification = normalizeName(
+      new URL(request.url).searchParams.get("nom")
+    );
+    if (
+      !verification ||
+      verification !== normalizeName(existingTransport.patientLastName)
+    ) {
+      return NextResponse.json(
+        { error: "Vérification requise" },
+        { status: 401 }
+      );
+    }
+
     // Vérifier que le statut permet une réponse client
     if (existingTransport.status !== RequestStatus.COUNTER_PROPOSAL) {
       return NextResponse.json(
@@ -178,8 +202,14 @@ export async function PATCH(
       );
     }
 
-    const body = await request.json();
-    const { action, responseNote, proposedDate, proposedTime } = body;
+    const parsed = patchTransportSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Données invalides", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+    const { action, responseNote, proposedDate, proposedTime } = parsed.data;
 
     let updateData: Prisma.TransportRequestUpdateInput;
     let historyComment: string;

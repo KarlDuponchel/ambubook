@@ -22,7 +22,21 @@ export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  // En production, le secret est obligatoire (fail-closed)
+  if (process.env.NODE_ENV === "production") {
+    if (!cronSecret) {
+      console.error("[CRON] CRON_SECRET non configuré");
+      return NextResponse.json(
+        { error: "Configuration manquante" },
+        { status: 500 }
+      );
+    }
+
+    if (authHeader !== `Bearer ${cronSecret}`) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+  } else if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    // En dev, vérifier le secret uniquement s'il est configuré
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 

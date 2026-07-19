@@ -148,7 +148,7 @@ export function ServicesStep({ data, onChange, errors }: ServicesStepProps) {
       <div className="bg-white rounded-xl border border-neutral-200 p-6">
         <h3 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
           <MapPin className="w-5 h-5 text-primary-600" />
-          Zone d'intervention
+          Zone d&apos;intervention
         </h3>
 
         <div>

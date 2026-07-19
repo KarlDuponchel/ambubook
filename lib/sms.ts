@@ -134,7 +134,12 @@ export async function sendSMS({ to, message }: SendSMSParams): Promise<SMSResult
     try {
       const result = await sendSMSToTwilio(formattedPhone, message);
 
-      console.log(`SMS envoyé avec succès à ${formattedPhone}`, {
+      // Ne pas logger le numéro en clair (donnée personnelle) : on masque
+      const maskedPhone =
+        formattedPhone.length > 6
+          ? `${formattedPhone.slice(0, 4)}****${formattedPhone.slice(-2)}`
+          : "****";
+      console.log(`SMS envoyé avec succès à ${maskedPhone}`, {
         messageId: result.sid,
         status: result.status,
       });

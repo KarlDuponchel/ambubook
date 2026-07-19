@@ -30,7 +30,17 @@ function LoginForm() {
       });
 
       if (result.error) {
-        setError(result.error.message || "Identifiants incorrects");
+        if (result.error.status === 429) {
+          setError(
+            "Trop de tentatives de connexion. Veuillez patienter une minute avant de réessayer."
+          );
+        } else if (result.error.status === 403) {
+          setError(
+            "Votre adresse email n'est pas encore confirmée. Consultez votre boîte mail pour activer votre compte."
+          );
+        } else {
+          setError(result.error.message || "Identifiants incorrects");
+        }
         setLoading(false);
         return;
       }
@@ -59,7 +69,8 @@ function LoginForm() {
           <div className="bg-green-50 text-green-700 p-3 rounded-md text-sm">
             <strong>Compte créé avec succès !</strong>
             <br />
-            Vous pouvez maintenant vous connecter.
+            Un email de confirmation vous a été envoyé. Cliquez sur le lien qu&apos;il
+            contient pour activer votre compte, puis connectez-vous.
             {linkedCount && parseInt(linkedCount) > 0 && (
               <>
                 <br />

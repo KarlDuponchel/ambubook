@@ -3,6 +3,13 @@ import { prisma } from "@/lib/prisma";
 import { getSignedDownloadUrl } from "@/lib/s3";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
+// Schéma de validation pour la mise à jour du profil ambulancier
+const updateProfileSchema = z.object({
+  name: z.string().optional(),
+  phone: z.string().optional(),
+});
 
 export async function GET() {
   try {
@@ -90,7 +97,14 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
     }
 
-    const body = await request.json() as { name?: string; phone?: string };
+    const parsed = updateProfileSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Données invalides", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+    const body = parsed.data;
 
     if (body.name !== undefined && body.name.trim() === "") {
       return NextResponse.json({ error: "Le nom ne peut pas être vide" }, { status: 400 });

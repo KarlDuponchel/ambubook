@@ -265,7 +265,7 @@ export function Autocomplete({
               onClick={handleSubmit}
               className="w-full px-4 py-3 text-sm text-primary-600 hover:bg-neutral-50 text-left font-medium transition-colors"
             >
-              Voir tous les résultats pour "{query}"
+              Voir tous les résultats pour &quot;{query}&quot;
             </button>
           </div>
         </div>

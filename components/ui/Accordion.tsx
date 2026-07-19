@@ -17,6 +17,7 @@ function AccordionItem({ question, answer, isOpen, onToggle, index }: AccordionI
 
   useEffect(() => {
     if (contentRef.current) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- mesure du DOM (scrollHeight) pour l'animation d'ouverture, nécessite un setState après montage
       setHeight(isOpen ? contentRef.current.scrollHeight : 0);
     }
   }, [isOpen]);

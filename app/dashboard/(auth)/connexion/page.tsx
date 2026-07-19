@@ -28,7 +28,17 @@ function LoginForm() {
       });
 
       if (result.error) {
-        setError(result.error.message || "Identifiants incorrects");
+        if (result.error.status === 429) {
+          setError(
+            "Trop de tentatives de connexion. Veuillez patienter une minute avant de réessayer."
+          );
+        } else if (result.error.status === 403) {
+          setError(
+            "Votre adresse email n'est pas encore confirmée. Consultez votre boîte mail pour activer votre compte."
+          );
+        } else {
+          setError(result.error.message || "Identifiants incorrects");
+        }
         setLoading(false);
         return;
       }
@@ -70,7 +80,7 @@ function LoginForm() {
             <div className="bg-warning-50 text-warning-700 p-3 rounded-lg text-sm">
               <strong>Compte créé avec succès !</strong>
               <br />
-              Votre demande est en cours de vérification. Vous recevrez un email dès que votre compte sera activé.
+              Un email de confirmation vous a été envoyé : cliquez sur le lien pour valider votre adresse. Votre compte sera ensuite vérifié par notre équipe avant activation.
             </div>
           )}
 

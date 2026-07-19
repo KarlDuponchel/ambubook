@@ -124,7 +124,7 @@ export function BasicInfoStep({ data, onChange, errors }: BasicInfoStepProps) {
             error={errors.licenseNumber}
             icon={<Shield className="w-4 h-4" />}
           />
-          <p className="mt-1 text-xs text-neutral-500">Numéro d'agrément délivré par l'ARS</p>
+          <p className="mt-1 text-xs text-neutral-500">Numéro d&apos;agrément délivré par l&apos;ARS</p>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { uploadToS3, deleteFromS3, getSignedDownloadUrl } from "@/lib/s3";
+import { matchesAllowedSignature } from "@/lib/file-signature";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5Mo
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -76,6 +77,15 @@ export async function POST(request: NextRequest) {
 
   // Upload vers S3
   const buffer = Buffer.from(await file.arrayBuffer());
+
+  // Vérifier la signature réelle du fichier (magic bytes), pas seulement le type déclaré
+  if (!matchesAllowedSignature(buffer, ALLOWED_TYPES)) {
+    return NextResponse.json(
+      { error: "Le contenu du fichier ne correspond pas à un format d'image autorisé (JPEG, PNG, WebP)." },
+      { status: 400 }
+    );
+  }
+
   await uploadToS3(fileKey, buffer, file.type);
 
   // Obtenir l'ordre max actuel

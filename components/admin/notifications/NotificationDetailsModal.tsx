@@ -14,6 +14,7 @@ import {
   FileText,
   ExternalLink,
 } from "lucide-react";
+import DOMPurify from "isomorphic-dompurify";
 import { cn } from "@/lib/utils";
 import {
   AdminNotificationLog,
@@ -148,6 +149,7 @@ export function NotificationDetailsModal({ log, onClose }: NotificationDetailsMo
                   getChannelColor(log.channel)
                 )}
               >
+                {/* eslint-disable-next-line react-hooks/static-components -- icône lucide sélectionnée via un mapping statique, sûre au rendu */}
                 <ChannelIcon className="h-3 w-3" />
                 {NOTIFICATION_CHANNEL_LABELS[log.channel]}
               </span>
@@ -158,6 +160,7 @@ export function NotificationDetailsModal({ log, onClose }: NotificationDetailsMo
                   getStatusStyles(log.status)
                 )}
               >
+                {/* eslint-disable-next-line react-hooks/static-components -- icône lucide sélectionnée via un mapping statique, sûre au rendu */}
                 <StatusIcon className="h-3 w-3" />
                 {NOTIFICATION_STATUS_LABELS[log.status]}
               </span>
@@ -206,7 +209,7 @@ export function NotificationDetailsModal({ log, onClose }: NotificationDetailsMo
                 {log.channel === "EMAIL" ? (
                   <div
                     className="text-sm text-neutral-700 prose prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{ __html: log.content }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(log.content) }}
                   />
                 ) : (
                   <p className="text-sm text-neutral-700 whitespace-pre-wrap">

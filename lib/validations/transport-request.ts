@@ -2,6 +2,10 @@ import { z } from "zod";
 
 const phoneRegex = /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/;
 
+// NIR (numéro de sécurité sociale FR) : 13 chiffres, + clé de 2 chiffres facultative (15)
+// sexe(1) année(2) mois(2) département(2, dont 2A/2B) commune(3) ordre(3) [clé(2)]
+const nirRegex = /^[12][0-9]{2}(0[1-9]|1[0-2])(2[AB]|[0-9]{2})[0-9]{3}[0-9]{3}([0-9]{2})?$/i;
+
 // Schéma de base sans companyId (pour réutilisation)
 const baseTransportRequestSchema = z.object({
   // Patient
@@ -25,7 +29,14 @@ const baseTransportRequestSchema = z.object({
     .email("Format d'email invalide")
     .optional()
     .or(z.literal("")),
-  patientSocialSecurityNumber: z.string().optional().or(z.literal("")),
+  patientSocialSecurityNumber: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine(
+      (val) => !val || nirRegex.test(val.replace(/[\s.]/g, "")),
+      "Numéro de sécurité sociale invalide (15 caractères attendus)"
+    ),
 
   // Transport
   transportType: z.enum(["AMBULANCE", "VSL"], {

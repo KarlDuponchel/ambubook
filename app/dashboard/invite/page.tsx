@@ -22,6 +22,7 @@ export default function InvitePage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- chargement initial : le setState a lieu de façon asynchrone après le fetch, pattern sûr
     fetchInvitations();
   }, []);
 

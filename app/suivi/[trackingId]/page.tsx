@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, use } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -168,8 +168,12 @@ export default function SuiviTransportPage({
   const { trackingId } = use(params);
   const toast = useToast();
   const [transport, setTransport] = useState<TransportDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Vérification 2e facteur : nom du patient
+  const [nameInput, setNameInput] = useState("");
+  const [verifiedName, setVerifiedName] = useState("");
+  const [verifyError, setVerifyError] = useState<string | null>(null);
 
   // États pour la réponse à une contre-proposition
   const [showCounterForm, setShowCounterForm] = useState(false);
@@ -179,29 +183,39 @@ export default function SuiviTransportPage({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [responseError, setResponseError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchTransport();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trackingId]);
-
-  const fetchTransport = async () => {
+  const loadTransport = async (name: string) => {
+    setLoading(true);
+    setVerifyError(null);
     try {
-      const response = await fetch(`/api/public/transport/${trackingId}`);
+      const response = await fetch(
+        `/api/public/transport/${trackingId}?nom=${encodeURIComponent(name)}`
+      );
       if (response.ok) {
         const data = await response.json();
         setTransport(data);
+        setVerifiedName(name);
+      } else if (response.status === 401) {
+        setVerifyError("Nom du patient incorrect. Veuillez réessayer.");
+      } else if (response.status === 429) {
+        setVerifyError("Trop de tentatives. Veuillez réessayer plus tard.");
       } else if (response.status === 404) {
         setError("Demande de transport non trouvée");
       } else if (response.status === 400) {
         setError("Identifiant de suivi invalide");
       } else {
-        setError("Erreur lors du chargement");
+        setVerifyError("Erreur lors du chargement");
       }
     } catch {
-      setError("Erreur lors du chargement");
+      setVerifyError("Erreur lors du chargement");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleVerify = (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = nameInput.trim();
+    if (name) loadTransport(name);
   };
 
   const formatDate = (dateString: string) => {
@@ -236,19 +250,22 @@ export default function SuiviTransportPage({
     setResponseError(null);
 
     try {
-      const response = await fetch(`/api/public/transport/${trackingId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action,
-          responseNote: responseNote || null,
-          proposedDate: action === "counter_proposal" ? proposedDate : null,
-          proposedTime: action === "counter_proposal" ? proposedTime : null,
-        }),
-      });
+      const response = await fetch(
+        `/api/public/transport/${trackingId}?nom=${encodeURIComponent(verifiedName)}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action,
+            responseNote: responseNote || null,
+            proposedDate: action === "counter_proposal" ? proposedDate : null,
+            proposedTime: action === "counter_proposal" ? proposedTime : null,
+          }),
+        }
+      );
 
       if (response.ok) {
-        await fetchTransport();
+        await loadTransport(verifiedName);
         setShowCounterForm(false);
         setResponseNote("");
         setProposedDate("");
@@ -287,7 +304,7 @@ export default function SuiviTransportPage({
     );
   }
 
-  if (error || !transport) {
+  if (error) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
@@ -310,6 +327,72 @@ export default function SuiviTransportPage({
                   <p className="text-neutral-500 text-sm">
                     Vérifiez que le lien de suivi est correct ou contactez l&apos;entreprise.
                   </p>
+                </div>
+              </CardContent>
+            </Card>
+          </Container>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Formulaire de vérification : demande le nom du patient avant d'afficher
+  // les données (2e facteur en complément du trackingId)
+  if (!transport) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 pt-24 lg:pt-28 pb-16">
+          <Container>
+            <Link
+              href="/"
+              className="mb-4 inline-flex items-center gap-2 text-sm text-neutral-500 transition-colors hover:text-neutral-900"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Retour à l&apos;accueil
+            </Link>
+            <Card>
+              <CardContent>
+                <div className="max-w-md mx-auto py-8">
+                  <h1 className="text-xl font-bold text-neutral-900 mb-2">
+                    Accès au suivi
+                  </h1>
+                  <p className="text-sm text-neutral-500 mb-6">
+                    Pour protéger les données de santé, indiquez le nom de famille
+                    du patient concerné par cette demande.
+                  </p>
+                  <form onSubmit={handleVerify} className="space-y-4">
+                    <div>
+                      <label
+                        htmlFor="nom"
+                        className="block text-sm font-medium text-neutral-700 mb-1"
+                      >
+                        Nom du patient
+                      </label>
+                      <input
+                        id="nom"
+                        type="text"
+                        value={nameInput}
+                        onChange={(e) => setNameInput(e.target.value)}
+                        required
+                        autoComplete="off"
+                        className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-neutral-900"
+                        placeholder="Ex : Dupont"
+                      />
+                    </div>
+                    {verifyError && (
+                      <p className="text-sm text-danger-600">{verifyError}</p>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors text-sm font-medium"
+                    >
+                      {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                      Accéder au suivi
+                    </button>
+                  </form>
                 </div>
               </CardContent>
             </Card>
@@ -676,6 +759,26 @@ export default function SuiviTransportPage({
                   </CardContent>
                 </Card>
               )}
+
+              {/* Documents : non exposés en suivi public, incitation à créer un compte */}
+              <Card className="border-primary-200 bg-primary-50/50">
+                <CardHeader icon={FileText} title="Vos documents" />
+                <CardContent>
+                  <p className="text-sm text-neutral-600 mb-4">
+                    Pour protéger vos données de santé, les documents liés à cette
+                    demande (ordonnance, carte vitale, bon de transport) ne sont pas
+                    accessibles depuis ce lien de suivi. Créez un compte pour
+                    retrouver toutes vos demandes et vos documents centralisés en un
+                    seul endroit.
+                  </p>
+                  <Link
+                    href="/inscription"
+                    className="inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
+                  >
+                    Créer un compte gratuit
+                  </Link>
+                </CardContent>
+              </Card>
 
               {/* Historique simplifié */}
               {transport.history && transport.history.length > 0 && (

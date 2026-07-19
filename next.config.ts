@@ -49,7 +49,7 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.axept.io https://*.axept.io",
+              "script-src 'self' 'unsafe-inline' https://static.axept.io https://*.axept.io",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://s3.fr-par.scw.cloud https://*.s3.fr-par.scw.cloud https://*.axept.io",
               "font-src 'self' data:",

@@ -11,6 +11,15 @@ import {
   notifyTransportCompleted,
 } from "@/lib/notifications";
 import { AuditHelpers } from "@/lib/audit-log";
+import { z } from "zod";
+
+// Schéma de validation pour la mise à jour d'une demande par l'ambulancier
+const patchDemandeSchema = z.object({
+  action: z.enum(["accept", "refuse", "counter_proposal", "complete"]),
+  responseNote: z.string().optional().nullable(),
+  proposedDate: z.string().optional().nullable(),
+  proposedTime: z.string().optional().nullable(),
+});
 
 // GET - Récupérer les détails d'une demande
 export async function GET(
@@ -158,8 +167,14 @@ export async function PATCH(
       return NextResponse.json({ error: "Demande non trouvée" }, { status: 404 });
     }
 
-    const body = await request.json();
-    const { action, responseNote, proposedDate, proposedTime } = body;
+    const parsed = patchDemandeSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Données invalides", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+    const { action, responseNote, proposedDate, proposedTime } = parsed.data;
 
     let updateData: Prisma.TransportRequestUpdateInput;
     let historyData: Prisma.RequestHistoryCreateInput;
@@ -273,7 +288,7 @@ export async function PATCH(
         console.error("Erreur notification transport accepté:", err);
       });
     } else if (action === "refuse") {
-      AuditHelpers.transportRefused(user.id, id, responseNote);
+      AuditHelpers.transportRefused(user.id, id, responseNote || undefined);
       notifyTransportRefused({
         patientName,
         patientEmail: existingDemande.patientEmail || undefined,
@@ -306,8 +321,8 @@ export async function PATCH(
         companyName: existingDemande.company.name,
         originalDate: formattedDate,
         originalTime: existingDemande.requestedTime,
-        proposedDate: new Date(proposedDate).toLocaleDateString("fr-FR"),
-        proposedTime,
+        proposedDate: new Date(proposedDate!).toLocaleDateString("fr-FR"),
+        proposedTime: proposedTime!,
         trackingId: existingDemande.trackingId,
         userId: existingDemande.userId || undefined,
       }).catch((err) => {

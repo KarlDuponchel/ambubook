@@ -6,6 +6,15 @@ import { getSignedDownloadUrl, isS3Configured } from "@/lib/s3";
 import { Prisma, RequestStatus, HistoryEventType } from "@/generated/prisma/client";
 import { notifyTransportCustomerResponse } from "@/lib/notifications";
 import { AuditHelpers } from "@/lib/audit-log";
+import { z } from "zod";
+
+// Schéma de validation pour la réponse du client à une contre-proposition
+const patchTransportSchema = z.object({
+  action: z.enum(["accept", "counter_proposal", "cancel"]),
+  responseNote: z.string().optional().nullable(),
+  proposedDate: z.string().optional().nullable(),
+  proposedTime: z.string().optional().nullable(),
+});
 
 export async function GET(
   request: NextRequest,
@@ -159,8 +168,14 @@ export async function PATCH(
       );
     }
 
-    const body = await request.json();
-    const { action, responseNote, proposedDate, proposedTime } = body;
+    const parsed = patchTransportSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Données invalides", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+    const { action, responseNote, proposedDate, proposedTime } = parsed.data;
 
     let updateData: Prisma.TransportRequestUpdateInput;
     let historyData: Prisma.RequestHistoryCreateInput;

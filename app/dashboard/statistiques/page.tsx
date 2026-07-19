@@ -137,6 +137,7 @@ export default function StatistiquesPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- réinitialisation de l'état de chargement au changement de période, avant le refetch
     setLoading(true);
     setError(null);
 
@@ -566,7 +567,7 @@ export default function StatistiquesPage() {
           {/* Bandeau revenus estimés */}
           <div className="flex items-center gap-2 px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm text-neutral-500">
             <TrendingUp className="h-4 w-4 shrink-0 text-neutral-400" />
-            Le chiffre d'affaires affiché est une estimation basée sur les tarifs indicatifs (Ambulance : 130 €, VSL : 40 €). Les montants réels peuvent varier selon les conventions et majorations applicables.
+            Le chiffre d&apos;affaires affiché est une estimation basée sur les tarifs indicatifs (Ambulance : 130 €, VSL : 40 €). Les montants réels peuvent varier selon les conventions et majorations applicables.
           </div>
         </>
       )}

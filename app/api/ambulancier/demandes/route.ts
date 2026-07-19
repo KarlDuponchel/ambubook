@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma, RequestStatus, HistoryEventType } from "@/generated/prisma/client";
 import { ambulancierTransportRequestSchema } from "@/lib/validations/transport-request";
+import { encryptField } from "@/lib/crypto";
 import { ZodError } from "zod";
 import { notifyTransportRequestCreated } from "@/lib/notifications";
 import { AuditHelpers } from "@/lib/audit-log";
@@ -170,8 +171,9 @@ export async function POST(request: NextRequest) {
           patientLastName: validatedData.patientLastName,
           patientPhone: validatedData.patientPhone,
           patientEmail: validatedData.patientEmail || null,
-          patientSocialSecurityNumber:
-            validatedData.patientSocialSecurityNumber || null,
+          patientSocialSecurityNumber: encryptField(
+            validatedData.patientSocialSecurityNumber
+          ),
 
           // Transport
           transportType: validatedData.transportType,

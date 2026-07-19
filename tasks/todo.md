@@ -4,6 +4,54 @@
 
 ---
 
+## 🚀 Audit mise en production (2026-07-19)
+
+> Verdict : **pas prêt en l'état**. Base technique solide (auth/authz, headers, export RGPD), mais bloquants sécurité + conformité données de santé.
+> Ordre d'attaque conseillé : 1) quick wins sécurité → 2) chiffrement/logs santé → 3) RGPD formulaires/rétention → 4) migration HDS (long, à lancer en parallèle).
+> ⚠️ Rappel : une réservation de transport sanitaire = **donnée de santé (art. 9 RGPD)**, même sans n° de Sécu. Faire valider par un DPO/avocat.
+
+### 🔴 Bloquants sécurité (quick wins — à faire en premier)
+- [x] **Crons fail-open** : `CRON_SECRET` rendu obligatoire (fail-closed) en production dans `app/api/cron/cleanup-logs/route.ts` et `app/api/cron/cleanup-notifications/route.ts` (aligné sur `app/api/cron/reminders/route.ts`)
+- [x] **XSS stocké** : contenu email assaini via `isomorphic-dompurify` (`DOMPurify.sanitize`) dans `components/admin/notifications/NotificationDetailsModal.tsx:210`
+- [x] **Email non vérifié** : `requireEmailVerification: true` + bloc `emailVerification` (envoi auto à l'inscription, `autoSignInAfterVerification`) dans `lib/auth.ts`
+- [x] **Invitations** : création réservée au gérant (`company.ownerId === user.id`, sinon 403) dans `app/api/invitations/route.ts`
+- [x] **Validation Zod manquante** : schémas ajoutés sur les 10 routes mutantes (`user/me`, `ambulancier/me`, `user/addresses`, `ambulancier/demandes/[id]` + `/history`, `customer/transports/[trackingId]`, `admin/transports/[id]`, `admin/feedback/[id]`, `admin/logs/errors`, `public/transport/[trackingId]`) — 400 + `error.flatten()` avant mutation
+- [x] **`/api/distance`** : rate-limit (100/min par IP) + validation Zod du body (`app/api/distance/route.ts`)
+- [ ] **Env prod** : provisionner `BETTER_AUTH_URL` (sinon fallback `localhost:3000`, `lib/auth.ts:10`) et `CRON_SECRET` — _config de déploiement, à faire sur Scaleway (voir `deployment.md`)_
+- [x] **Bootstrap admin prod** : `scripts/create-admin.ts` créé (idempotent, mot de passe via env `ADMIN_PASSWORD` ou généré/affiché une fois, refus des mots de passe faibles, `emailVerified: true`, aucune donnée de démo) + script npm `create-admin` + `.env.example`
+- [x] Valider `n° sécu` au format NIR (regex 15 caractères, 2A/2B, tolérante espaces/points) dans `lib/validations/transport-request.ts`
+- [x] Durcir la CSP : `'unsafe-eval'` retiré de `script-src` (`next.config.ts`). _`'unsafe-inline'` conservé (nonces = chantier à risque, reporté)_
+- [ ] Convergence : utiliser partout le helper `lib/auth-guard.ts` (`requireAuth`/`requireRole`) au lieu du pattern `getSession`+`findUnique` dupliqué — _amélioration, non bloquant_
+- [x] **`next build` débloqué (ESLint)** : 22 erreurs préexistantes corrigées → 11 entités JSX échappées, Axeptio `useState`→`useRef` (vraie correction), 6 `eslint-disable-next-line` justifiés (patterns idiomatiques sûrs : `set-state-in-effect` ×3, `static-components` ×3), artefact `prisma/geocode-companies.js` ignoré. Lint = 0 erreur, tsc = 0 erreur. _(Restent 31 warnings non bloquants.)_
+- [x] **Message inscription** ajusté pour la vérif email (pages connexion customer + dashboard) + message dédié si connexion refusée pour email non confirmé (403)
+
+### 🟠 Protection des données de santé
+- [x] **Chiffrement au repos** : n° de Sécu chiffré applicativement (AES-256-GCM, `lib/crypto.ts`) — chiffré à l'écriture (routes de création) + déchiffré à la lecture via extension Prisma (`lib/prisma.ts`). `reason`/`notes` reposent sur le chiffrement disque Scaleway (décision). ⚠️ Requiert `ENCRYPTION_KEY` en env (`openssl rand -base64 32`, à provisionner + **ne jamais changer** une fois des données chiffrées).
+- [x] **Fuite de log** : téléphone patient masqué dans les logs SMS (`lib/sms.ts`)
+- [x] **Route publique `public/transport/[trackingId]`** : renforcée avec 2e identifiant (nom du patient via `?nom=`) sur GET + PATCH, + rate-limit sur GET (15/h). Page `/suivi/[trackingId]` : formulaire de saisie du nom avant affichage.
+- [x] **Documents non exposés en suivi public** : `attachments` retirés de la réponse de la route publique (accessibles uniquement via l'espace connecté `/mes-transports`, scoping `userId`). Encart sur `/suivi` incitant à créer un compte pour centraliser données + documents.
+- [x] Validation upload par **signature/magic bytes** (`lib/file-signature.ts`) sur les 3 routes d'upload (photos, attachments customer + ambulancier)
+- [x] _Bonus_ : réconciliation validation NIR client/serveur (accepte 13 **ou** 15 chiffres, `lib/validations/transport-request.ts`)
+
+### 🟠 RGPD / conformité légale
+- [ ] **Mentions RGPD dans les formulaires** : inscription (`app/(customer)/inscription/page.tsx`), demande de transport (`components/booking/steps/PatientInfoStep.tsx`), inscription pro — ajouter mention d'information + lien vers politique de confidentialité
+- [ ] **Consentement explicite art. 9** pour les données de santé dans le tunnel de réservation
+- [ ] **Suppression de compte self-service** : handler `DELETE` dans `app/api/user/me/route.ts` (aujourd'hui email manuel uniquement) + fonction d'anonymisation
+- [ ] **Rétention appliquée** : cron de purge/anonymisation des **comptes** (3 ans) et **demandes de transport** (5 ans) — aujourd'hui seuls logs/notifs sont purgés
+- [ ] Corriger la divergence durée logs : politique annonce 1 an vs 90/180j réellement implémentés
+- [ ] Footer légal absent des espaces dashboard/admin et du tunnel de réservation
+- [ ] Politique mentionne des cookies analytiques alors qu'aucun traceur n'est implémenté (aligner déclaratif/réel)
+- [ ] `clientId` Axeptio codé en dur (`components/common/Axeptio.tsx`) → utiliser `NEXT_PUBLIC_AXEPTIO_CLIENT_ID`
+- [ ] **AIPD/DPIA** (art. 35) à rédiger pour le traitement de données de santé
+- [ ] **Registre des traitements** (art. 30)
+
+### 🔵 Hébergement HDS (long — lancer en parallèle)
+- [ ] **Migrer vers un hébergeur certifié HDS** (Hostinger/Chypre actuel = NON conforme) : OVHcloud HDS, Scaleway, Outscale…
+- [ ] Vérifier hébergement physique exclusivement UE/EEE (décret 24 mars 2026)
+- [ ] Mettre à jour les mentions légales avec le nouvel hébergeur HDS
+
+---
+
 ## Tests & Vérification
 
 - [ ] Tests manuels du flux complet (booking, transports, notifications)

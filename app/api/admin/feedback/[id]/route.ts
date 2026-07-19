@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, isAuthError } from "@/lib/auth-guard";
 import { getSignedDownloadUrl, isS3Configured } from "@/lib/s3";
+import { z } from "zod";
+
+// Schéma de validation pour la modification d'un feedback
+const patchFeedbackSchema = z.object({
+  status: z.enum(["NEW", "IN_PROGRESS", "RESOLVED", "WONT_FIX"]).optional(),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]).optional(),
+  adminNotes: z.string().optional().nullable(),
+});
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -101,22 +109,20 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     );
   }
 
-  const body = await request.json();
-  const { status, priority, adminNotes } = body;
+  const parsed = patchFeedbackSchema.safeParse(await request.json());
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Données invalides", details: parsed.error.flatten() },
+      { status: 400 }
+    );
+  }
+  const { status, priority, adminNotes } = parsed.data;
 
   // Préparer les données à mettre à jour
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateData: any = {};
 
   if (status !== undefined) {
-    // Valider le statut
-    const validStatuses = ["NEW", "IN_PROGRESS", "RESOLVED", "WONT_FIX"];
-    if (!validStatuses.includes(status)) {
-      return NextResponse.json(
-        { error: "Statut invalide" },
-        { status: 400 }
-      );
-    }
     updateData.status = status;
 
     // Si on passe à RESOLVED, enregistrer la date de résolution
@@ -130,14 +136,6 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   }
 
   if (priority !== undefined) {
-    // Valider la priorité
-    const validPriorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
-    if (!validPriorities.includes(priority)) {
-      return NextResponse.json(
-        { error: "Priorité invalide" },
-        { status: 400 }
-      );
-    }
     updateData.priority = priority;
   }
 

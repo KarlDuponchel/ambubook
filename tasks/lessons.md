@@ -83,3 +83,19 @@ export default async function Page({ params }) {
 }
 ```
 **Prévention** : Avant de créer une page publique, toujours se poser la question "Comment Google va-t-il indexer cette page ?"
+
+---
+
+### [2026-07-19] - Rate limit de connexion trop restrictif (UX)
+**Contexte** : Configuration du rate limiting Better Auth sur `/sign-in/email` dans `lib/auth.ts`
+**Erreur** : "Too many requests. Please try again later." après quelques échecs de connexion, blocage ressenti dès la 3e tentative
+**Cause** : Fenêtre trop longue (`window: 300` = 5 min) avec `max: 5`. Le compteur est par IP et ne se réinitialise pas après une connexion réussie, donc les tentatives s'accumulent et le blocage dure jusqu'à 5 minutes. En dev local, tous les comptes de test partagent la même IP, ce qui aggrave le ressenti.
+**Solution** : Réduire la fenêtre pour un déblocage rapide tout en gardant la protection anti-brute-force :
+```typescript
+"/sign-in/email": {
+  window: 60, // 1 minute (déblocage rapide)
+  max: 10,
+},
+```
+Et traduire le message d'erreur 429 (Better Auth le renvoie en anglais) côté client en testant `result.error.status === 429`.
+**Prévention** : Pour un rate limit orienté anti-brute-force, préférer une fenêtre COURTE (déblocage rapide) plutôt qu'un `max` bas sur une fenêtre longue. Toujours traduire les messages 429 de Better Auth. Se souvenir que la limite est par IP (attention au partage d'IP : réseau d'entreprise, hôpital, NAT).

@@ -68,10 +68,10 @@ export function HoursStep({ data, onChange, errors }: HoursStepProps) {
     <div className="space-y-8">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-neutral-900 mb-2">
-          Horaires d'ouverture
+          Horaires d&apos;ouverture
         </h2>
         <p className="text-neutral-600">
-          Indiquez vos horaires d'ouverture pour que les patients sachent quand vous joindre.
+          Indiquez vos horaires d&apos;ouverture pour que les patients sachent quand vous joindre.
         </p>
       </div>
 

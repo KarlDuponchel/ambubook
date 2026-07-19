@@ -78,7 +78,7 @@ export default function OnboardingLayout({ children }: OnboardingLayoutProps) {
       {/* Footer minimaliste */}
       <footer className="fixed bottom-0 inset-x-0 py-4 text-center text-sm text-neutral-400 bg-white/80 backdrop-blur-md border-t border-neutral-100">
         <p>
-          Besoin d'aide ?{" "}
+          Besoin d&apos;aide ?{" "}
           <a href="mailto:support@ambubook.fr" className="text-primary-600 hover:underline">
             Contactez-nous
           </a>

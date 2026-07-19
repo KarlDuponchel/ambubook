@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { notifyWelcomeCustomer } from "@/lib/notifications";
 
 /**
  * Schéma de validation pour l'inscription customer
@@ -93,15 +92,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 6. Envoyer l'email/SMS de bienvenue (seulement si activé)
-    notifyWelcomeCustomer({
-      userName: name,
-      userEmail: email,
-      userPhone: phone || undefined,
-      userId: signUpResponse.user.id,
-    }).catch((err) => {
-      console.error("Erreur notification bienvenue client:", err);
-    });
+    // Le mail de bienvenue est envoyé après la confirmation de l'email
+    // (voir emailVerification.afterEmailVerification dans lib/auth.ts)
 
     return NextResponse.json(
       {

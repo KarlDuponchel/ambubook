@@ -3,6 +3,12 @@ import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { HistoryEventType } from "@/generated/prisma/client";
+import { z } from "zod";
+
+// Schéma de validation pour l'ajout d'une note à l'historique
+const addNoteSchema = z.object({
+  comment: z.string().trim().min(1),
+});
 
 // GET - Historique d'une demande
 export async function GET(
@@ -99,12 +105,14 @@ export async function POST(
       return NextResponse.json({ error: "Demande non trouvée" }, { status: 404 });
     }
 
-    const body = await request.json();
-    const { comment } = body;
-
-    if (!comment || typeof comment !== "string" || comment.trim().length === 0) {
-      return NextResponse.json({ error: "Commentaire requis" }, { status: 400 });
+    const parsed = addNoteSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Données invalides", details: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
+    const { comment } = parsed.data;
 
     const historyEntry = await prisma.requestHistory.create({
       data: {

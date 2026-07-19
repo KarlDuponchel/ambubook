@@ -55,8 +55,16 @@ export async function POST() {
 
     const company = await prisma.company.findUnique({
       where: { id: user.companyId },
-      select: { name: true },
+      select: { name: true, ownerId: true },
     });
+
+    // Seul le gérant (owner) de la société peut créer des invitations
+    if (!company || company.ownerId !== user.id) {
+      return NextResponse.json(
+        { error: "Seul le gérant de la société peut inviter des membres" },
+        { status: 403 }
+      );
+    }
 
     // Générer un code unique
     let code = generateInviteCode();

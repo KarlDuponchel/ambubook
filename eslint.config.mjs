@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Artefact compilé (la source est prisma/geocode-companies.ts)
+    "prisma/geocode-companies.js",
   ]),
 ]);
 

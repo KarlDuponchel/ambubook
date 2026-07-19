@@ -187,7 +187,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
           {/* Screenshot */}
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-              Capture d'écran (optionnel)
+              Capture d&apos;écran (optionnel)
             </label>
 
             {screenshot ? (

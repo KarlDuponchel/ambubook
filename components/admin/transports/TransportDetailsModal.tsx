@@ -270,6 +270,7 @@ export function TransportDetailsModal({
               </div>
               <div className="grid sm:grid-cols-2 gap-3 text-sm">
                 <div className="flex items-center gap-2">
+                  {/* eslint-disable-next-line react-hooks/static-components -- icône lucide sélectionnée via un mapping statique, sûre au rendu */}
                   <MobilityIcon className="h-4 w-4 text-neutral-400" />
                   <span className="text-neutral-600">
                     {MOBILITY_LABELS[transport.mobilityType]}

@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, isAuthError } from "@/lib/auth-guard";
 import { getSignedDownloadUrl, isS3Configured } from "@/lib/s3";
+import { z } from "zod";
+
+// Schéma de validation pour la modification administrative du statut
+const patchTransportSchema = z.object({
+  status: z.enum([
+    "PENDING",
+    "ACCEPTED",
+    "REFUSED",
+    "COUNTER_PROPOSAL",
+    "CANCELLED",
+    "COMPLETED",
+  ]),
+  adminNote: z.string().optional().nullable(),
+});
 
 /**
  * Génère une URL signée pour une pièce jointe
@@ -114,8 +128,14 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const body = await request.json();
-  const { status, adminNote } = body;
+  const parsed = patchTransportSchema.safeParse(await request.json());
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Données invalides", details: parsed.error.flatten() },
+      { status: 400 }
+    );
+  }
+  const { status, adminNote } = parsed.data;
 
   // Vérifier que le transport existe
   const existingTransport = await prisma.transportRequest.findUnique({
