@@ -9,6 +9,7 @@ import { TransportStep } from "./steps/TransportStep";
 import { AddressStep } from "./steps/AddressStep";
 import { ScheduleStep } from "./steps/ScheduleStep";
 import { useSession } from "@/lib/auth-client";
+import { isValidFrenchPhone, isValidNir } from "@/lib/validators";
 import {
   Company,
   BookingFormData,
@@ -67,14 +68,14 @@ export function BookingModal({ isOpen, onClose, company }: BookingModalProps) {
       }
       if (!formData.patientPhone.trim()) {
         newErrors.patientPhone = "Le téléphone est requis";
-      } else if (!/^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/.test(formData.patientPhone.replace(/\s/g, ""))) {
+      } else if (!isValidFrenchPhone(formData.patientPhone)) {
         newErrors.patientPhone = "Format de téléphone invalide";
       }
       if (formData.patientEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.patientEmail)) {
         newErrors.patientEmail = "Format d'email invalide";
       }
-      if (formData.patientSocialSecurityNumber && !/^\d{13}$/.test(formData.patientSocialSecurityNumber)) {
-        newErrors.patientSocialSecurityNumber = "Le numéro de sécurité sociale doit contenir exactement 13 chiffres";
+      if (formData.patientSocialSecurityNumber && !isValidNir(formData.patientSocialSecurityNumber)) {
+        newErrors.patientSocialSecurityNumber = "Numéro de sécurité sociale invalide (13 chiffres)";
       }
     }
 
@@ -113,6 +114,10 @@ export function BookingModal({ isOpen, onClose, company }: BookingModalProps) {
         if (!formData.returnTime) {
           newErrors.returnTime = "L'heure de retour est requise";
         }
+      }
+      if (!formData.consentGiven) {
+        newErrors.consentGiven =
+          "Vous devez accepter le traitement de vos données pour envoyer la demande.";
       }
     }
 

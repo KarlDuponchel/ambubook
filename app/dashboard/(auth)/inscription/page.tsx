@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { isValidFrenchPhone, isValidSiret, isValidArsLicense } from "@/lib/validators";
 
 type SignupMode = "new" | "invite";
 
@@ -24,6 +25,11 @@ function SignUpForm() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{
+    phone?: string;
+    companySiret?: string;
+    companyLicenseNumber?: string;
+  }>({});
 
   // Validation du code d'invitation
   const [validatingCode, setValidatingCode] = useState(false);
@@ -64,11 +70,33 @@ function SignUpForm() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Efface l'erreur du champ modifié
+    setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    // Validation de format (blocage UI avant envoi)
+    const fe: typeof fieldErrors = {};
+    if (formData.phone && !isValidFrenchPhone(formData.phone)) {
+      fe.phone = "Format de téléphone invalide (ex : 06 12 34 56 78)";
+    }
+    if (mode === "new") {
+      if (!isValidSiret(formData.companySiret)) {
+        fe.companySiret = "Le SIRET doit contenir 14 chiffres";
+      }
+      if (!isValidArsLicense(formData.companyLicenseNumber)) {
+        fe.companyLicenseNumber =
+          "Numéro d'agrément invalide (5 à 30 caractères : chiffres, lettres, - / .)";
+      }
+    }
+    if (Object.keys(fe).length > 0) {
+      setFieldErrors(fe);
+      return;
+    }
+
     setLoading(true);
 
     // Préparer les données selon le mode
@@ -264,9 +292,16 @@ function SignUpForm() {
                 type="tel"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 text-neutral-900"
+                className={`w-full px-4 py-2.5 border rounded-lg bg-input-bg focus:outline-none focus:ring-2 text-neutral-900 ${
+                  fieldErrors.phone
+                    ? "border-danger-500 focus:ring-danger-500"
+                    : "border-input-border focus:ring-primary-500"
+                }`}
                 placeholder="06 12 34 56 78"
               />
+              {fieldErrors.phone && (
+                <p className="mt-1 text-sm text-danger-600">{fieldErrors.phone}</p>
+              )}
             </div>
           </div>
 
@@ -304,12 +339,19 @@ function SignUpForm() {
                   value={formData.companySiret}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 text-neutral-900"
+                  inputMode="numeric"
+                  className={`w-full px-4 py-2.5 border rounded-lg bg-input-bg focus:outline-none focus:ring-2 text-neutral-900 ${
+                    fieldErrors.companySiret
+                      ? "border-danger-500 focus:ring-danger-500"
+                      : "border-input-border focus:ring-primary-500"
+                  }`}
                   placeholder="123 456 789 00012"
                 />
-                <p className="mt-1 text-xs text-neutral-500">
-                  14 chiffres
-                </p>
+                {fieldErrors.companySiret ? (
+                  <p className="mt-1 text-sm text-danger-600">{fieldErrors.companySiret}</p>
+                ) : (
+                  <p className="mt-1 text-xs text-neutral-500">14 chiffres</p>
+                )}
               </div>
 
               <div>
@@ -323,15 +365,40 @@ function SignUpForm() {
                   value={formData.companyLicenseNumber}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 text-neutral-900"
+                  className={`w-full px-4 py-2.5 border rounded-lg bg-input-bg focus:outline-none focus:ring-2 text-neutral-900 ${
+                    fieldErrors.companyLicenseNumber
+                      ? "border-danger-500 focus:ring-danger-500"
+                      : "border-input-border focus:ring-primary-500"
+                  }`}
                   placeholder="XX-XXXX-XXXX"
                 />
-                <p className="mt-1 text-xs text-neutral-500">
-                  Numéro d&apos;agrément délivré par l&apos;Agence Régionale de Santé
-                </p>
+                {fieldErrors.companyLicenseNumber ? (
+                  <p className="mt-1 text-sm text-danger-600">
+                    {fieldErrors.companyLicenseNumber}
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-neutral-500">
+                    Numéro d&apos;agrément délivré par l&apos;Agence Régionale de Santé
+                  </p>
+                )}
               </div>
             </div>
           )}
+
+          <p className="text-xs text-neutral-500 text-center">
+            En créant un compte, vous acceptez nos{" "}
+            <Link href="/cgu" className="text-primary-600 hover:underline">
+              CGU
+            </Link>{" "}
+            et notre{" "}
+            <Link
+              href="/politique-confidentialite"
+              className="text-primary-600 hover:underline"
+            >
+              politique de confidentialité
+            </Link>
+            . Vos données sont traitées conformément au RGPD.
+          </p>
 
           <button
             type="submit"

@@ -35,6 +35,14 @@ export default function CalendrierPage() {
           <span className="w-3 h-3 rounded-full bg-primary-500" />
           <span>Terminée</span>
         </div>
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-sm bg-accent-100 border border-accent-300" />
+          <span>Congés</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-sm bg-neutral-200 border border-neutral-300" />
+          <span>Fermé</span>
+        </div>
       </div>
     </div>
   );

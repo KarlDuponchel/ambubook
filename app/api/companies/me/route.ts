@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { getSignedDownloadUrl } from "@/lib/s3";
 import { geocodeAddress } from "@/lib/geo";
+import { isValidFrenchPhone, isValidSiret, isValidArsLicense } from "@/lib/validators";
 
 /**
  * GET /api/companies/me
@@ -79,18 +80,38 @@ const updateCompanySchema = z.object({
   name: z.string().min(2).optional(),
   address: z.string().optional().nullable(),
   city: z.string().optional().nullable(),
-  postalCode: z.string().optional().nullable(),
-  phone: z.string().optional().nullable(),
+  postalCode: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((v) => !v || /^\d{5}$/.test(v), "Code postal invalide (5 chiffres)"),
+  phone: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((v) => !v || isValidFrenchPhone(v), "Téléphone invalide"),
   email: z.string().email().optional().nullable(),
-  siret: z.string().optional().nullable(),
-  description: z.string().optional().nullable(),
+  siret: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((v) => !v || isValidSiret(v), "SIRET invalide (14 chiffres)"),
+  description: z
+    .string()
+    .max(1500, "La description ne peut pas dépasser 1500 caractères")
+    .optional()
+    .nullable(),
   hasAmbulance: z.boolean().optional(),
   hasVSL: z.boolean().optional(),
   acceptsOnlineBooking: z.boolean().optional(),
   foundedYear: z.number().int().min(1900).max(new Date().getFullYear()).optional().nullable(),
   fleetSize: z.number().int().min(1).optional().nullable(),
   coverageRadius: z.number().int().min(1).optional().nullable(),
-  licenseNumber: z.string().optional().nullable(),
+  licenseNumber: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((v) => !v || isValidArsLicense(v), "Numéro d'agrément invalide"),
 });
 
 /**

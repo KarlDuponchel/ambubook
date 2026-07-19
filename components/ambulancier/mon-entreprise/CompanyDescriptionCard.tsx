@@ -50,13 +50,19 @@ export function CompanyDescriptionCard({ company, isOwner, onUpdate }: CompanyDe
       />
       <CardContent>
         {isEditing ? (
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={6}
-            className="w-full px-4 py-3 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-            placeholder="Décrivez votre entreprise, vos services, votre zone d'intervention..."
-          />
+          <>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={6}
+              maxLength={1500}
+              className="w-full px-4 py-3 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+              placeholder="Décrivez votre entreprise, vos services, votre zone d'intervention..."
+            />
+            <p className="mt-1 text-xs text-neutral-500 text-right">
+              {description.length}/1500
+            </p>
+          </>
         ) : (
           <div className="min-h-25">
             {company.description ? (

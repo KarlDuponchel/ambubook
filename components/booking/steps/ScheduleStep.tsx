@@ -7,6 +7,8 @@ import { StepProps, BookingFormData, Company } from "../types";
 
 interface ScheduleStepProps extends StepProps {
   company: Company;
+  /** Affiche la case de consentement RGPD (réservation patient uniquement) */
+  showConsent?: boolean;
 }
 
 const TRANSPORT_LABELS = {
@@ -20,7 +22,7 @@ const MOBILITY_LABELS = {
   STRETCHER: "Brancard",
 };
 
-export function ScheduleStep({ formData, setFormData, errors, company }: ScheduleStepProps) {
+export function ScheduleStep({ formData, setFormData, errors, company, showConsent = true }: ScheduleStepProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = <K extends keyof BookingFormData>(
@@ -261,6 +263,38 @@ export function ScheduleStep({ formData, setFormData, errors, company }: Schedul
           )}
         </div>
       </div>
+
+      {/* Consentement RGPD - données de santé (art. 9) */}
+      {showConsent && (
+      <div
+        className={`rounded-lg border p-3 ${
+          errors.consentGiven
+            ? "border-danger-300 bg-danger-50/40"
+            : "border-neutral-200 bg-neutral-50"
+        }`}
+      >
+        <Checkbox
+          label="J'accepte que mes données (dont données de santé) soient traitées par l'ambulancier et AmbuBook afin d'organiser ce transport sanitaire."
+          checked={formData.consentGiven}
+          onChange={(checked) => handleChange("consentGiven", checked)}
+        />
+        <p className="mt-1 pl-8 text-xs text-neutral-500">
+          Consentement requis (art. 9 RGPD). Voir notre{" "}
+          <a
+            href="/politique-confidentialite"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary-600 hover:underline"
+          >
+            politique de confidentialité
+          </a>
+          .
+        </p>
+        {errors.consentGiven && (
+          <p className="mt-1 text-sm text-danger-600">{errors.consentGiven}</p>
+        )}
+      </div>
+      )}
     </div>
   );
 }

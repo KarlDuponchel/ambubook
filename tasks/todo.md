@@ -34,16 +34,16 @@
 - [x] _Bonus_ : réconciliation validation NIR client/serveur (accepte 13 **ou** 15 chiffres, `lib/validations/transport-request.ts`)
 
 ### 🟠 RGPD / conformité légale
-- [ ] **Mentions RGPD dans les formulaires** : inscription (`app/(customer)/inscription/page.tsx`), demande de transport (`components/booking/steps/PatientInfoStep.tsx`), inscription pro — ajouter mention d'information + lien vers politique de confidentialité
-- [ ] **Consentement explicite art. 9** pour les données de santé dans le tunnel de réservation
-- [ ] **Suppression de compte self-service** : handler `DELETE` dans `app/api/user/me/route.ts` (aujourd'hui email manuel uniquement) + fonction d'anonymisation
-- [ ] **Rétention appliquée** : cron de purge/anonymisation des **comptes** (3 ans) et **demandes de transport** (5 ans) — aujourd'hui seuls logs/notifs sont purgés
-- [ ] Corriger la divergence durée logs : politique annonce 1 an vs 90/180j réellement implémentés
-- [ ] Footer légal absent des espaces dashboard/admin et du tunnel de réservation
-- [ ] Politique mentionne des cookies analytiques alors qu'aucun traceur n'est implémenté (aligner déclaratif/réel)
-- [ ] `clientId` Axeptio codé en dur (`components/common/Axeptio.tsx`) → utiliser `NEXT_PUBLIC_AXEPTIO_CLIENT_ID`
-- [ ] **AIPD/DPIA** (art. 35) à rédiger pour le traitement de données de santé
-- [ ] **Registre des traitements** (art. 30)
+- [x] **Mentions RGPD dans les formulaires** : mention + liens CGU/politique de confidentialité ajoutés sur inscription client (`app/(customer)/inscription`) et pro (`app/dashboard/(auth)/inscription`)
+- [x] **Consentement explicite art. 9** : case à cocher bloquante (données de santé) dans le tunnel de réservation (`ScheduleStep` + validation `BookingModal` étape 4) — masquée côté ambulancier via `showConsent={false}`. _Suivi possible : stocker une preuve de consentement en base (nécessite migration)._
+- [x] **Suppression de compte self-service** : handler `DELETE` `app/api/user/me/route.ts` (réservé CUSTOMER) réutilisant `anonymizeUser` + bouton avec confirmation dans `app/mon-compte/parametres`
+- [x] **Rétention appliquée** : cron `app/api/cron/retention/route.ts` (anonymise comptes clients inactifs > 3 ans, purge transports > 5 ans + fichiers S3). À planifier côté Dokploy/Scaleway (`0 5 * * 0`)
+- [x] Divergence durée logs corrigée dans la politique (audit/erreurs 90j–6 mois, notifications 30/90j)
+- [x] **Footer légal** : composant `components/common/LegalLinks.tsx` ajouté aux shells dashboard + admin (le tunnel a déjà le lien via le consentement)
+- [x] Politique cookies alignée (aucun outil analytics déployé aujourd'hui)
+- [x] `clientId` Axeptio via `NEXT_PUBLIC_AXEPTIO_CLIENT_ID` (repli sur l'ancienne valeur)
+- [ ] **AIPD/DPIA** (art. 35) à rédiger pour le traitement de données de santé — _document, pas du code_
+- [ ] **Registre des traitements** (art. 30) — _document, pas du code_
 
 ### 🔵 Hébergement HDS (long — lancer en parallèle)
 - [ ] **Migrer vers un hébergeur certifié HDS** (Hostinger/Chypre actuel = NON conforme) : OVHcloud HDS, Scaleway, Outscale…
@@ -138,6 +138,11 @@
 - [ ] Vérifier le hashage des mots de passe (bcrypt/argon2)
 
 ### Autorisation
+- [x] **Cloisonner front office / dashboard ambulancier par rôle** (Option 1, fait 2026-07-19) :
+  - `components/landing/Header.tsx` : « connecté » reconnu uniquement si `role === "CUSTOMER"` (`isCustomer`/`isPro`). Un ambulancier/admin connecté = état visiteur (pas de menu compte patient) + bouton « Mon dashboard » → `/dashboard`.
+  - `proxy.ts` : `/mon-compte/:path*` et `/mes-transports/:path*` protégés (non connecté → `/connexion?redirect=` ; rôle ≠ CUSTOMER → `/dashboard`) + ajoutés au `matcher`.
+  - `app/api/customer/transports` POST : **création interdite aux comptes pro** (session avec `role !== CUSTOMER` → 403). Seuls les clients CUSTOMER et les visiteurs non connectés peuvent réserver ; les ambulanciers passent par leur dashboard.
+  - _Note UI (optionnel plus tard)_ : le bouton « Réserver » reste visible pour un pro sur une fiche entreprise publique ; l'API renvoie 403 avec message clair. Masquage UI possible ultérieurement.
 - [ ] Vérifier que toutes les routes protégées vérifient la session
 - [ ] Vérifier les contrôles de rôle (ADMIN, AMBULANCIER, CUSTOMER)
 - [ ] Vérifier l'ownership (un user ne peut modifier que ses propres données)

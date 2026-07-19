@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { AdminSidebar } from "@/components/admin";
 import { LoadingSpinner } from "@/components/ui";
+import { LegalLinks } from "@/components/common/LegalLinks";
 
 // Pages publiques admin (connexion si on en crée une)
 const PUBLIC_PATHS = ["/admin/connexion"];
@@ -98,6 +99,7 @@ export default function AdminLayout({
       >
         <div className="px-4 sm:px-6 lg:px-10 py-6 pt-20 lg:pt-8">
           <div className="mx-auto w-full max-w-7xl">{children}</div>
+          <LegalLinks className="mt-10 pt-6 border-t border-neutral-200/60" />
         </div>
       </main>
     </div>

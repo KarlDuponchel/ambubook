@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Sidebar } from "@/components/ambulancier/Sidebar";
 import { LoadingSpinner } from "@/components/ui";
+import { LegalLinks } from "@/components/common/LegalLinks";
 
 // Pages qui ne nécessitent pas d'authentification
 const PUBLIC_PATHS = ["/dashboard/connexion", "/dashboard/inscription"];
@@ -136,6 +137,7 @@ export default function DashboardLayout({
       >
         <div className="px-4 sm:px-6 lg:px-10 py-6 pt-20 lg:pt-8">
           <div className="mx-auto w-full max-w-7xl">{children}</div>
+          <LegalLinks className="mt-10 pt-6 border-t border-neutral-200/60" />
         </div>
       </main>
     </div>

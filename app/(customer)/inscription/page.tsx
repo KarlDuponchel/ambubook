@@ -3,6 +3,7 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { isValidFrenchPhone } from "@/lib/validators";
 
 function SignUpForm() {
   const router = useRouter();
@@ -21,18 +22,26 @@ function SignUpForm() {
     newsletter: false,
   });
   const [error, setError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "phone") setPhoneError("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setPhoneError("");
 
     // Validation
+    if (!isValidFrenchPhone(formData.phone)) {
+      setPhoneError("Format de téléphone invalide (ex : 06 12 34 56 78)");
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError("Les mots de passe ne correspondent pas");
       return;
@@ -173,9 +182,16 @@ function SignUpForm() {
             value={formData.phone}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-black focus:ring-primary-500 focus:border-transparent"
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black focus:border-transparent ${
+              phoneError
+                ? "border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:ring-primary-500"
+            }`}
             placeholder="06 12 34 56 78"
           />
+          {phoneError && (
+            <p className="mt-1 text-sm text-red-600">{phoneError}</p>
+          )}
         </div>
 
         <div>
@@ -279,6 +295,21 @@ function SignUpForm() {
             </div>
           </div>
         </div>
+
+        <p className="text-xs text-gray-500 text-center">
+          En créant un compte, vous acceptez nos{" "}
+          <Link href="/cgu" className="text-primary-600 hover:underline">
+            CGU
+          </Link>{" "}
+          et notre{" "}
+          <Link
+            href="/politique-confidentialite"
+            className="text-primary-600 hover:underline"
+          >
+            politique de confidentialité
+          </Link>
+          . Vos données personnelles sont traitées conformément au RGPD.
+        </p>
 
         <button
           type="submit"

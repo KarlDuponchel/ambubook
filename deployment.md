@@ -132,6 +132,56 @@ La certification HDS de Scaleway ne suffit pas à elle seule :
 
 ---
 
+## Checklist de mise en production (ordonnée)
+
+Cocher dans l'ordre. Les 🔴 sont bloquants.
+
+### 1. Pré-requis légaux (🔴)
+- [ ] 🔴 Hébergement **HDS** contractualisé (convention signée, région `fr-par`)
+- [ ] 🔴 **AIPD/DPIA** complétée et validée (`docs/rgpd/AIPD.md`)
+- [ ] 🔴 **Registre des traitements** complété (`docs/rgpd/registre-des-traitements.md`)
+- [ ] **DPA** signés avec les sous-traitants (hébergeur, Resend, Twilio, Axeptio)
+- [ ] Mentions légales mises à jour avec l'hébergeur HDS
+
+### 2. Variables d'environnement (🔴)
+- [ ] 🔴 `DATABASE_URL` (Managed DB `fr-par`, `?sslmode=require`)
+- [ ] 🔴 `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (URL de prod, pas localhost)
+- [ ] 🔴 `ENCRYPTION_KEY` (32 octets base64 — sans elle, création de transport avec n° de Sécu = erreur ; **ne jamais changer** ensuite)
+- [ ] 🔴 `CRON_SECRET`
+- [ ] `S3_*` (Object Storage HDS), `RESEND_API_KEY`/`FROM_EMAIL`/`ADMIN_EMAIL`, `TWILIO_*`, `GOOGLE_CLIENT_ID/SECRET`, `NEXT_PUBLIC_AXEPTIO_CLIENT_ID`
+
+### 3. Build & base de données
+- [ ] `npm run build` passe sans erreur
+- [ ] `npx prisma migrate deploy` exécuté contre la Managed DB (étape séparée, pas au démarrage du container)
+- [ ] Image Docker construite (`linux/amd64`) et poussée sur le registry
+
+### 4. Amorçage
+- [ ] 🔴 **Bootstrap admin** exécuté une fois : `npx tsx scripts/create-admin.ts` (via un Serverless Job) — noter le mot de passe généré
+- [ ] Vérifier la connexion admin + vérification email fonctionnelle (Resend)
+
+### 5. Crons (à planifier avec `Authorization: Bearer $CRON_SECRET`)
+- [ ] `/api/cron/reminders` — `0 18 * * *`
+- [ ] `/api/cron/cleanup-logs` — `0 4 * * *`
+- [ ] `/api/cron/cleanup-notifications` — `0 3 * * *`
+- [ ] `/api/cron/retention` — `0 5 * * 0`
+
+### 6. Sécurité & exploitation (🟡 fortement recommandé)
+- [ ] **Monitoring** d'erreurs (Sentry) + alertes
+- [ ] **Backups** automatiques de la base
+- [ ] HTTPS/TLS actif (cookies `Secure` déjà conditionnés à la prod)
+- [ ] Vérifier que `requireEmailVerification` n'empêche pas les comptes existants (base prod vierge = OK)
+
+### 7. Tests de bout en bout (🔴 aucun test automatisé n'existe)
+- [ ] Inscription patient → email de vérification → connexion
+- [ ] Réservation invité + connectée → consentement art. 9 obligatoire → demande créée (n° de Sécu chiffré en base)
+- [ ] Inscription ambulancier (nouvelle société) → en attente validation → activation admin → onboarding
+- [ ] Un ambulancier ne peut pas réserver depuis le front (403) ni accéder à `/mon-compte`
+- [ ] Suivi public : accès avec le bon nom, refus sinon ; documents non exposés
+- [ ] Suppression de compte (anonymisation) + export des données
+- [ ] Notifications email/SMS reçues
+
+---
+
 ## Références
 
 - Certification HDS — https://esante.gouv.fr/produits-services/hds

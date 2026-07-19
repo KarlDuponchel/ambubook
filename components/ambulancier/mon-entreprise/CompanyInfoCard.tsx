@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Building2, MapPin, Phone, Mail, FileText, Shield, Save, X, Pencil } from "lucide-react";
 import { CompanyFull } from "@/lib/types";
 import { Card, CardHeader, CardContent } from "@/components/ui";
+import { isValidFrenchPhone, isValidSiret, isValidArsLicense } from "@/lib/validators";
 
 interface CompanyInfoCardProps {
   company: CompanyFull;
@@ -24,8 +25,44 @@ export function CompanyInfoCard({ company, isOwner, onUpdate }: CompanyInfoCardP
     siret: company.siret || "",
     licenseNumber: company.licenseNumber || "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Met à jour un champ et efface son erreur
+  const setField = (key: keyof typeof formData, value: string) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
+    setErrors((prev) => ({ ...prev, [key]: "" }));
+  };
 
   const handleSave = async () => {
+    // Validation de format (blocage UI). Champs facultatifs : validés si renseignés.
+    const newErrors: Record<string, string> = {};
+    if (!formData.name.trim() || formData.name.trim().length < 2) {
+      newErrors.name = "Le nom doit contenir au moins 2 caractères";
+    }
+    if (formData.siret.trim() && !isValidSiret(formData.siret)) {
+      newErrors.siret = "Le SIRET doit contenir 14 chiffres";
+    }
+    if (formData.licenseNumber.trim() && !isValidArsLicense(formData.licenseNumber)) {
+      newErrors.licenseNumber = "Numéro d'agrément invalide (5 à 30 caractères)";
+    }
+    if (formData.postalCode.trim() && !/^\d{5}$/.test(formData.postalCode)) {
+      newErrors.postalCode = "Le code postal doit contenir 5 chiffres";
+    }
+    if (formData.phone.trim() && !isValidFrenchPhone(formData.phone)) {
+      newErrors.phone = "Format de téléphone invalide (ex : 06 12 34 56 78)";
+    }
+    if (
+      formData.email.trim() &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+    ) {
+      newErrors.email = "Format d'email invalide";
+    }
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
     setSaving(true);
     try {
       await onUpdate({
@@ -55,8 +92,17 @@ export function CompanyInfoCard({ company, isOwner, onUpdate }: CompanyInfoCardP
       siret: company.siret || "",
       licenseNumber: company.licenseNumber || "",
     });
+    setErrors({});
     setIsEditing(false);
   };
+
+  // Classe d'input avec bordure d'erreur conditionnelle
+  const inputClass = (field: string, extra = "") =>
+    `${extra} px-4 py-2.5 border rounded-lg bg-input-bg focus:outline-none focus:ring-2 disabled:bg-neutral-50 disabled:text-neutral-500 ${
+      errors[field]
+        ? "border-danger-500 focus:ring-danger-500"
+        : "border-input-border focus:ring-primary-500"
+    }`;
 
   return (
     <Card>
@@ -85,10 +131,11 @@ export function CompanyInfoCard({ company, isOwner, onUpdate }: CompanyInfoCardP
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) => setField("name", e.target.value)}
               disabled={!isEditing}
-              className="w-full px-4 py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-neutral-50 disabled:text-neutral-500"
+              className={inputClass("name", "w-full")}
             />
+            {errors.name && <p className="mt-1 text-sm text-danger-600">{errors.name}</p>}
           </div>
 
           {/* SIRET */}
@@ -101,12 +148,14 @@ export function CompanyInfoCard({ company, isOwner, onUpdate }: CompanyInfoCardP
               <input
                 type="text"
                 value={formData.siret}
-                onChange={(e) => setFormData({ ...formData, siret: e.target.value })}
+                onChange={(e) => setField("siret", e.target.value)}
                 disabled={!isEditing}
-                className="flex-1 w-full px-4 py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-neutral-50 disabled:text-neutral-500"
+                inputMode="numeric"
+                className={inputClass("siret", "flex-1 w-full")}
                 placeholder="Non renseigné"
               />
             </div>
+            {errors.siret && <p className="mt-1 text-sm text-danger-600">{errors.siret}</p>}
           </div>
 
           {/* N° agrément ARS */}
@@ -119,12 +168,15 @@ export function CompanyInfoCard({ company, isOwner, onUpdate }: CompanyInfoCardP
               <input
                 type="text"
                 value={formData.licenseNumber}
-                onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
+                onChange={(e) => setField("licenseNumber", e.target.value)}
                 disabled={!isEditing}
-                className="flex-1 px-4 py-2.5 w-full border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-neutral-50 disabled:text-neutral-500"
+                className={inputClass("licenseNumber", "flex-1 w-full")}
                 placeholder="Non renseigné"
               />
             </div>
+            {errors.licenseNumber && (
+              <p className="mt-1 text-sm text-danger-600">{errors.licenseNumber}</p>
+            )}
           </div>
 
           {/* Adresse */}
@@ -167,11 +219,16 @@ export function CompanyInfoCard({ company, isOwner, onUpdate }: CompanyInfoCardP
               <input
                 type="text"
                 value={formData.postalCode}
-                onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+                onChange={(e) => setField("postalCode", e.target.value)}
                 disabled={!isEditing}
-                className="w-full px-4 py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-neutral-50 disabled:text-neutral-500"
+                maxLength={5}
+                inputMode="numeric"
+                className={inputClass("postalCode", "w-full")}
                 placeholder="Non renseigné"
               />
+              {errors.postalCode && (
+                <p className="mt-1 text-sm text-danger-600">{errors.postalCode}</p>
+              )}
             </div>
           </div>
 
@@ -185,12 +242,13 @@ export function CompanyInfoCard({ company, isOwner, onUpdate }: CompanyInfoCardP
               <input
                 type="tel"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                onChange={(e) => setField("phone", e.target.value)}
                 disabled={!isEditing}
-                className="flex-1 px-4 w-full py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-neutral-50 disabled:text-neutral-500"
+                className={inputClass("phone", "flex-1 w-full")}
                 placeholder="Non renseigné"
               />
             </div>
+            {errors.phone && <p className="mt-1 text-sm text-danger-600">{errors.phone}</p>}
           </div>
 
           {/* Email */}
@@ -203,12 +261,13 @@ export function CompanyInfoCard({ company, isOwner, onUpdate }: CompanyInfoCardP
               <input
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) => setField("email", e.target.value)}
                 disabled={!isEditing}
-                className="flex-1 px-4 py-2.5 border border-input-border rounded-lg bg-input-bg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-neutral-50 disabled:text-neutral-500"
+                className={inputClass("email", "flex-1 w-full")}
                 placeholder="Non renseigné"
               />
             </div>
+            {errors.email && <p className="mt-1 text-sm text-danger-600">{errors.email}</p>}
           </div>
         </div>
       </CardContent>

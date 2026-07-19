@@ -343,6 +343,41 @@ export function getPredomnantStatus(events: CalendarEvent[]): RequestStatus | nu
 }
 
 // ============================================
+// Fermetures : congés (CompanyTimeOff) + jours fermés (CompanyHours)
+// ============================================
+
+export interface DayClosure {
+  /** Jour de fermeture récurrent (horaires isClosed) */
+  isClosed: boolean;
+  /** Titre du congé couvrant ce jour, le cas échéant */
+  timeOffTitle: string | null;
+  /** Libellé à afficher (congé prioritaire sur fermeture récurrente) */
+  label: string | null;
+}
+
+export function getDayClosure(
+  date: Date,
+  hours: { dayOfWeek: number; isClosed: boolean }[],
+  timeOffs: { title: string; startDate: string; endDate: string }[]
+): DayClosure {
+  const dayStart = startOfDay(date).getTime();
+
+  const timeOff = timeOffs.find((t) => {
+    const from = startOfDay(new Date(t.startDate)).getTime();
+    const to = startOfDay(new Date(t.endDate)).getTime();
+    return dayStart >= from && dayStart <= to;
+  });
+
+  const dayHours = hours.find((h) => h.dayOfWeek === date.getDay());
+  const isClosed = !!dayHours?.isClosed;
+
+  const timeOffTitle = timeOff ? timeOff.title : null;
+  const label = timeOffTitle ?? (isClosed ? "Fermé" : null);
+
+  return { isClosed, timeOffTitle, label };
+}
+
+// ============================================
 // Calcul de position pour timeline
 // ============================================
 

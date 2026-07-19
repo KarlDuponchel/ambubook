@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn, signOut } from "@/lib/auth-client";
@@ -11,6 +11,15 @@ function LoginForm() {
   const registered = searchParams.get("registered");
   const joined = searchParams.get("joined");
   const reset = searchParams.get("reset");
+  const pending = searchParams.get("pending");
+
+  // Compte non encore validé redirigé ici par le middleware : on nettoie la
+  // session résiduelle (créée par l'auto-connexion après vérification email)
+  useEffect(() => {
+    if (pending) {
+      signOut().catch(() => {});
+    }
+  }, [pending]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -76,6 +85,16 @@ function LoginForm() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {pending && (
+            <div className="bg-warning-50 text-warning-700 p-3 rounded-lg text-sm">
+              <strong>Compte en attente de validation</strong>
+              <br />
+              Votre adresse email est confirmée. Votre compte doit maintenant être
+              validé par notre équipe : vous recevrez un email dès qu&apos;il sera
+              activé, puis vous pourrez vous connecter.
+            </div>
+          )}
+
           {registered && (
             <div className="bg-warning-50 text-warning-700 p-3 rounded-lg text-sm">
               <strong>Compte créé avec succès !</strong>

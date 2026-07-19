@@ -41,6 +41,9 @@ export interface BookingFormData {
   transportVoucherFile: File | null;
   reason: string;
   notes: string;
+
+  // Consentement RGPD (données de santé, art. 9)
+  consentGiven: boolean;
 }
 
 export const initialFormData: BookingFormData = {
@@ -73,6 +76,7 @@ export const initialFormData: BookingFormData = {
   transportVoucherFile: null,
   reason: "",
   notes: "",
+  consentGiven: false,
 };
 
 export interface StepProps {

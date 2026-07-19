@@ -99,3 +99,12 @@ export default async function Page({ params }) {
 ```
 Et traduire le message d'erreur 429 (Better Auth le renvoie en anglais) côté client en testant `result.error.status === 429`.
 **Prévention** : Pour un rate limit orienté anti-brute-force, préférer une fenêtre COURTE (déblocage rapide) plutôt qu'un `max` bas sur une fenêtre longue. Toujours traduire les messages 429 de Better Auth. Se souvenir que la limite est par IP (attention au partage d'IP : réseau d'entreprise, hôpital, NAT).
+
+---
+
+### [2026-07-19] - `autoSignInAfterVerification` contourne le contrôle `isActive`
+**Contexte** : Activation de `requireEmailVerification` + `autoSignInAfterVerification` dans `lib/auth.ts`
+**Erreur** : Un ambulancier « nouvelle société » (créé avec `isActive=false`, en attente de validation admin) accédait à l'onboarding juste après avoir validé son email.
+**Cause** : Le seul garde-fou `isActive` était côté client sur la page de connexion (`check-status` → `signOut`). Le middleware `proxy.ts` ne vérifiait QUE session + rôle, pas `isActive`. Avec l'auto-connexion après vérification email, l'utilisateur obtenait une session sans passer par la page de connexion, contournant le garde-fou.
+**Solution** : Contrôle `isActive` déplacé/ajouté dans le middleware (barrière serveur) : `AMBULANCIER` + `isActive === false` → redirection vers `/dashboard/connexion?pending=1` (+ bannière et `signOut` de la session résiduelle).
+**Prévention** : Les contrôles d'accès (auth, rôle, statut de compte) doivent être appliqués côté SERVEUR (middleware/route), jamais uniquement côté client. Un check client-side sur la page de connexion ne protège pas la navigation directe ni les sessions obtenues autrement (auto sign-in, OAuth, etc.).

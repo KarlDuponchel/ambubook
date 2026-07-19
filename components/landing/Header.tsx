@@ -48,14 +48,18 @@ export function Header() {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { data: session } = useSession();
 
-  // Vérifier le rôle de l'utilisateur
+  // Cloisonnement front / dashboard : le front office ne reconnaît comme
+  // « connecté » qu'un compte CUSTOMER. Un ambulancier/admin connecté est
+  // traité comme un pro (accès à son dashboard) mais pas comme un utilisateur
+  // du front office (pas de menu compte patient).
   const userRole = (session?.user as { role?: string })?.role;
-  const isAmbulancier = userRole === "AMBULANCIER" || userRole === "ADMIN";
+  const isCustomer = userRole === "CUSTOMER";
+  const isPro = !!session?.user && !isCustomer;
+  // Alias conservé pour les menus internes (ambulancier/admin connecté)
+  const isAmbulancier = isPro;
 
-  // Clé SWR nulle tant que la session n'est pas chargée → pas de fetch
-  const profileEndpoint = session?.user
-    ? isAmbulancier ? "/api/ambulancier/me" : "/api/user/me"
-    : null;
+  // Profil (avatar) chargé uniquement pour un client
+  const profileEndpoint = isCustomer ? "/api/user/me" : null;
 
   const { data: profileData } = useSWR<{ imageUrl?: string | null }>(
     profileEndpoint,
@@ -156,7 +160,7 @@ export function Header() {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-3">
-            {session?.user ? (
+            {isCustomer ? (
               <>
                 {/* Notifications Bell */}
                 <NotificationBell variant="landing" />
@@ -171,7 +175,7 @@ export function Header() {
                       : "border-neutral-200 hover:border-neutral-300 hover:bg-neutral-100"
                   }`}
                 >
-                  <UserAvatar name={session.user.name || "U"} imageUrl={profileImageUrl} size="sm" />
+                  <UserAvatar name={session?.user?.name || "U"} imageUrl={profileImageUrl} size="sm" />
                   <ChevronDown
                     className={`w-4 h-4 text-neutral-500 transition-transform ${
                       userMenuOpen ? "rotate-180" : ""
@@ -190,10 +194,10 @@ export function Header() {
                   {/* User info */}
                   <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
                     <p className="font-medium text-neutral-900 truncate">
-                      {session.user.name}
+                      {session?.user?.name}
                     </p>
                     <p className="text-sm text-neutral-500 truncate">
-                      {session.user.email}
+                      {session?.user?.email}
                     </p>
                   </div>
 
@@ -279,32 +283,34 @@ export function Header() {
               </div>
               </>
             ) : (
-              <>
-                <Link
-                  href="/connexion"
-                  className="px-4 py-2 text-primary-600 hover:text-primary-700 font-medium rounded-lg hover:bg-neutral-100 transition-all"
-                >
-                  Connexion
-                </Link>
-                <Link
-                  href="/inscription"
-                  className="px-4 py-2 text-white hover:bg-primary-700 font-medium rounded-lg bg-primary-600 transition-all"
-                >
-                  Créer un compte
-                </Link>
-              </>
+              !isPro && (
+                <>
+                  <Link
+                    href="/connexion"
+                    className="px-4 py-2 text-primary-600 hover:text-primary-700 font-medium rounded-lg hover:bg-neutral-100 transition-all"
+                  >
+                    Connexion
+                  </Link>
+                  <Link
+                    href="/inscription"
+                    className="px-4 py-2 text-white hover:bg-primary-700 font-medium rounded-lg bg-primary-600 transition-all"
+                  >
+                    Créer un compte
+                  </Link>
+                </>
+              )
             )}
 
-            {/* Separator + Pro CTA - seulement si non ambulancier connecté */}
-            {!(session?.user && isAmbulancier) && (
+            {/* CTA espace pro : visible pour les visiteurs et les pros, jamais pour un client */}
+            {!isCustomer && (
               <>
-                <div className="w-px h-6 bg-neutral-200" />
+                {!isPro && <div className="w-px h-6 bg-neutral-200" />}
                 <Link
-                  href="/dashboard/connexion"
+                  href={isPro ? "/dashboard" : "/dashboard/connexion"}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white font-medium rounded-lg hover:bg-neutral-800 transition-all shadow-sm"
                 >
                   <Truck className="w-4 h-4" />
-                  <span>Espace Ambulancier</span>
+                  <span>{isPro ? "Mon dashboard" : "Espace Ambulancier"}</span>
                 </Link>
               </>
             )}
@@ -322,7 +328,7 @@ export function Header() {
             </Link>
 
             {/* Notifications mobile */}
-            {session?.user && <NotificationBell variant="landing" />}
+            {isCustomer && <NotificationBell variant="landing" />}
 
             {/* Menu button */}
             <button
@@ -400,16 +406,16 @@ export function Header() {
             <hr className="my-3 border-neutral-100" />
 
             {/* User section */}
-            {session?.user ? (
+            {isCustomer ? (
               <div className="space-y-1">
                 <div className="flex items-center gap-3 px-4 py-3">
-                  <UserAvatar name={session.user.name || "U"} imageUrl={profileImageUrl} />
+                  <UserAvatar name={session?.user?.name || "U"} imageUrl={profileImageUrl} />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-neutral-900 truncate">
-                      {session.user.name}
+                      {session?.user?.name}
                     </p>
                     <p className="text-sm text-neutral-500 truncate">
-                      {session.user.email}
+                      {session?.user?.email}
                     </p>
                   </div>
                 </div>
@@ -493,35 +499,37 @@ export function Header() {
                 </button>
               </div>
             ) : (
-              <div className="space-y-2">
-                <Link
-                  href="/connexion"
-                  className="flex items-center justify-center px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl border border-neutral-200 transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Connexion patient
-                </Link>
-                <Link
-                  href="/inscription"
-                  className="flex items-center justify-center px-4 py-3 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Créer un compte patient
-                </Link>
-              </div>
+              !isPro && (
+                <div className="space-y-2">
+                  <Link
+                    href="/connexion"
+                    className="flex items-center justify-center px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl border border-neutral-200 transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Connexion patient
+                  </Link>
+                  <Link
+                    href="/inscription"
+                    className="flex items-center justify-center px-4 py-3 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Créer un compte patient
+                  </Link>
+                </div>
+              )
             )}
 
-            {/* Pro CTA - seulement si non ambulancier connecté */}
-            {!(session?.user && isAmbulancier) && (
+            {/* CTA espace pro : visiteurs et pros, jamais pour un client */}
+            {!isCustomer && (
               <>
                 <hr className="my-3 border-neutral-100" />
                 <Link
-                  href="/dashboard/connexion"
+                  href={isPro ? "/dashboard" : "/dashboard/connexion"}
                   className="flex items-center justify-center gap-2 px-4 py-3 bg-neutral-900 text-white font-medium rounded-xl hover:bg-neutral-800 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Truck className="w-5 h-5" />
-                  Espace Ambulancier
+                  {isPro ? "Mon dashboard" : "Espace Ambulancier"}
                 </Link>
               </>
             )}

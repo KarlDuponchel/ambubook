@@ -124,9 +124,10 @@ export default function PolitiqueConfidentialitePage() {
               Vos données sont conservées pendant les durées suivantes :
             </p>
             <ul className="mt-4 space-y-2 text-neutral-700 list-disc list-inside">
-              <li><strong>Données de compte</strong> : pendant toute la durée de votre inscription, puis 3 ans après la dernière activité</li>
+              <li><strong>Données de compte</strong> : pendant toute la durée de votre inscription, puis anonymisation 3 ans après la dernière activité</li>
               <li><strong>Données de transport</strong> : 5 ans (obligations légales du secteur médical)</li>
-              <li><strong>Logs de connexion</strong> : 1 an</li>
+              <li><strong>Journaux d&apos;audit et d&apos;erreurs</strong> : 90 jours (jusqu&apos;à 6 mois pour les erreurs non résolues)</li>
+              <li><strong>Notifications</strong> : 30 jours (lues) à 90 jours (non lues)</li>
               <li><strong>Cookies</strong> : 13 mois maximum</li>
             </ul>
           </section>
@@ -225,7 +226,9 @@ export default function PolitiqueConfidentialitePage() {
             </p>
             <h3 className="text-lg font-medium text-neutral-800 mt-6 mb-3">Cookies analytiques</h3>
             <p className="text-neutral-700 leading-relaxed">
-              Permettent de mesurer l&apos;audience et d&apos;améliorer nos services. Soumis à votre consentement.
+              Nous n&apos;utilisons actuellement aucun outil de mesure d&apos;audience.
+              Si nous en déployons un à l&apos;avenir, il sera strictement soumis à votre
+              consentement via le bandeau de gestion des cookies.
             </p>
           </section>
 

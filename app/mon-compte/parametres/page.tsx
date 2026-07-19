@@ -17,6 +17,7 @@ import {
   Shield,
 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
+import { signOut } from "@/lib/auth-client";
 
 interface NotificationPreferences {
   emailEnabled: boolean;
@@ -32,6 +33,8 @@ export default function ParametresClientPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const [notifications, setNotifications] = useState<NotificationPreferences>({
     emailEnabled: true,
@@ -129,6 +132,27 @@ export default function ParametresClientPage() {
       toast.error("Erreur lors de l'export des donnees");
     } finally {
       setExporting(false);
+    }
+  };
+
+  // Supprimer (anonymiser) le compte (RGPD)
+  const deleteAccount = async () => {
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/user/me", { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Erreur lors de la suppression");
+      }
+      // La session est invalidée côté serveur ; on nettoie le client et on redirige
+      await signOut().catch(() => {});
+      toast.success("Votre compte a été supprimé.");
+      router.push("/");
+    } catch (e) {
+      toast.error(
+        e instanceof Error ? e.message : "Erreur lors de la suppression du compte"
+      );
+      setDeleting(false);
     }
   };
 
@@ -322,23 +346,51 @@ export default function ParametresClientPage() {
           <div className="pt-4 border-t border-neutral-100">
             <div className="flex items-start gap-3">
               <Trash2 className="h-5 w-5 text-red-400 mt-0.5" />
-              <div>
+              <div className="flex-1">
                 <p className="font-medium text-neutral-900">Supprimer mon compte</p>
                 <p className="text-sm text-neutral-500 mt-1">
-                  Pour demander la suppression de votre compte et de vos donnees personnelles,
-                  veuillez nous contacter par email a{" "}
-                  <a
-                    href="mailto:contact@ambubook.fr?subject=Demande%20de%20suppression%20de%20compte"
-                    className="text-primary-600 hover:underline"
+                  Vos données personnelles seront définitivement anonymisées. L&apos;historique
+                  des transports est conservé sous forme anonymisée pour les obligations légales
+                  de l&apos;ambulancier. Cette action est irréversible.
+                </p>
+
+                {!confirmingDelete ? (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmingDelete(true)}
+                    className="mt-3 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
                   >
-                    contact@ambubook.fr
-                  </a>
-                  .
-                </p>
-                <p className="text-sm text-neutral-500 mt-2">
-                  Conformement au RGPD, votre demande sera traitee dans un delai de 30 jours.
-                  L&apos;historique des transports pourra etre anonymise plutot que supprime pour des raisons legales.
-                </p>
+                    <Trash2 className="h-4 w-4" />
+                    Supprimer mon compte
+                  </button>
+                ) : (
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    <span className="text-sm font-medium text-red-600">
+                      Confirmer la suppression définitive ?
+                    </span>
+                    <button
+                      type="button"
+                      onClick={deleteAccount}
+                      disabled={deleting}
+                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                    >
+                      {deleting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                      Oui, supprimer
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmingDelete(false)}
+                      disabled={deleting}
+                      className="px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -14,7 +14,8 @@ export function Axeptio() {
 
     // Configurer Axeptio
     window.axeptioSettings = {
-      clientId: "69a8c2595c331f2959aa7747",
+      clientId:
+        process.env.NEXT_PUBLIC_AXEPTIO_CLIENT_ID || "69a8c2595c331f2959aa7747",
       cookiesVersion: "247e5117-b76e-4595-bc66-d5ccc1849420",
       googleConsentMode: {
         default: {

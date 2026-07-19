@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Button, useToast } from "@/components/ui";
+import { isValidFrenchPhone, isValidNir } from "@/lib/validators";
 import { BookingProgress } from "@/components/booking/BookingProgress";
 import { PatientInfoStep } from "@/components/booking/steps/PatientInfoStep";
 import { TransportStep } from "@/components/booking/steps/TransportStep";
@@ -66,14 +67,14 @@ export function CreateTransportModal({ isOpen, onClose, onSuccess }: CreateTrans
       }
       if (!formData.patientPhone.trim()) {
         newErrors.patientPhone = "Le téléphone est requis";
-      } else if (!/^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/.test(formData.patientPhone.replace(/\s/g, ""))) {
+      } else if (!isValidFrenchPhone(formData.patientPhone)) {
         newErrors.patientPhone = "Format de téléphone invalide";
       }
       if (formData.patientEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.patientEmail)) {
         newErrors.patientEmail = "Format d'email invalide";
       }
-      if (formData.patientSocialSecurityNumber && !/^\d{13}$/.test(formData.patientSocialSecurityNumber)) {
-        newErrors.patientSocialSecurityNumber = "Le numéro de sécurité sociale doit contenir exactement 13 chiffres";
+      if (formData.patientSocialSecurityNumber && !isValidNir(formData.patientSocialSecurityNumber)) {
+        newErrors.patientSocialSecurityNumber = "Numéro de sécurité sociale invalide (13 chiffres)";
       }
     }
 
@@ -272,6 +273,7 @@ export function CreateTransportModal({ isOpen, onClose, onSuccess }: CreateTrans
                   setFormData={setFormData}
                   errors={errors}
                   company={company}
+                  showConsent={false}
                 />
               )}
             </>

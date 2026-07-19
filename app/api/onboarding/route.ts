@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { getSignedDownloadUrl } from "@/lib/s3";
+import { isValidFrenchPhone, isValidSiret, isValidArsLicense } from "@/lib/validators";
 
 // Schéma de validation pour les données d'onboarding
 const onboardingDataSchema = z.object({
@@ -11,11 +12,23 @@ const onboardingDataSchema = z.object({
   name: z.string().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
-  postalCode: z.string().optional(),
-  phone: z.string().optional(),
+  postalCode: z
+    .string()
+    .optional()
+    .refine((v) => !v || /^\d{5}$/.test(v), "Code postal invalide (5 chiffres)"),
+  phone: z
+    .string()
+    .optional()
+    .refine((v) => !v || isValidFrenchPhone(v), "Téléphone invalide"),
   email: z.string().email().optional().or(z.literal("")),
-  siret: z.string().optional(),
-  licenseNumber: z.string().optional(),
+  siret: z
+    .string()
+    .optional()
+    .refine((v) => !v || isValidSiret(v), "SIRET invalide (14 chiffres)"),
+  licenseNumber: z
+    .string()
+    .optional()
+    .refine((v) => !v || isValidArsLicense(v), "Numéro d'agrément invalide"),
 
   // Étape 2 : Services
   hasAmbulance: z.boolean().optional(),
@@ -30,7 +43,10 @@ const onboardingDataSchema = z.object({
   coverImageUrl: z.string().nullable().optional(),
 
   // Étape 4 : Description
-  description: z.string().optional(),
+  description: z
+    .string()
+    .max(1500, "La description ne peut pas dépasser 1500 caractères")
+    .optional(),
 
   // Étape 5 : Horaires
   hours: z

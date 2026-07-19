@@ -21,6 +21,7 @@ import {
 import { Button, LoadingSpinner } from "@/components/ui";
 import { useToast } from "@/components/ui/Toast";
 import { ArrowLeft, ArrowRight, Check, SkipForward, Loader2 } from "lucide-react";
+import { isValidFrenchPhone, isValidSiret, isValidArsLicense } from "@/lib/validators";
 
 interface OnboardingWizardProps {
   initialStep?: number;
@@ -81,11 +82,23 @@ export function OnboardingWizard({
         }
         if (!formData.phone?.trim()) {
           newErrors.phone = "Le téléphone est requis";
+        } else if (!isValidFrenchPhone(formData.phone)) {
+          newErrors.phone = "Format de téléphone invalide (ex : 06 12 34 56 78)";
         }
         if (!formData.email?.trim()) {
           newErrors.email = "L'email est requis";
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
           newErrors.email = "L'email n'est pas valide";
+        }
+        if (formData.siret?.trim() && !isValidSiret(formData.siret)) {
+          newErrors.siret = "Le SIRET doit contenir 14 chiffres";
+        }
+        if (
+          formData.licenseNumber?.trim() &&
+          !isValidArsLicense(formData.licenseNumber)
+        ) {
+          newErrors.licenseNumber =
+            "Numéro d'agrément invalide (5 à 30 caractères : chiffres, lettres, - / .)";
         }
         break;
 

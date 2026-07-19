@@ -7,13 +7,16 @@ import {
   getCurrentTimePosition,
   getEventTopPosition,
   isToday,
+  getDayClosure,
 } from "@/lib/calendar-utils";
-import type { CalendarEvent } from "@/lib/types";
+import type { CalendarEvent, CompanyHour, CompanyTimeOff } from "@/lib/types";
 import { CalendarEvent as CalendarEventComponent } from "./CalendarEvent";
 
 interface CalendarDayViewProps {
   currentDate: Date;
   eventsByDate: Map<string, CalendarEvent[]>;
+  hours: CompanyHour[];
+  timeOffs: CompanyTimeOff[];
 }
 
 const START_HOUR = 6;
@@ -24,10 +27,13 @@ const MINUTE_HEIGHT = HOUR_HEIGHT / 60;
 export function CalendarDayView({
   currentDate,
   eventsByDate,
+  hours,
+  timeOffs,
 }: CalendarDayViewProps) {
   const timeSlots = getTimeSlots(START_HOUR, END_HOUR);
   const dateKey = getDateKey(currentDate);
   const dayEvents = eventsByDate.get(dateKey) || [];
+  const closure = getDayClosure(currentDate, hours, timeOffs);
   const isTodayView = isToday(currentDate);
   const currentTimePosition = isTodayView ? getCurrentTimePosition(START_HOUR) : null;
 
@@ -43,8 +49,31 @@ export function CalendarDayView({
   }, [dayEvents]);
 
   return (
-    <div className="flex overflow-auto">
-      {/* Colonne des heures */}
+    <div>
+      {/* Bannière congés / fermeture */}
+      {closure.label && (
+        <div
+          className={`flex items-center gap-2 px-4 py-3 border-b border-card-border text-sm ${
+            closure.timeOffTitle
+              ? "bg-accent-50 text-accent-800"
+              : "bg-neutral-100 text-neutral-700"
+          }`}
+        >
+          <span
+            className={`w-2.5 h-2.5 rounded-full ${
+              closure.timeOffTitle ? "bg-accent-500" : "bg-neutral-400"
+            }`}
+          />
+          <span className="font-medium">
+            {closure.timeOffTitle
+              ? `Congés : ${closure.timeOffTitle}`
+              : "Établissement fermé ce jour"}
+          </span>
+        </div>
+      )}
+
+      <div className="flex overflow-auto">
+        {/* Colonne des heures */}
       <div className="w-20 shrink-0 border-r border-card-border">
         {timeSlots.map((slot) => (
           <div
@@ -155,6 +184,7 @@ export function CalendarDayView({
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

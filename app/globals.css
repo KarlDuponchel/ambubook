@@ -94,6 +94,18 @@
   --neutral-900: #171717;
   --neutral-950: #0a0a0a;
 
+  /* ACCENT - Violet (contre-propositions / mise en avant) */
+  --accent-50: #f5f3ff;
+  --accent-100: #ede9fe;
+  --accent-200: #ddd6fe;
+  --accent-300: #c4b5fd;
+  --accent-400: #a78bfa;
+  --accent-500: #8b5cf6;
+  --accent-600: #7c3aed;
+  --accent-700: #6d28d9;
+  --accent-800: #5b21b6;
+  --accent-900: #4c1d95;
+
   /* Typography Tokens */
   --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   --font-size: 16px;
@@ -385,6 +397,18 @@
   --color-neutral-800: var(--neutral-800);
   --color-neutral-900: var(--neutral-900);
   --color-neutral-950: var(--neutral-950);
+
+  /* Palette Accent (violet) */
+  --color-accent-50: var(--accent-50);
+  --color-accent-100: var(--accent-100);
+  --color-accent-200: var(--accent-200);
+  --color-accent-300: var(--accent-300);
+  --color-accent-400: var(--accent-400);
+  --color-accent-500: var(--accent-500);
+  --color-accent-600: var(--accent-600);
+  --color-accent-700: var(--accent-700);
+  --color-accent-800: var(--accent-800);
+  --color-accent-900: var(--accent-900);
 
   /* Sidebar */
   --color-sidebar: var(--sidebar);

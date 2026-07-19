@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { Card } from "@/components/ui";
 import { useCalendarNavigation } from "@/hooks/useCalendarNavigation";
 import { useTransportRequests } from "@/hooks/useTransportRequests";
+import { useCompanySchedule } from "@/hooks/useCompanySchedule";
 import { CalendarHeader } from "./CalendarHeader";
 import { CalendarDayView } from "./CalendarDayView";
 import { CalendarWeekView } from "./CalendarWeekView";
@@ -32,6 +33,9 @@ export function Calendar({ defaultView = "month" }: CalendarProps) {
     dateTo: dateRange.to,
   });
 
+  // Congés + jours de fermeture de l'entreprise
+  const { hours, timeOffs } = useCompanySchedule();
+
   // Rafraîchir les données quand la plage de dates change
   useEffect(() => {
     refetch();
@@ -54,11 +58,13 @@ export function Calendar({ defaultView = "month" }: CalendarProps) {
         onToday={goToToday}
       />
 
-      <div className="min-h-[500px]">
+      <div className="min-h-125">
         {view === "day" && (
           <CalendarDayView
             currentDate={currentDate}
             eventsByDate={eventsByDate}
+            hours={hours}
+            timeOffs={timeOffs}
           />
         )}
 
@@ -66,6 +72,8 @@ export function Calendar({ defaultView = "month" }: CalendarProps) {
           <CalendarWeekView
             currentDate={currentDate}
             eventsByDate={eventsByDate}
+            hours={hours}
+            timeOffs={timeOffs}
             onDayClick={handleDayClick}
           />
         )}
@@ -74,6 +82,8 @@ export function Calendar({ defaultView = "month" }: CalendarProps) {
           <CalendarMonthView
             currentDate={currentDate}
             eventsByDate={eventsByDate}
+            hours={hours}
+            timeOffs={timeOffs}
             onDayClick={handleDayClick}
           />
         )}

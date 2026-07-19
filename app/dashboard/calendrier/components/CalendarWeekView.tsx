@@ -1,12 +1,14 @@
 "use client";
 
-import { getWeekDays, getTimeSlots, getDateKey, getCurrentTimePosition } from "@/lib/calendar-utils";
-import type { CalendarEvent } from "@/lib/types";
+import { getWeekDays, getTimeSlots, getDateKey, getCurrentTimePosition, getDayClosure } from "@/lib/calendar-utils";
+import type { CalendarEvent, CompanyHour, CompanyTimeOff } from "@/lib/types";
 import { CalendarEventList } from "./CalendarEvent";
 
 interface CalendarWeekViewProps {
   currentDate: Date;
   eventsByDate: Map<string, CalendarEvent[]>;
+  hours: CompanyHour[];
+  timeOffs: CompanyTimeOff[];
   onDayClick: (date: Date) => void;
 }
 
@@ -17,6 +19,8 @@ const HOUR_HEIGHT = 60; // pixels par heure
 export function CalendarWeekView({
   currentDate,
   eventsByDate,
+  hours,
+  timeOffs,
   onDayClick,
 }: CalendarWeekViewProps) {
   const weekDays = getWeekDays(currentDate);
@@ -46,16 +50,22 @@ export function CalendarWeekView({
             const dateKey = getDateKey(day.date);
             const dayEvents = eventsByDate.get(dateKey) || [];
             const eventCount = dayEvents.length;
+            const closure = getDayClosure(day.date, hours, timeOffs);
+            const bgClass = day.isToday
+              ? "bg-primary-50"
+              : closure.timeOffTitle
+                ? "bg-accent-50 hover:bg-accent-100"
+                : closure.isClosed
+                  ? "bg-neutral-100 hover:bg-neutral-200"
+                  : day.isWeekend
+                    ? "bg-neutral-50/30 hover:bg-neutral-50"
+                    : "hover:bg-neutral-50";
 
             return (
               <button
                 key={day.date.toISOString()}
                 onClick={() => onDayClick(day.date)}
-                className={`
-                  flex-1 py-3 px-2 text-center border-l border-card-border transition-colors
-                  ${day.isToday ? "bg-primary-50" : "hover:bg-neutral-50"}
-                  ${day.isWeekend ? "bg-neutral-50/30" : ""}
-                `}
+                className={`flex-1 py-3 px-2 text-center border-l border-card-border transition-colors ${bgClass}`}
               >
                 <p className={`text-xs font-medium ${day.isWeekend ? "text-neutral-400" : "text-neutral-500"}`}>
                   {day.dayName}
@@ -68,10 +78,22 @@ export function CalendarWeekView({
                 >
                   {day.dayNumber}
                 </p>
-                {eventCount > 0 && (
-                  <p className="mt-0.5 text-xs text-primary-600 font-medium">
-                    {eventCount} transport{eventCount > 1 ? "s" : ""}
-                  </p>
+                {closure.label ? (
+                  <span
+                    className={`mt-0.5 inline-block max-w-full truncate rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                      closure.timeOffTitle
+                        ? "bg-accent-100 text-accent-700"
+                        : "bg-neutral-200 text-neutral-600"
+                    }`}
+                  >
+                    {closure.label}
+                  </span>
+                ) : (
+                  eventCount > 0 && (
+                    <p className="mt-0.5 text-xs text-primary-600 font-medium">
+                      {eventCount} transport{eventCount > 1 ? "s" : ""}
+                    </p>
+                  )
                 )}
               </button>
             );
@@ -111,15 +133,21 @@ export function CalendarWeekView({
             {/* Colonnes des jours */}
             {weekDays.map((day) => {
               const hourEvents = getEventsForDayAndHour(day.date, slot.hour);
+              const closure = getDayClosure(day.date, hours, timeOffs);
+              const cellBg = closure.timeOffTitle
+                ? "bg-accent-50/40"
+                : closure.isClosed
+                  ? "bg-neutral-100/60"
+                  : day.isToday
+                    ? "bg-primary-50/30"
+                    : day.isWeekend
+                      ? "bg-neutral-50/50"
+                      : "";
 
               return (
                 <div
                   key={`${day.date.toISOString()}-${slot.hour}`}
-                  className={`
-                    flex-1 border-l border-b border-card-border p-1
-                    ${day.isToday ? "bg-primary-50/30" : ""}
-                    ${day.isWeekend ? "bg-neutral-50/50" : ""}
-                  `}
+                  className={`flex-1 border-l border-b border-card-border p-1 ${cellBg}`}
                 >
                   {hourEvents.length > 0 && (
                     <CalendarEventList

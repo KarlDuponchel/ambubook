@@ -11,6 +11,9 @@ interface CalendarDayCellProps {
   isWeekend: boolean;
   isPast: boolean;
   events: CalendarEventType[];
+  isClosed?: boolean;
+  isTimeOff?: boolean;
+  closureLabel?: string | null;
   onClick?: () => void;
 }
 
@@ -30,20 +33,31 @@ export function CalendarDayCell({
   isWeekend,
   isPast,
   events,
+  isClosed = false,
+  isTimeOff = false,
+  closureLabel = null,
   onClick,
 }: CalendarDayCellProps) {
   const hasEvents = events.length > 0;
   const predominantStatus = hasEvents ? getPredomnantStatus(events) : null;
 
+  // Fond de la cellule (priorité : aujourd'hui > congé > fermé > défaut)
+  const bgClass = isToday
+    ? "bg-primary-50"
+    : isTimeOff
+      ? "bg-accent-50 hover:bg-accent-100"
+      : isClosed
+        ? "bg-neutral-100 hover:bg-neutral-200"
+        : !isCurrentMonth
+          ? "bg-neutral-50/50"
+          : isWeekend
+            ? "bg-neutral-50/30 hover:bg-neutral-50"
+            : "hover:bg-neutral-50";
+
   return (
     <button
       onClick={onClick}
-      className={`
-        min-h-24 p-2 text-left transition-colors border-b border-r border-card-border
-        ${isToday ? "bg-primary-50" : "hover:bg-neutral-50"}
-        ${!isCurrentMonth ? "bg-neutral-50/50" : ""}
-        ${isWeekend && isCurrentMonth ? "bg-neutral-50/30" : ""}
-      `}
+      className={`min-h-24 p-2 text-left transition-colors border-b border-r border-card-border ${bgClass}`}
     >
       {/* Numéro du jour */}
       <div className="flex items-center justify-between mb-1">
@@ -71,6 +85,19 @@ export function CalendarDayCell({
           </span>
         )}
       </div>
+
+      {/* Congé / jour fermé */}
+      {closureLabel && (
+        <div
+          className={`mb-1 inline-block max-w-full truncate rounded px-1.5 py-0.5 text-[10px] font-medium ${
+            isTimeOff
+              ? "bg-accent-100 text-accent-700"
+              : "bg-neutral-200 text-neutral-600"
+          }`}
+        >
+          {closureLabel}
+        </div>
+      )}
 
       {/* Liste des événements (dots) */}
       {hasEvents && (

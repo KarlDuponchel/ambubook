@@ -120,6 +120,21 @@ export async function POST(request: NextRequest) {
       headers: await headers(),
     });
 
+    // Cloisonnement : un compte professionnel (ambulancier/admin) connecté ne
+    // peut pas créer de demande depuis l'espace patient. Seuls les clients
+    // (CUSTOMER) et les visiteurs non connectés le peuvent ; les ambulanciers
+    // créent leurs demandes via leur tableau de bord.
+    const sessionRole = (session?.user as { role?: string } | undefined)?.role;
+    if (session?.user && sessionRole !== "CUSTOMER") {
+      return NextResponse.json(
+        {
+          error:
+            "Les comptes professionnels ne peuvent pas créer de demande depuis l'espace patient. Utilisez votre tableau de bord.",
+        },
+        { status: 403 }
+      );
+    }
+
     const userId = session?.user?.id || null;
 
     // Créer la demande de transport avec historique
