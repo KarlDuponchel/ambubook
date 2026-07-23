@@ -11,7 +11,7 @@ import {
   Loader2,
   ExternalLink,
 } from "lucide-react";
-import { Card, CardHeader, CardContent, useToast } from "@/components/ui";
+import { useToast } from "@/components/ui";
 import type { RequestAttachment, AttachmentType } from "@/lib/types";
 
 type UserContext = "ambulancier" | "customer";
@@ -212,192 +212,189 @@ export function RequestAttachments({
   };
 
   return (
-    <Card>
-      <CardHeader
-        icon={Paperclip}
-        title="Pièces jointes"
-        action={
-          <button
-            onClick={() => setShowUpload(!showUpload)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-          >
-            <Upload className="h-4 w-4" />
-            Ajouter
-          </button>
-        }
-      />
-      <CardContent noPadding>
-        {/* Formulaire d'upload */}
-        {showUpload && (
-          <div className="p-4 border-b border-card-border bg-neutral-50">
-            <div className="space-y-3">
-              {/* Sélection du fichier */}
-              <div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  onChange={handleFileSelect}
-                  accept="image/*,.pdf"
-                  capture="environment"
-                  className="hidden"
-                  id="file-upload"
-                />
-                <label
-                  htmlFor="file-upload"
-                  className="flex items-center justify-center gap-2 w-full px-4 py-3 border-2 border-dashed border-neutral-300 rounded-lg cursor-pointer hover:border-primary-400 hover:bg-primary-50/50 transition-colors"
-                >
-                  {selectedFile ? (
-                    <span className="text-sm text-neutral-700 truncate">
-                      {selectedFile.name}
+    <div className="bg-surface border border-line rounded-2xl overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-line">
+        <div className="flex items-center gap-2.5">
+          <Paperclip className="h-5 w-5 text-ink-3" />
+          <h2 className="font-bold text-ink">Pièces jointes</h2>
+        </div>
+        <button
+          onClick={() => setShowUpload(!showUpload)}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-brand hover:bg-surface-2 rounded-lg transition-colors"
+        >
+          <Upload className="h-4 w-4" />
+          Ajouter
+        </button>
+      </div>
+
+      {/* Formulaire d'upload */}
+      {showUpload && (
+        <div className="p-4 border-b border-line bg-surface-2">
+          <div className="space-y-3">
+            {/* Sélection du fichier */}
+            <div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={handleFileSelect}
+                accept="image/*,.pdf"
+                capture="environment"
+                className="hidden"
+                id="file-upload"
+              />
+              <label
+                htmlFor="file-upload"
+                className="flex items-center justify-center gap-2 w-full px-4 py-3 border-2 border-dashed border-line rounded-xl cursor-pointer hover:border-brand hover:bg-brand/5 transition-colors"
+              >
+                {selectedFile ? (
+                  <span className="text-sm text-ink truncate">
+                    {selectedFile.name}
+                  </span>
+                ) : (
+                  <>
+                    <Upload className="h-5 w-5 text-ink-3" />
+                    <span className="text-sm text-ink-2">
+                      Cliquer pour sélectionner un fichier
                     </span>
-                  ) : (
-                    <>
-                      <Upload className="h-5 w-5 text-neutral-400" />
-                      <span className="text-sm text-neutral-500">
-                        Cliquer pour sélectionner un fichier
-                      </span>
-                    </>
-                  )}
-                </label>
-                <p className="text-xs text-neutral-500 mt-1">
-                  PDF, JPEG, PNG, WebP - Max 10 Mo
-                </p>
-              </div>
+                  </>
+                )}
+              </label>
+              <p className="text-xs text-ink-3 mt-1">
+                PDF, JPEG, PNG, WebP - Max 10 Mo
+              </p>
+            </div>
 
-              {/* Type de fichier */}
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1">
-                  Type de document
-                </label>
-                <select
-                  value={fileType}
-                  onChange={(e) => setFileType(e.target.value as AttachmentType)}
-                  className="w-full px-3 py-2 border border-input-border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
-                >
-                  {typeOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            {/* Type de fichier */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wide text-ink-3 mb-1.5">
+                Type de document
+              </label>
+              <select
+                value={fileType}
+                onChange={(e) => setFileType(e.target.value as AttachmentType)}
+                className="w-full px-3 py-2.5 border border-line rounded-xl bg-surface text-ink focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 text-sm transition-colors"
+              >
+                {typeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-              {/* Erreur */}
-              {error && (
-                <p className="text-sm text-danger-600">{error}</p>
-              )}
+            {/* Erreur */}
+            {error && <p className="text-sm text-rouge">{error}</p>}
 
-              {/* Boutons */}
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => {
-                    setShowUpload(false);
-                    setSelectedFile(null);
-                    setError(null);
-                    if (fileInputRef.current) {
-                      fileInputRef.current.value = "";
-                    }
-                  }}
-                  className="px-3 py-1.5 text-sm text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
-                >
-                  Annuler
-                </button>
-                <button
-                  onClick={handleUpload}
-                  disabled={!selectedFile || isUploading}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
-                >
-                  {isUploading ? (
-                    <>
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      Upload...
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-3.5 w-3.5" />
-                      Envoyer
-                    </>
-                  )}
-                </button>
-              </div>
+            {/* Boutons */}
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setShowUpload(false);
+                  setSelectedFile(null);
+                  setError(null);
+                  if (fileInputRef.current) {
+                    fileInputRef.current.value = "";
+                  }
+                }}
+                className="px-3 py-1.5 text-sm font-semibold text-ink-2 hover:bg-surface-3 rounded-lg transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleUpload}
+                disabled={!selectedFile || isUploading}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold bg-brand text-white rounded-lg hover:bg-brand-ink disabled:opacity-50 transition-colors"
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    Upload...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-3.5 w-3.5" />
+                    Envoyer
+                  </>
+                )}
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Liste des pièces jointes */}
-        {attachments.length === 0 ? (
-          <div className="p-6 text-center text-neutral-500 text-sm">
-            Aucune pièce jointe
-          </div>
-        ) : (
-          <div className="divide-y divide-card-border">
-            {attachments.map((attachment) => {
-              const FileIcon = getFileIcon(attachment.mimeType);
-              const isDeleting = deletingId === attachment.id;
-              const canDeleteThis = canDeleteAttachment(attachment);
-              const isExternalUrl = !attachment.fileUrl.startsWith("data:");
+      {/* Liste des pièces jointes */}
+      {attachments.length === 0 ? (
+        <div className="p-6 text-center text-ink-3 text-sm">
+          Aucune pièce jointe
+        </div>
+      ) : (
+        <div className="divide-y divide-line">
+          {attachments.map((attachment) => {
+            const FileIcon = getFileIcon(attachment.mimeType);
+            const isDeleting = deletingId === attachment.id;
+            const canDeleteThis = canDeleteAttachment(attachment);
+            const isExternalUrl = !attachment.fileUrl.startsWith("data:");
 
-              return (
-                <div
-                  key={attachment.id}
-                  className="p-4 flex items-center gap-3 hover:bg-neutral-50 transition-colors"
-                >
-                  {/* Icône */}
-                  <div className="shrink-0 p-2 rounded-lg bg-neutral-100">
-                    <FileIcon className="h-5 w-5 text-neutral-600" />
+            return (
+              <div
+                key={attachment.id}
+                className="p-4 flex items-center gap-3 hover:bg-surface-2 transition-colors"
+              >
+                {/* Icône */}
+                <div className="shrink-0 grid place-items-center w-10 h-10 rounded-xl bg-surface-2 text-ink-2">
+                  <FileIcon className="h-5 w-5" />
+                </div>
+
+                {/* Infos */}
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-sm text-ink truncate">
+                    {attachment.fileName}
+                  </p>
+                  <div className="flex items-center gap-2 text-xs text-ink-3 mt-0.5 flex-wrap">
+                    <span className="px-1.5 py-0.5 bg-surface-2 border border-line rounded">
+                      {ATTACHMENT_TYPE_LABELS[attachment.fileType]}
+                    </span>
+                    <span>{formatFileSize(attachment.fileSizeKb)}</span>
+                    <span>par {attachment.uploadedBy?.name || "Visiteur"}</span>
                   </div>
+                  <p className="text-xs text-ink-3 mt-0.5">
+                    {formatDateTime(attachment.createdAt)}
+                  </p>
+                </div>
 
-                  {/* Infos */}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm text-neutral-900 truncate">
-                      {attachment.fileName}
-                    </p>
-                    <div className="flex items-center gap-2 text-xs text-neutral-500 mt-0.5 flex-wrap">
-                      <span className="px-1.5 py-0.5 bg-neutral-100 rounded">
-                        {ATTACHMENT_TYPE_LABELS[attachment.fileType]}
-                      </span>
-                      <span>{formatFileSize(attachment.fileSizeKb)}</span>
-                      <span>par {attachment.uploadedBy?.name || "Visiteur"}</span>
-                    </div>
-                    <p className="text-xs text-neutral-400 mt-0.5">
-                      {formatDateTime(attachment.createdAt)}
-                    </p>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-1 shrink-0">
+                {/* Actions */}
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    onClick={() => handleDownload(attachment)}
+                    className="p-2 text-ink-3 hover:text-brand hover:bg-surface-2 rounded-lg transition-colors"
+                    title={isExternalUrl ? "Ouvrir" : "Télécharger"}
+                  >
+                    {isExternalUrl ? (
+                      <ExternalLink className="h-4 w-4" />
+                    ) : (
+                      <Download className="h-4 w-4" />
+                    )}
+                  </button>
+                  {canDeleteThis && (
                     <button
-                      onClick={() => handleDownload(attachment)}
-                      className="p-2 text-neutral-500 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                      title={isExternalUrl ? "Ouvrir" : "Télécharger"}
+                      onClick={() => handleDelete(attachment.id)}
+                      disabled={isDeleting}
+                      className="p-2 text-ink-3 hover:text-rouge hover:bg-surface-2 rounded-lg transition-colors disabled:opacity-50"
+                      title="Supprimer"
                     >
-                      {isExternalUrl ? (
-                        <ExternalLink className="h-4 w-4" />
+                      {isDeleting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        <Download className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                       )}
                     </button>
-                    {canDeleteThis && (
-                      <button
-                        onClick={() => handleDelete(attachment.id)}
-                        disabled={isDeleting}
-                        className="p-2 text-neutral-500 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors disabled:opacity-50"
-                        title="Supprimer"
-                      >
-                        {isDeleting ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </button>
-                    )}
-                  </div>
+                  )}
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }

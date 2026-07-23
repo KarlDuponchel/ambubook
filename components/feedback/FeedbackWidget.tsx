@@ -25,10 +25,9 @@ export function FeedbackWidget({ position = "bottom-right" }: FeedbackWidgetProp
         className={`
           fixed bottom-4 sm:bottom-6 ${positionClasses[position]} z-40
           flex items-center gap-2 px-4 py-3
-          bg-primary-600 text-white
-          rounded-full shadow-lg shadow-primary-600/25
-          hover:bg-primary-700 hover:shadow-xl hover:shadow-primary-600/30
-          hover:scale-105
+          bg-brand text-white
+          rounded-full shadow-soft
+          hover:bg-brand-ink hover:scale-105
           active:scale-95
           transition-all duration-200
           group

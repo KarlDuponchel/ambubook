@@ -19,7 +19,7 @@ export default function MonCompteLayout({
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-neutral-50 pt-24 pb-16">
+      <main className="min-h-screen bg-page pt-24 pb-16">
         <div className="max-w-3xl mx-auto px-4">
           {children}
         </div>

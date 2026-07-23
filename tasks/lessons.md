@@ -108,3 +108,34 @@ Et traduire le message d'erreur 429 (Better Auth le renvoie en anglais) côté c
 **Cause** : Le seul garde-fou `isActive` était côté client sur la page de connexion (`check-status` → `signOut`). Le middleware `proxy.ts` ne vérifiait QUE session + rôle, pas `isActive`. Avec l'auto-connexion après vérification email, l'utilisateur obtenait une session sans passer par la page de connexion, contournant le garde-fou.
 **Solution** : Contrôle `isActive` déplacé/ajouté dans le middleware (barrière serveur) : `AMBULANCIER` + `isActive === false` → redirection vers `/dashboard/connexion?pending=1` (+ bannière et `signOut` de la session résiduelle).
 **Prévention** : Les contrôles d'accès (auth, rôle, statut de compte) doivent être appliqués côté SERVEUR (middleware/route), jamais uniquement côté client. Un check client-side sur la page de connexion ne protège pas la navigation directe ni les sessions obtenues autrement (auto sign-in, OAuth, etc.).
+
+### [2026-07-23] - Carrousels mobiles trop larges, collés aux bords (refonte landing)
+**Contexte** : Refonte visuelle des sections « Nos services » (ServicesSection) et « Pourquoi nous choisir » (Reassurance) : carrousel horizontal `flex overflow-x-auto snap` sur mobile, grille/liste sur desktop.
+**Erreur** : En mobile, les cartes débordaient largement de l'écran (~1131px sur 390px, texte non wrappé) et la première carte était collée au bord gauche sans padding. Le titre/paragraphe de Reassurance étaient aussi coupés à droite.
+**Cause** : Trois pièges CSS distincts :
+1. `min-w-[82%]` sur des items `shrink-0` ne fixe qu'un MINIMUM. Sans largeur/`flex-basis` définie, l'item prend sa taille `max-content` (le texte ne peut pas wrapper) → carte géante.
+2. Le carrousel de Reassurance est imbriqué dans un `grid`. Un item de grille a `min-width: auto` par défaut → la piste s'élargit à la taille `min-content` du contenu, étirant la colonne au-delà du viewport (masqué par `overflow-hidden` de la section).
+3. `snap-mandatory` aligne le bord du premier item sur le bord du scrollport, en défilant PAR-DESSUS le `padding-left` → première carte collée au bord.
+**Solution** :
+1. Remplacer `min-w-[X%]` par une largeur définie `w-[X%]` (+ reset `md:w-auto`/`lg:w-auto`), qui agit comme flex-basis et donne une boîte finie où le texte wrappe.
+2. Ajouter `min-w-0` sur la cellule de grille contenant le carrousel.
+3. Ajouter `scroll-pl-4` (= au `px-4` du carrousel, + reset `md:scroll-pl-0`) pour que le snap respecte le padding.
+**Prévention** : Pour un carrousel flex : utiliser `w-[X%]` et non `min-w-[X%]` sur les items `shrink-0`. Ajouter `min-w-0` à tout parent flex/grid d'un scroller pour éviter l'expansion `min-content`. Toujours accompagner `snap-mandatory` + padding interne d'un `scroll-p*` correspondant. Vérifier visuellement en viewport réel (Playwright + mesure `scrollWidth` vs `clientWidth`), pas seulement à l'analyse statique.
+
+### [2026-07-23] - Refonte visuelle espace patient/auth + mode sombre
+**Contexte** : Migration de l'espace patient (mon-compte, profil, paramètres, mes-transports liste+détail), du suivi public et de l'auth patient depuis l'ancien système "Medical Trust Blue" (primary-*/neutral-*) vers le système éditorial de la landing (tokens ink/brand/teal/surface/line + .serif), avec ajout d'un mode sombre complet.
+**Points clés / pièges** :
+- **Composants ui partagés** : `components/ui/*` (Button, Card, Modal, StatusBadge…) sont utilisés par le dashboard pro ET l'admin. Ne PAS les migrer globalement (régressions hors périmètre). À la place, restyler les pages front-office en markup éditorial inline (comme la landing) et n'adapter que les composants réellement front-facing (`notifications/*`, `demandes/*`) en préservant leurs variantes/contextes.
+- **Mode sombre FOUC** : la classe `.dark`/`.light` doit être posée sur `<html>` AVANT le 1er paint via un script inline synchrone dans `<head>` (app/layout.tsx), aligné avec le `ThemeProvider` (localStorage + prefers-color-scheme). Sans ça, flash de thème au chargement. `<html>` ne doit plus figer `light`.
+- **Tokens theme-aware = dark gratuit** : en utilisant systématiquement les utilitaires sémantiques (text-ink, bg-surface, border-line, bg-brand, text-vert/ambre/rouge/violet…), les deux thèmes fonctionnent sans styles dédiés. Pour les teintes de statut avec fond léger : `color-mix(in srgb, var(--token) 13%, var(--surface))` (inline style) ou opacité `/10`.
+- **Vérification** : pages publiques (auth, suivi) testées via Playwright en clair ET sombre, viewports 390/900/1280, `scrollWidth == clientWidth`. Pages authentifiées (redirigées 307 sans session, pas de compte CUSTOMER dans le seed) validées par compilation (pas de 500), diagnostics TS vides, et réutilisation des mêmes primitives éditoriales déjà validées. Prévoir un compte de test CUSTOMER vérifié pour un futur passage visuel complet.
+**Prévention** : Pour toute refonte transverse, cartographier d'abord quels composants sont partagés entre espaces (front/dashboard/admin) avant de décider migration vs restylage inline. Toujours livrer le mode sombre via tokens sémantiques + script anti-FOUC.
+
+### [2026-07-23] - Extension refonte : recherche, page ambulance, module de réservation
+**Contexte** : Suite de la refonte éditoriale — /recherche (+ ses composants + `components/ui/Autocomplete`), page publique `/[slug]` (CompanyPageClient), et module de réservation `components/booking/*` (modale + 4 étapes).
+**Points clés** :
+- **Champs de formulaire partagés (Input/Checkbox/Textarea)** : plutôt que de les migrer (utilisés partout), créer un petit kit local `components/booking/fields.tsx` (`Field`, `FieldArea`, `CheckRow`) en tokens éditoriaux, et l'utiliser dans les étapes. Zéro impact sur les autres espaces.
+- **Autocomplete** : composant `ui/` mais front-facing uniquement (Hero + SearchBar) → OK de le restyler (vérifier le périmètre d'usage avec un grep avant).
+- **Backdrop de modale theme-safe** : utiliser `bg-black/50` (et non `bg-ink/40`, qui devient un voile clair en mode sombre car `--ink` s'inverse). Vaut pour BookingModal et ChangePasswordModal.
+- **Case à cocher peer** : le SVG de coche n'est pas frère de l'input → utiliser la variante arbitraire `peer-checked:[&>svg]:opacity-100` sur la boîte (sibling de l'input) pour révéler la coche.
+- **Parallélisation** : /recherche et /[slug] délégués à des forks (héritant du contexte : cheatsheet tokens + patterns), pendant le traitement du booking en direct. Vérif Playwright clair+sombre 390/1280 → overflow=0 partout.

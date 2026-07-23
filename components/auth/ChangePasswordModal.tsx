@@ -90,6 +90,11 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }: ChangePasswo
 
   if (!isOpen) return null;
 
+  const fieldClass =
+    "w-full px-4 py-2.5 pr-12 border border-line rounded-xl text-[15px] text-ink bg-surface placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-colors";
+  const eyeBtnClass =
+    "absolute right-3 top-1/2 -translate-y-1/2 p-1 text-ink-3 hover:text-ink transition-colors";
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
@@ -99,22 +104,22 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }: ChangePasswo
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md mx-4 bg-white rounded-xl shadow-xl">
+      <div className="relative w-full max-w-md mx-4 bg-surface border border-line rounded-2xl shadow-soft">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-line">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary-100 rounded-lg">
-              <Lock className="h-5 w-5 text-primary-600" />
+            <div className="grid place-items-center w-10 h-10 bg-brand/12 text-brand rounded-xl">
+              <Lock className="h-5 w-5" />
             </div>
-            <h2 className="text-lg font-semibold text-neutral-900">
+            <h2 className="serif text-lg text-ink">
               Changer le mot de passe
             </h2>
           </div>
           <button
             onClick={handleClose}
-            className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+            className="grid place-items-center w-9 h-9 text-ink-3 hover:bg-surface-2 hover:text-ink rounded-lg transition-colors"
           >
-            <X className="h-5 w-5 text-neutral-500" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -122,9 +127,9 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }: ChangePasswo
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Message de succès */}
           {success && (
-            <div className="flex items-center gap-3 p-4 bg-green-50 text-green-700 rounded-lg">
+            <div className="flex items-center gap-3 p-4 bg-vert/10 border border-vert/25 text-vert rounded-xl">
               <CheckCircle className="h-5 w-5 shrink-0" />
-              <p className="text-sm font-medium">
+              <p className="text-sm font-semibold">
                 Mot de passe modifié avec succès !
               </p>
             </div>
@@ -132,7 +137,7 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }: ChangePasswo
 
           {/* Message d'erreur */}
           {error && (
-            <div className="flex items-center gap-3 p-4 bg-red-50 text-red-700 rounded-lg">
+            <div className="flex items-center gap-3 p-4 bg-rouge/10 border border-rouge/25 text-rouge rounded-xl">
               <AlertCircle className="h-5 w-5 shrink-0" />
               <p className="text-sm">{error}</p>
             </div>
@@ -142,7 +147,7 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }: ChangePasswo
             <>
               {/* Mot de passe actuel */}
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wide text-ink-3 mb-1.5">
                   Mot de passe actuel
                 </label>
                 <div className="relative">
@@ -151,13 +156,13 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }: ChangePasswo
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     required
-                    className="w-full px-4 py-2.5 pr-12 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className={fieldClass}
                     placeholder="Entrez votre mot de passe actuel"
                   />
                   <button
                     type="button"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-600"
+                    className={eyeBtnClass}
                   >
                     {showCurrentPassword ? (
                       <EyeOff className="h-5 w-5" />
@@ -170,7 +175,7 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }: ChangePasswo
 
               {/* Nouveau mot de passe */}
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wide text-ink-3 mb-1.5">
                   Nouveau mot de passe
                 </label>
                 <div className="relative">
@@ -180,13 +185,13 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }: ChangePasswo
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
                     minLength={8}
-                    className="w-full px-4 py-2.5 pr-12 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className={fieldClass}
                     placeholder="8 caractères minimum"
                   />
                   <button
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-600"
+                    className={eyeBtnClass}
                   >
                     {showNewPassword ? (
                       <EyeOff className="h-5 w-5" />
@@ -199,7 +204,7 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }: ChangePasswo
 
               {/* Confirmer le mot de passe */}
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wide text-ink-3 mb-1.5">
                   Confirmer le nouveau mot de passe
                 </label>
                 <div className="relative">
@@ -208,13 +213,13 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }: ChangePasswo
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
-                    className="w-full px-4 py-2.5 pr-12 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className={fieldClass}
                     placeholder="Confirmez votre nouveau mot de passe"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-600"
+                    className={eyeBtnClass}
                   >
                     {showConfirmPassword ? (
                       <EyeOff className="h-5 w-5" />
@@ -230,12 +235,12 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }: ChangePasswo
 
         {/* Footer */}
         {!success && (
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-neutral-200">
+          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-line">
             <button
               type="button"
               onClick={handleClose}
               disabled={isLoading}
-              className="px-4 py-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors disabled:opacity-50"
+              className="px-4 py-2.5 font-bold text-ink bg-surface-2 border border-line rounded-xl hover:border-brand transition-colors disabled:opacity-50"
             >
               Annuler
             </button>
@@ -243,7 +248,7 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }: ChangePasswo
               type="submit"
               onClick={handleSubmit}
               disabled={isLoading || !currentPassword || !newPassword || !confirmPassword}
-              className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2.5 bg-brand text-white font-bold rounded-xl hover:bg-brand-ink transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>

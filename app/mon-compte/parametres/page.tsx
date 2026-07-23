@@ -11,10 +11,8 @@ import {
   Megaphone,
   Loader2,
   ArrowLeft,
-  Settings,
   Download,
   Trash2,
-  Shield,
 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { signOut } from "@/lib/auth-client";
@@ -26,6 +24,46 @@ interface NotificationPreferences {
   transportReminders: boolean;
   marketing: boolean;
 }
+
+/** Ligne de réglage avec interrupteur éditorial. */
+function ToggleRow({
+  icon: Icon,
+  title,
+  description,
+  checked,
+  disabled,
+  onChange,
+}: {
+  icon?: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+  checked: boolean;
+  disabled?: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <div className="flex items-center gap-3 px-4 py-4 border-b border-line last:border-b-0">
+      {Icon && <Icon className="h-5 w-5 text-ink-2 shrink-0" />}
+      <div className="flex-1 min-w-0">
+        <p className="font-bold text-sm text-ink">{title}</p>
+        <p className="text-[13px] text-ink-2">{description}</p>
+      </div>
+      <label className="relative inline-flex items-center cursor-pointer shrink-0">
+        <input
+          type="checkbox"
+          className="sr-only peer"
+          checked={checked}
+          disabled={disabled}
+          onChange={(e) => onChange(e.target.checked)}
+        />
+        <div className="w-12 h-7 bg-surface-3 peer-focus:ring-4 peer-focus:ring-brand/20 rounded-full peer peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-6 after:w-6 after:shadow-sm after:transition-all peer-checked:bg-brand peer-disabled:opacity-50 transition-colors" />
+      </label>
+    </div>
+  );
+}
+
+const sectionLabelClass =
+  "text-xs font-extrabold uppercase tracking-wider text-ink-3 mb-3";
 
 export default function ParametresClientPage() {
   const router = useRouter();
@@ -159,240 +197,166 @@ export default function ParametresClientPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-100">
-        <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-brand" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div>
         <Link
           href="/mon-compte"
-          className="p-2 -ml-2 hover:bg-neutral-100 rounded-lg transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-2 hover:text-ink transition-colors mb-3"
         >
-          <ArrowLeft className="h-5 w-5 text-neutral-600" />
+          <ArrowLeft className="h-4 w-4" /> Mon compte
         </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900">Paramètres</h1>
-          <p className="text-neutral-600">Gérez vos préférences de notification</p>
-        </div>
+        <h1 className="serif text-3xl text-ink">Paramètres</h1>
+        <p className="text-ink-2 mt-1">Gérez vos préférences et vos données</p>
       </div>
 
       {/* Canaux de notification */}
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-neutral-100 flex items-center gap-3">
-          <Settings className="h-5 w-5 text-neutral-400" />
-          <h2 className="font-semibold text-neutral-900">Canaux de notification</h2>
-        </div>
-        <div className="p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Mail className="h-5 w-5 text-neutral-400" />
-              <div>
-                <p className="font-medium text-neutral-900">Notifications par email</p>
-                <p className="text-sm text-neutral-500">
-                  Recevez les notifications par email
-                </p>
-              </div>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={notifications.emailEnabled}
-                onChange={(e) => updateNotification("emailEnabled", e.target.checked)}
-                disabled={saving}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600 peer-disabled:opacity-50" />
-            </label>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <MessageSquare className="h-5 w-5 text-neutral-400" />
-              <div>
-                <p className="font-medium text-neutral-900">Notifications SMS</p>
-                <p className="text-sm text-neutral-500">
-                  Recevez les notifications par SMS
-                </p>
-              </div>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={notifications.smsEnabled}
-                onChange={(e) => updateNotification("smsEnabled", e.target.checked)}
-                disabled={saving}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600 peer-disabled:opacity-50" />
-            </label>
-          </div>
+      <div>
+        <div className={sectionLabelClass}>Canaux de notification</div>
+        <div className="bg-surface border border-line rounded-2xl overflow-hidden">
+          <ToggleRow
+            icon={Mail}
+            title="Notifications par email"
+            description="Recevez les notifications par email"
+            checked={notifications.emailEnabled}
+            disabled={saving}
+            onChange={(v) => updateNotification("emailEnabled", v)}
+          />
+          <ToggleRow
+            icon={MessageSquare}
+            title="Notifications SMS"
+            description="Recevez les notifications par SMS"
+            checked={notifications.smsEnabled}
+            disabled={saving}
+            onChange={(v) => updateNotification("smsEnabled", v)}
+          />
         </div>
       </div>
 
       {/* Types de notifications */}
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-neutral-100 flex items-center gap-3">
-          <Bell className="h-5 w-5 text-neutral-400" />
-          <h2 className="font-semibold text-neutral-900">Types de notifications</h2>
-        </div>
-        <div className="p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Bell className="h-5 w-5 text-neutral-400" />
-              <div>
-                <p className="font-medium text-neutral-900">Mises à jour des transports</p>
-                <p className="text-sm text-neutral-500">
-                  Confirmations, refus, contre-propositions
-                </p>
-              </div>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={notifications.transportUpdates}
-                onChange={(e) => updateNotification("transportUpdates", e.target.checked)}
-                disabled={saving}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600 peer-disabled:opacity-50" />
-            </label>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-neutral-400" />
-              <div>
-                <p className="font-medium text-neutral-900">Rappels de transport</p>
-                <p className="text-sm text-neutral-500">
-                  Rappels la veille de vos transports
-                </p>
-              </div>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={notifications.transportReminders}
-                onChange={(e) => updateNotification("transportReminders", e.target.checked)}
-                disabled={saving}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600 peer-disabled:opacity-50" />
-            </label>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Megaphone className="h-5 w-5 text-neutral-400" />
-              <div>
-                <p className="font-medium text-neutral-900">Newsletter AmbuBook</p>
-                <p className="text-sm text-neutral-500">
-                  Actualités et conseils santé
-                </p>
-              </div>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={notifications.marketing}
-                onChange={(e) => updateNotification("marketing", e.target.checked)}
-                disabled={saving}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600 peer-disabled:opacity-50" />
-            </label>
-          </div>
+      <div>
+        <div className={sectionLabelClass}>Types de notifications</div>
+        <div className="bg-surface border border-line rounded-2xl overflow-hidden">
+          <ToggleRow
+            icon={Bell}
+            title="Mises à jour des transports"
+            description="Confirmations, refus, contre-propositions"
+            checked={notifications.transportUpdates}
+            disabled={saving}
+            onChange={(v) => updateNotification("transportUpdates", v)}
+          />
+          <ToggleRow
+            icon={Calendar}
+            title="Rappels de transport"
+            description="Rappels la veille de vos transports"
+            checked={notifications.transportReminders}
+            disabled={saving}
+            onChange={(v) => updateNotification("transportReminders", v)}
+          />
+          <ToggleRow
+            icon={Megaphone}
+            title="Newsletter AmbuBook"
+            description="Actualités et conseils santé"
+            checked={notifications.marketing}
+            disabled={saving}
+            onChange={(v) => updateNotification("marketing", v)}
+          />
         </div>
       </div>
 
       {/* Donnees personnelles (RGPD) */}
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-neutral-100 flex items-center gap-3">
-          <Shield className="h-5 w-5 text-neutral-400" />
-          <h2 className="font-semibold text-neutral-900">Vos donnees personnelles</h2>
-        </div>
-        <div className="p-6 space-y-6">
+      <div>
+        <div className={sectionLabelClass}>Vos données personnelles</div>
+        <div className="bg-surface border border-line rounded-2xl p-5">
           {/* Export des donnees */}
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <Download className="h-5 w-5 text-neutral-400 mt-0.5" />
-              <div>
-                <p className="font-medium text-neutral-900">Exporter mes donnees</p>
-                <p className="text-sm text-neutral-500">
-                  Telechargez une copie de toutes vos donnees personnelles (profil, adresses, transports) au format JSON.
-                </p>
-              </div>
+          <div className="flex items-start justify-between gap-4 pb-5 border-b border-line">
+            <div>
+              <p className="font-bold text-sm text-ink">Exporter mes données</p>
+              <p className="text-[13px] text-ink-2">
+                Téléchargez une copie de toutes vos données personnelles (profil, adresses, transports) au format JSON (RGPD).
+              </p>
             </div>
             <button
               onClick={exportData}
               disabled={exporting}
-              className="shrink-0 px-4 py-2 text-sm font-medium text-primary-600 border border-primary-200 rounded-lg hover:bg-primary-50 transition-colors disabled:opacity-50"
+              className="shrink-0 inline-flex items-center gap-2 px-3.5 py-2.5 text-[13px] font-bold text-ink bg-surface-2 border border-line rounded-xl hover:border-brand transition-colors disabled:opacity-50 whitespace-nowrap"
             >
               {exporting ? (
-                <span className="flex items-center gap-2">
+                <>
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Export...
-                </span>
+                </>
               ) : (
-                "Exporter"
+                <>
+                  <Download className="h-4 w-4" />
+                  Exporter
+                </>
               )}
             </button>
           </div>
 
           {/* Suppression du compte */}
-          <div className="pt-4 border-t border-neutral-100">
-            <div className="flex items-start gap-3">
-              <Trash2 className="h-5 w-5 text-red-400 mt-0.5" />
-              <div className="flex-1">
-                <p className="font-medium text-neutral-900">Supprimer mon compte</p>
-                <p className="text-sm text-neutral-500 mt-1">
-                  Vos données personnelles seront définitivement anonymisées. L&apos;historique
-                  des transports est conservé sous forme anonymisée pour les obligations légales
-                  de l&apos;ambulancier. Cette action est irréversible.
+          <div className="pt-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="font-bold text-sm text-rouge">Supprimer mon compte</p>
+                <p className="text-[13px] text-ink-2 mt-0.5">
+                  Action définitive et irréversible. Vos données seront anonymisées.
                 </p>
+              </div>
+              {!confirmingDelete && (
+                <button
+                  type="button"
+                  onClick={() => setConfirmingDelete(true)}
+                  className="shrink-0 px-3.5 py-2.5 text-[13px] font-bold text-rouge rounded-xl border transition-colors whitespace-nowrap bg-rouge/10 border-rouge/30 hover:bg-rouge/15"
+                >
+                  Supprimer
+                </button>
+              )}
+            </div>
 
-                {!confirmingDelete ? (
+            {confirmingDelete && (
+              <div className="mt-4 bg-rouge/8 border border-rouge/25 rounded-xl p-4 animate-in fade-in duration-200">
+                <div className="flex items-start gap-2.5 mb-3">
+                  <Trash2 className="h-5 w-5 text-rouge mt-0.5 shrink-0" />
+                  <p className="text-[13px] text-ink-2 leading-relaxed">
+                    <strong className="text-ink">Confirmer la suppression définitive ?</strong>{" "}
+                    Vos données personnelles seront anonymisées. L&apos;historique des transports
+                    est conservé sous forme anonymisée pour les obligations légales. Cette action
+                    est irréversible.
+                  </p>
+                </div>
+                <div className="flex gap-3">
                   <button
                     type="button"
-                    onClick={() => setConfirmingDelete(true)}
-                    className="mt-3 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+                    onClick={() => setConfirmingDelete(false)}
+                    disabled={deleting}
+                    className="flex-1 px-4 py-2.5 text-sm font-bold text-ink bg-surface border border-line rounded-xl hover:border-brand transition-colors disabled:opacity-50"
                   >
-                    <Trash2 className="h-4 w-4" />
-                    Supprimer mon compte
+                    Annuler
                   </button>
-                ) : (
-                  <div className="mt-3 flex flex-wrap items-center gap-3">
-                    <span className="text-sm font-medium text-red-600">
-                      Confirmer la suppression définitive ?
-                    </span>
-                    <button
-                      type="button"
-                      onClick={deleteAccount}
-                      disabled={deleting}
-                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
-                    >
-                      {deleting ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-4 w-4" />
-                      )}
-                      Oui, supprimer
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setConfirmingDelete(false)}
-                      disabled={deleting}
-                      className="px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
-                    >
-                      Annuler
-                    </button>
-                  </div>
-                )}
+                  <button
+                    type="button"
+                    onClick={deleteAccount}
+                    disabled={deleting}
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-rouge rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity"
+                  >
+                    {deleting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                    Supprimer définitivement
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

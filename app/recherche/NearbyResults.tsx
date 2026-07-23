@@ -61,13 +61,13 @@ export function NearbyResults() {
   if (geoState === "loading") {
     return (
       <div className="text-center py-12">
-        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary-50 flex items-center justify-center">
-          <Navigation className="w-10 h-10 text-primary-500 animate-pulse" />
+        <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-brand/10 flex items-center justify-center">
+          <Navigation className="w-10 h-10 text-brand animate-pulse" />
         </div>
-        <h2 className="text-xl font-semibold text-neutral-900 mb-2">
+        <h2 className="serif text-xl text-ink mb-2">
           Localisation en cours...
         </h2>
-        <p className="text-neutral-600 max-w-md mx-auto">
+        <p className="text-ink-2 max-w-md mx-auto">
           Autorisez l&apos;accès à votre position pour voir les ambulanciers près de chez vous.
         </p>
       </div>
@@ -78,9 +78,9 @@ export function NearbyResults() {
   if (geoState === "denied" || geoState === "unsupported" || geoState === "error") {
     return (
       <div className="text-center py-12">
-        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary-50 flex items-center justify-center">
+        <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-brand/10 flex items-center justify-center">
           <svg
-            className="w-10 h-10 text-primary-500"
+            className="w-10 h-10 text-brand"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -93,10 +93,10 @@ export function NearbyResults() {
             />
           </svg>
         </div>
-        <h2 className="text-xl font-semibold text-neutral-900 mb-2">
+        <h2 className="serif text-xl text-ink mb-2">
           Recherchez un ambulancier
         </h2>
-        <p className="text-neutral-600 max-w-md mx-auto">
+        <p className="text-ink-2 max-w-md mx-auto">
           Entrez une ville pour trouver les ambulanciers à proximité, ou recherchez
           directement par nom d&apos;entreprise.
         </p>
@@ -108,18 +108,18 @@ export function NearbyResults() {
   if (loadingResults) {
     return (
       <div className="space-y-4">
-        <div className="flex items-center gap-2 text-neutral-600">
-          <Navigation className="h-5 w-5 animate-spin" />
+        <div className="flex items-center gap-2 text-ink-2">
+          <Navigation className="h-5 w-5 animate-spin text-brand" />
           <span>Recherche des ambulanciers à proximité...</span>
         </div>
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="p-6 bg-white rounded-xl border border-neutral-200 animate-pulse"
+            className="p-6 bg-surface rounded-2xl border border-line animate-pulse"
           >
-            <div className="h-6 w-48 bg-neutral-200 rounded mb-3" />
-            <div className="h-4 w-64 bg-neutral-100 rounded mb-2" />
-            <div className="h-4 w-32 bg-neutral-100 rounded" />
+            <div className="h-6 w-48 bg-surface-3 rounded mb-3" />
+            <div className="h-4 w-64 bg-surface-2 rounded mb-2" />
+            <div className="h-4 w-32 bg-surface-2 rounded" />
           </div>
         ))}
       </div>
@@ -130,13 +130,13 @@ export function NearbyResults() {
   if (companies.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-neutral-100 flex items-center justify-center">
-          <MapPin className="w-10 h-10 text-neutral-400" />
+        <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-surface-2 flex items-center justify-center">
+          <MapPin className="w-10 h-10 text-ink-3" />
         </div>
-        <h2 className="text-xl font-semibold text-neutral-900 mb-2">
+        <h2 className="serif text-xl text-ink mb-2">
           Aucun ambulancier à proximité
         </h2>
-        <p className="text-neutral-600 max-w-md mx-auto">
+        <p className="text-ink-2 max-w-md mx-auto">
           Aucun ambulancier n&apos;est disponible dans votre zone. Essayez de rechercher par ville ou région.
         </p>
       </div>
@@ -146,8 +146,8 @@ export function NearbyResults() {
   // Afficher les résultats avec CompanyCard
   return (
     <div>
-      <p className="text-neutral-600 mb-6 flex items-center gap-2">
-        <MapPin className="h-5 w-5 text-primary-500" />
+      <p className="text-ink-2 mb-6 flex items-center gap-2">
+        <MapPin className="h-5 w-5 text-brand" />
         <span>
           <span className="font-medium">{companies.length}</span> ambulancier
           {companies.length > 1 ? "s" : ""} près de vous

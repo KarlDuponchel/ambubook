@@ -10,21 +10,18 @@ import {
   AlertCircle,
   Ambulance,
   Car,
-  ChevronRight,
   Calendar,
+  Loader2,
+  Search,
+  Inbox,
+  Route,
+  ArrowRight,
+  Repeat,
 } from "lucide-react";
 import { Header, Footer } from "@/components/landing";
-import {
-  Container,
-  Card,
-  CardContent,
-  EmptyState,
-  LoadingSpinner,
-  StatusBadge,
-  useToast,
-} from "@/components/ui";
+import { Container, useToast } from "@/components/ui";
 import { useSession } from "@/lib/auth-client";
-import type { RequestStatus, TransportType, StatusConfig } from "@/lib/types";
+import type { RequestStatus, TransportType } from "@/lib/types";
 
 interface CustomerTransport {
   id: string;
@@ -47,55 +44,17 @@ interface CustomerTransport {
   };
 }
 
-const statusConfig: Record<RequestStatus, Required<StatusConfig>> = {
-  PENDING: {
-    label: "En attente",
-    color: "text-warning-600",
-    bgColor: "bg-warning-50",
-    icon: Clock,
-  },
-  ACCEPTED: {
-    label: "Acceptée",
-    color: "text-success-600",
-    bgColor: "bg-success-50",
-    icon: CheckCircle,
-  },
-  REFUSED: {
-    label: "Refusée",
-    color: "text-danger-600",
-    bgColor: "bg-danger-50",
-    icon: XCircle,
-  },
-  COUNTER_PROPOSAL: {
-    label: "Contre-proposition",
-    color: "text-accent-600",
-    bgColor: "bg-accent-50",
-    icon: AlertCircle,
-  },
-  CANCELLED: {
-    label: "Annulée",
-    color: "text-neutral-600",
-    bgColor: "bg-neutral-100",
-    icon: XCircle,
-  },
-  COMPLETED: {
-    label: "Terminée",
-    color: "text-primary-600",
-    bgColor: "bg-primary-50",
-    icon: CheckCircle,
-  },
-};
-
-const statusToBadgeVariant: Record<
+// Couleur (token éditorial) + libellé + icône par statut.
+const statusConfig: Record<
   RequestStatus,
-  "pending" | "accepted" | "refused" | "counter_proposal" | "cancelled" | "completed"
+  { label: string; color: string; icon: typeof Clock }
 > = {
-  PENDING: "pending",
-  ACCEPTED: "accepted",
-  REFUSED: "refused",
-  COUNTER_PROPOSAL: "counter_proposal",
-  CANCELLED: "cancelled",
-  COMPLETED: "completed",
+  PENDING: { label: "En attente", color: "var(--ambre)", icon: Clock },
+  ACCEPTED: { label: "Acceptée", color: "var(--vert)", icon: CheckCircle },
+  REFUSED: { label: "Refusée", color: "var(--rouge)", icon: XCircle },
+  COUNTER_PROPOSAL: { label: "Contre-proposition", color: "var(--violet)", icon: Repeat },
+  CANCELLED: { label: "Annulée", color: "var(--neutre)", icon: XCircle },
+  COMPLETED: { label: "Terminée", color: "var(--bleu)", icon: CheckCircle },
 };
 
 export default function MesTransportsPage() {
@@ -154,10 +113,10 @@ export default function MesTransportsPage() {
   // Afficher le chargement pendant la vérification de session
   if (sessionLoading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-page">
         <Header />
-        <main className="flex-1 pt-24 lg:pt-28">
-          <LoadingSpinner fullPage text="Chargement..." />
+        <main className="flex-1 pt-24 lg:pt-28 grid place-items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-brand" />
         </main>
         <Footer />
       </div>
@@ -169,43 +128,44 @@ export default function MesTransportsPage() {
     return null;
   }
 
+  const filters = [
+    { value: "ALL", label: "Tous", icon: null },
+    { value: "PENDING", label: "En attente", icon: Clock },
+    { value: "ACCEPTED", label: "Acceptées", icon: CheckCircle },
+    { value: "COUNTER_PROPOSAL", label: "Contre-propositions", icon: AlertCircle },
+    { value: "REFUSED", label: "Refusées", icon: XCircle },
+    { value: "COMPLETED", label: "Terminées", icon: CheckCircle },
+  ] as const;
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-page">
       <Header />
       <main className="flex-1 pt-24 lg:pt-28 pb-16">
-        <Container>
+        <Container size="lg">
           {/* En-tête */}
-          <div className="mb-8">
-            <div className="inline-flex items-center rounded-lg bg-primary-50 px-3 py-1 text-sm font-medium text-primary-700 mb-2">
-              <Calendar className="w-4 h-4 mr-2" />
+          <div className="mb-7">
+            <span className="text-xs font-extrabold uppercase tracking-[0.12em] text-teal">
               Espace patient
-            </div>
-            <h1 className="text-3xl font-bold text-neutral-900">Mes transports</h1>
-            <p className="mt-2 text-neutral-500">
-              Consultez l&apos;historique et le statut de vos demandes de transport
+            </span>
+            <h1 className="serif text-3xl lg:text-4xl text-ink mt-2">Mes transports</h1>
+            <p className="mt-2 text-ink-2">
+              Suivez l&apos;état de vos demandes de transport sanitaire.
             </p>
           </div>
 
           {/* Filtres par statut */}
           <div className="flex flex-wrap gap-2 mb-6">
-            {[
-              { value: "ALL", label: "Tous", icon: null },
-              { value: "PENDING", label: "En attente", icon: Clock },
-              { value: "ACCEPTED", label: "Acceptées", icon: CheckCircle },
-              { value: "COUNTER_PROPOSAL", label: "Contre-propositions", icon: AlertCircle },
-              { value: "REFUSED", label: "Refusées", icon: XCircle },
-              { value: "COMPLETED", label: "Terminées", icon: CheckCircle },
-            ].map((filter) => {
+            {filters.map((filter) => {
               const isActive = statusFilter === filter.value;
               const Icon = filter.icon;
               return (
                 <button
                   key={filter.value}
                   onClick={() => setStatusFilter(filter.value as RequestStatus | "ALL")}
-                  className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-colors ${
                     isActive
-                      ? "bg-primary-600 text-white shadow-sm"
-                      : "bg-white text-neutral-600 border border-neutral-200 hover:border-primary-300 hover:text-primary-600"
+                      ? "bg-brand text-white"
+                      : "bg-surface text-ink-2 border border-line hover:border-brand hover:text-brand"
                   }`}
                 >
                   {Icon && <Icon className="h-4 w-4" />}
@@ -216,98 +176,119 @@ export default function MesTransportsPage() {
           </div>
 
           {/* Liste des transports */}
-          <Card>
-            {loading ? (
-              <CardContent>
-                <LoadingSpinner text="Chargement de vos transports..." />
-              </CardContent>
-            ) : transports.length === 0 ? (
-              <CardContent>
-                <EmptyState
-                  icon={Calendar}
-                  title="Aucune demande"
-                  description="Vous n'avez pas encore effectué de demande de transport. Recherchez un ambulancier pour commencer."
-                  action={
-                    <Link
-                      href="/recherche"
-                      className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors"
-                    >
-                      Trouver un ambulancier
-                    </Link>
-                  }
-                />
-              </CardContent>
-            ) : (
-              <div className="divide-y divide-card-border">
-                {transports.map((transport) => {
-                  const status = statusConfig[transport.status];
-                  const StatusIcon = status.icon;
-                  const TransportIcon =
-                    transport.transportType === "AMBULANCE" ? Ambulance : Car;
-
-                  return (
-                    <Link
-                      key={transport.id}
-                      href={`/mes-transports/${transport.trackingId}`}
-                      className="block p-5 hover:bg-neutral-50 transition-colors"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          {/* Ligne 1 : Entreprise + Statut */}
-                          <div className="flex items-center gap-3 flex-wrap">
-                            <span className="font-semibold text-neutral-900 text-base">
-                              {transport.company.name}
-                            </span>
-                            <StatusBadge
-                              variant={statusToBadgeVariant[transport.status]}
-                              label={status.label}
-                              icon={StatusIcon}
-                              size="sm"
-                            />
-                          </div>
-
-                          {/* Ligne 2 : Trajet */}
-                          <p className="text-sm text-neutral-600 mt-1.5">
-                            <span className="font-medium">{transport.pickupCity}</span>
-                            {" → "}
-                            <span className="font-medium">{transport.destinationCity}</span>
-                          </p>
-
-                          {/* Ligne 3 : Date + Type + Tracking ID */}
-                          <div className="flex items-center gap-4 mt-2 flex-wrap">
-                            <span className="text-sm text-neutral-600">
-                              {formatDate(transport.requestedDate)} à {transport.requestedTime}
-                            </span>
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-neutral-100 rounded-lg text-xs text-neutral-600">
-                              <TransportIcon className="h-3 w-3" />
-                              {transport.transportType}
-                            </span>
-                            <span className="text-xs text-neutral-400 font-mono">
-                              #{truncateTrackingId(transport.trackingId)}
-                            </span>
-                          </div>
-
-                          {/* Ligne 4 : Contre-proposition si applicable */}
-                          {transport.status === "COUNTER_PROPOSAL" &&
-                            transport.proposedDate &&
-                            transport.proposedTime && (
-                              <div className="mt-2 px-3 py-2 bg-accent-50 rounded-lg">
-                                <p className="text-sm text-accent-700">
-                                  <span className="font-medium">Nouvelle date proposée : </span>
-                                  {formatDate(transport.proposedDate)} à {transport.proposedTime}
-                                </p>
-                              </div>
-                            )}
-                        </div>
-
-                        <ChevronRight className="h-5 w-5 text-neutral-400 shrink-0 mt-1" />
-                      </div>
-                    </Link>
-                  );
-                })}
+          {loading ? (
+            <div className="grid place-items-center py-16">
+              <Loader2 className="h-7 w-7 animate-spin text-brand" />
+            </div>
+          ) : transports.length === 0 ? (
+            <div className="text-center border-[1.5px] border-dashed border-line rounded-2xl px-6 py-12">
+              <div className="grid place-items-center w-14 h-14 rounded-2xl bg-surface-2 text-ink-3 mx-auto mb-4">
+                <Inbox className="h-7 w-7" />
               </div>
-            )}
-          </Card>
+              <p className="font-bold text-lg text-ink">Aucun transport dans cette catégorie</p>
+              <p className="text-ink-2 text-sm mt-1 mb-5">
+                Vos réservations apparaîtront ici dès qu&apos;elles seront créées.
+              </p>
+              <Link
+                href="/recherche"
+                className="inline-flex items-center gap-2 bg-brand text-white font-bold px-5 py-3 rounded-xl hover:bg-brand-ink transition-colors"
+              >
+                <Search className="h-4 w-4" />
+                Trouver un ambulancier
+              </Link>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3.5">
+              {transports.map((transport) => {
+                const status = statusConfig[transport.status];
+                const StatusIcon = status.icon;
+                const TransportIcon =
+                  transport.transportType === "AMBULANCE" ? Ambulance : Car;
+
+                return (
+                  <Link
+                    key={transport.id}
+                    href={`/mes-transports/${transport.trackingId}`}
+                    className="block bg-surface border border-line rounded-2xl p-5 hover:border-brand hover:shadow-soft transition-all"
+                  >
+                    {/* Ligne 1 : type + entreprise + statut */}
+                    <div className="flex items-start justify-between gap-3 mb-3.5">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span
+                          className="grid place-items-center w-11 h-11 rounded-xl shrink-0"
+                          style={{
+                            background: `color-mix(in srgb, ${status.color} 14%, var(--surface))`,
+                            color: status.color,
+                          }}
+                        >
+                          <TransportIcon className="h-5 w-5" />
+                        </span>
+                        <div className="min-w-0">
+                          <div className="font-extrabold text-ink truncate">
+                            {transport.company.name}
+                          </div>
+                          <div className="text-[13px] text-ink-3 font-mono">
+                            #{truncateTrackingId(transport.trackingId)}
+                          </div>
+                        </div>
+                      </div>
+                      <span
+                        className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full whitespace-nowrap shrink-0"
+                        style={{
+                          color: status.color,
+                          background: `color-mix(in srgb, ${status.color} 13%, var(--surface))`,
+                          border: `1px solid color-mix(in srgb, ${status.color} 32%, transparent)`,
+                        }}
+                      >
+                        <StatusIcon className="h-3.5 w-3.5" />
+                        {status.label}
+                      </span>
+                    </div>
+
+                    {/* Ligne 2 : trajet / date / type */}
+                    <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-ink-2">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Route className="h-4 w-4 text-ink-3" />
+                        {transport.pickupCity}
+                        <ArrowRight className="h-3.5 w-3.5 text-ink-3" />
+                        {transport.destinationCity}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Calendar className="h-4 w-4 text-ink-3" />
+                        {formatDate(transport.requestedDate)} · {transport.requestedTime}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <TransportIcon className="h-4 w-4 text-ink-3" />
+                        {transport.transportType}
+                      </span>
+                    </div>
+
+                    {/* Ligne 3 : contre-proposition */}
+                    {transport.status === "COUNTER_PROPOSAL" &&
+                      transport.proposedDate &&
+                      transport.proposedTime && (
+                        <div
+                          className="mt-3.5 flex items-center gap-2.5 rounded-xl px-3.5 py-2.5"
+                          style={{
+                            background: "color-mix(in srgb, var(--violet) 10%, var(--surface))",
+                            border: "1px solid color-mix(in srgb, var(--violet) 28%, transparent)",
+                          }}
+                        >
+                          <Repeat className="h-4 w-4 text-violet shrink-0" />
+                          <span className="text-[13px] text-ink font-semibold">
+                            Nouvelle date proposée :{" "}
+                            <strong>
+                              {formatDate(transport.proposedDate)} à {transport.proposedTime}
+                            </strong>{" "}
+                            — une réponse est attendue.
+                          </span>
+                        </div>
+                      )}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </Container>
       </main>
       <Footer />

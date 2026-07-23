@@ -76,16 +76,16 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(searchActionSchema) }}
       />
 
-      <div className="min-h-screen flex flex-col bg-neutral-50">
+      <div className="min-h-screen flex flex-col bg-page">
         <Header />
 
         <main className="flex-1 pt-24 lg:pt-28 pb-8">
         <Container>
           {/* Fil d'ariane */}
           <nav className="mb-6">
-            <ol className="flex items-center gap-2 text-sm text-neutral-500">
+            <ol className="flex items-center gap-2 text-sm text-ink-3">
               <li>
-                <Link href="/" className="hover:text-primary-600 transition-colors">
+                <Link href="/" className="hover:text-brand transition-colors">
                   Accueil
                 </Link>
               </li>
@@ -104,12 +104,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                   />
                 </svg>
               </li>
-              <li className="text-neutral-900 font-medium">Recherche</li>
+              <li className="text-ink font-semibold">Recherche</li>
             </ol>
           </nav>
 
           {/* Titre */}
-          <h1 className="text-3xl font-bold text-neutral-900 mb-8">
+          <h1 className="serif text-3xl lg:text-4xl text-ink mb-8">
             Trouver un ambulancier
           </h1>
 
@@ -141,8 +141,8 @@ function SearchBarSkeleton() {
   return (
     <div className="w-full max-w-2xl mx-auto">
       <div className="flex gap-3">
-        <div className="flex-1 h-12 bg-neutral-200 rounded-xl animate-pulse" />
-        <div className="w-32 h-12 bg-neutral-200 rounded-xl animate-pulse" />
+        <div className="flex-1 h-12 bg-surface-3 rounded-xl animate-pulse" />
+        <div className="w-32 h-12 bg-surface-3 rounded-xl animate-pulse" />
       </div>
     </div>
   );
@@ -151,15 +151,15 @@ function SearchBarSkeleton() {
 function ResultsSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="h-6 w-48 bg-neutral-200 rounded animate-pulse" />
+      <div className="h-6 w-48 bg-surface-3 rounded animate-pulse" />
       {[1, 2, 3].map((i) => (
         <div
           key={i}
-          className="p-6 bg-white rounded-xl border border-neutral-200"
+          className="p-6 bg-surface rounded-2xl border border-line"
         >
-          <div className="h-6 w-48 bg-neutral-200 rounded animate-pulse mb-3" />
-          <div className="h-4 w-64 bg-neutral-100 rounded animate-pulse mb-2" />
-          <div className="h-4 w-32 bg-neutral-100 rounded animate-pulse" />
+          <div className="h-6 w-48 bg-surface-3 rounded animate-pulse mb-3" />
+          <div className="h-4 w-64 bg-surface-2 rounded animate-pulse mb-2" />
+          <div className="h-4 w-32 bg-surface-2 rounded animate-pulse" />
         </div>
       ))}
     </div>

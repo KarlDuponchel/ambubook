@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { BookmarkPlus, ChevronDown, Check, MapPin } from "lucide-react";
-import { Input, Textarea } from "@/components/ui";
+import { BookmarkPlus, ChevronDown, Check, MapPin, Search, Loader2 } from "lucide-react";
+import { Field, FieldArea } from "../fields";
 import { useSession } from "@/lib/auth-client";
 import { StepProps, BookingFormData } from "../types";
 
@@ -139,10 +139,14 @@ function AddressBlock({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="font-medium text-neutral-800 flex items-center gap-2">
-          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
-            prefix === "pickup" ? "bg-success-100 text-success-700" : "bg-danger-100 text-danger-700"
-          }`}>
+        <h4 className="font-bold text-ink flex items-center gap-2">
+          <span
+            className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold"
+            style={{
+              color: prefix === "pickup" ? "var(--vert)" : "var(--rouge)",
+              background: `color-mix(in srgb, ${prefix === "pickup" ? "var(--vert)" : "var(--rouge)"} 15%, var(--surface))`,
+            }}
+          >
             {prefix === "pickup" ? "A" : "B"}
           </span>
           {title}
@@ -154,23 +158,23 @@ function AddressBlock({
             <button
               type="button"
               onClick={() => setSavedAddressDropdown(!savedAddressDropdown)}
-              className="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 font-medium"
+              className="flex items-center gap-1 text-sm text-brand hover:text-brand-ink font-semibold"
             >
               <MapPin className="w-4 h-4" />
               Mes adresses
               <ChevronDown className={`w-4 h-4 transition-transform ${savedAddressDropdown ? "rotate-180" : ""}`} />
             </button>
             {savedAddressDropdown && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-neutral-200 py-1 z-50">
+              <div className="absolute right-0 mt-2 w-64 bg-surface rounded-xl shadow-soft border border-line py-1 z-50">
                 {savedAddresses.map((addr) => (
                   <button
                     key={addr.id}
                     type="button"
                     onClick={() => handleSelectSavedAddress(addr)}
-                    className="w-full px-4 py-2 text-left hover:bg-neutral-50 transition-colors"
+                    className="w-full px-4 py-2 text-left hover:bg-surface-2 transition-colors"
                   >
-                    <p className="text-sm font-medium text-neutral-900">{addr.label}</p>
-                    <p className="text-xs text-neutral-500 truncate">{addr.address}, {addr.city}</p>
+                    <p className="text-sm font-bold text-ink">{addr.label}</p>
+                    <p className="text-xs text-ink-3 truncate">{addr.address}, {addr.city}</p>
                   </button>
                 ))}
               </div>
@@ -180,7 +184,7 @@ function AddressBlock({
       </div>
 
       <div ref={containerRef} className="relative">
-        <Input
+        <Field
           label="Adresse *"
           name={addressKey}
           value={formData[addressKey] as string}
@@ -190,61 +194,25 @@ function AddressBlock({
           autoComplete="off"
           icon={
             isLoading ? (
-              <svg
-                className="w-5 h-5 animate-spin text-neutral-400"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
+              <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
+              <Search className="w-5 h-5" />
             )
           }
         />
 
         {/* Dropdown suggestions */}
         {isOpen && suggestions.length > 0 && (
-          <div className="absolute z-50 w-full mt-1 bg-white rounded-lg border border-neutral-200 shadow-lg overflow-hidden">
+          <div className="absolute z-50 w-full mt-1 bg-surface rounded-xl border border-line shadow-soft overflow-hidden">
             <ul className="py-1 max-h-48 overflow-y-auto">
               {suggestions.map((suggestion, index) => (
                 <li key={index}>
                   <button
                     type="button"
                     onClick={() => handleSelectSuggestion(suggestion)}
-                    className="w-full px-4 py-2 text-left hover:bg-neutral-50 transition-colors"
+                    className="w-full px-4 py-2 text-left hover:bg-surface-2 transition-colors"
                   >
-                    <p className="text-sm font-medium text-neutral-900 truncate">
+                    <p className="text-sm font-semibold text-ink truncate">
                       {suggestion.label}
                     </p>
                   </button>
@@ -256,7 +224,7 @@ function AddressBlock({
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <Input
+        <Field
           label="Ville *"
           name={cityKey}
           value={formData[cityKey] as string}
@@ -264,7 +232,7 @@ function AddressBlock({
           placeholder="Paris"
           error={errors[cityKey]}
         />
-        <Input
+        <Field
           label="Code postal *"
           name={postalCodeKey}
           value={formData[postalCodeKey] as string}
@@ -274,7 +242,7 @@ function AddressBlock({
         />
       </div>
 
-      <Textarea
+      <FieldArea
         label="Détails"
         name={detailsKey}
         value={formData[detailsKey] as string}
@@ -290,17 +258,17 @@ function AddressBlock({
             <button
               type="button"
               onClick={() => setShowSaveForm(true)}
-              className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium"
+              className="flex items-center gap-2 text-sm text-brand hover:text-brand-ink font-semibold"
             >
               <BookmarkPlus className="w-4 h-4" />
               Sauvegarder cette adresse
             </button>
           ) : (
-            <div className="flex items-center gap-2 p-3 bg-neutral-50 rounded-lg">
+            <div className="flex items-center gap-2 p-3 bg-surface-2 rounded-xl">
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className="flex-1 px-3 py-2 text-sm border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="flex-1 px-3 py-2 text-sm text-ink bg-surface border border-line rounded-xl focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
               >
                 {ADDRESS_TYPES.map((type) => (
                   <option key={type.value} value={type.value}>
@@ -312,7 +280,7 @@ function AddressBlock({
                 type="button"
                 onClick={handleSaveAddress}
                 disabled={savingAddress}
-                className="flex items-center gap-1 px-3 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                className="flex items-center gap-1 px-3 py-2 bg-brand text-white text-sm font-bold rounded-xl hover:bg-brand-ink disabled:opacity-50"
               >
                 <Check className="w-4 h-4" />
                 {savingAddress ? "..." : "OK"}
@@ -320,7 +288,7 @@ function AddressBlock({
               <button
                 type="button"
                 onClick={() => setShowSaveForm(false)}
-                className="px-3 py-2 text-sm text-neutral-600 hover:text-neutral-800"
+                className="px-3 py-2 text-sm font-semibold text-ink-2 hover:text-ink"
               >
                 Annuler
               </button>
@@ -396,12 +364,12 @@ export function AddressStep({ formData, setFormData, errors }: StepProps) {
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-neutral-200" />
+          <div className="w-full border-t border-line" />
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-white px-3">
+          <span className="bg-surface px-3">
             <svg
-              className="w-6 h-6 text-neutral-400"
+              className="w-6 h-6 text-ink-3"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

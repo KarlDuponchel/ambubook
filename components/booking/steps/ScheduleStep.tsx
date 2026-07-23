@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { Camera, X, FileText } from "lucide-react";
-import { Input, Checkbox, Textarea } from "@/components/ui";
+import { Field, FieldArea, CheckRow } from "../fields";
 import { StepProps, BookingFormData, Company } from "../types";
 
 interface ScheduleStepProps extends StepProps {
@@ -53,11 +53,11 @@ export function ScheduleStep({ formData, setFormData, errors, company, showConse
     <div className="space-y-6">
       {/* Date et heure aller */}
       <div>
-        <h4 className="font-medium text-neutral-800 mb-3">
+        <h4 className="font-bold text-ink mb-3">
           {formData.tripType === "ROUND_TRIP" ? "Aller" : "Date et heure"}
         </h4>
         <div className="grid grid-cols-2 gap-4">
-          <Input
+          <Field
             label="Date *"
             name="requestedDate"
             type="date"
@@ -66,7 +66,7 @@ export function ScheduleStep({ formData, setFormData, errors, company, showConse
             onChange={(e) => handleChange("requestedDate", e.target.value)}
             error={errors.requestedDate}
           />
-          <Input
+          <Field
             label="Heure *"
             name="requestedTime"
             type="time"
@@ -80,9 +80,9 @@ export function ScheduleStep({ formData, setFormData, errors, company, showConse
       {/* Date et heure retour */}
       {formData.tripType === "ROUND_TRIP" && (
         <div>
-          <h4 className="font-medium text-neutral-800 mb-3">Retour</h4>
+          <h4 className="font-bold text-ink mb-3">Retour</h4>
           <div className="grid grid-cols-2 gap-4">
-            <Input
+            <Field
               label="Date *"
               name="returnDate"
               type="date"
@@ -91,7 +91,7 @@ export function ScheduleStep({ formData, setFormData, errors, company, showConse
               onChange={(e) => handleChange("returnDate", e.target.value)}
               error={errors.returnDate}
             />
-            <Input
+            <Field
               label="Heure *"
               name="returnTime"
               type="time"
@@ -105,7 +105,7 @@ export function ScheduleStep({ formData, setFormData, errors, company, showConse
 
       {/* Bon de transport */}
       <div className="space-y-3">
-        <Checkbox
+        <CheckRow
           label="J'ai un bon de transport"
           description="Prescription médicale de transport"
           checked={formData.hasTransportVoucher}
@@ -119,8 +119,8 @@ export function ScheduleStep({ formData, setFormData, errors, company, showConse
 
         {/* Upload du bon de transport */}
         {formData.hasTransportVoucher && (
-          <div className="ml-6 p-4 bg-neutral-50 rounded-xl border border-neutral-200">
-            <p className="text-sm font-medium text-neutral-700 mb-2">
+          <div className="ml-6 p-4 bg-surface-2 rounded-xl border border-line">
+            <p className="text-sm font-bold text-ink mb-2">
               Joindre le bon de transport (optionnel)
             </p>
             <input
@@ -134,22 +134,22 @@ export function ScheduleStep({ formData, setFormData, errors, company, showConse
             />
 
             {formData.transportVoucherFile ? (
-              <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-neutral-200">
-                <div className="p-2 rounded-lg bg-success-50">
-                  <FileText className="h-5 w-5 text-success-600" />
+              <div className="flex items-center gap-3 p-3 bg-surface rounded-xl border border-line">
+                <div className="grid place-items-center w-9 h-9 rounded-lg bg-vert/12 text-vert">
+                  <FileText className="h-5 w-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-neutral-900 truncate">
+                  <p className="text-sm font-bold text-ink truncate">
                     {formData.transportVoucherFile.name}
                   </p>
-                  <p className="text-xs text-neutral-500">
+                  <p className="text-xs text-ink-3">
                     {(formData.transportVoucherFile.size / 1024).toFixed(0)} Ko
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={handleRemoveFile}
-                  className="p-1.5 text-neutral-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
+                  className="p-1.5 text-ink-3 hover:text-rouge hover:bg-surface-2 rounded-lg transition-colors"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -157,15 +157,15 @@ export function ScheduleStep({ formData, setFormData, errors, company, showConse
             ) : (
               <label
                 htmlFor="transport-voucher-upload"
-                className="flex items-center justify-center gap-2 w-full px-4 py-3 border-2 border-dashed border-neutral-300 rounded-lg cursor-pointer hover:border-primary-400 hover:bg-primary-50/50 transition-colors"
+                className="flex items-center justify-center gap-2 w-full px-4 py-3 border-2 border-dashed border-line rounded-xl cursor-pointer hover:border-brand hover:bg-brand/5 transition-colors"
               >
-                <Camera className="h-5 w-5 text-neutral-400" />
-                <span className="text-sm text-neutral-600">
+                <Camera className="h-5 w-5 text-ink-3" />
+                <span className="text-sm text-ink-2">
                   Photographier ou sélectionner
                 </span>
               </label>
             )}
-            <p className="text-xs text-neutral-500 mt-2">
+            <p className="text-xs text-ink-3 mt-2">
               Photo ou PDF - Max 10 Mo
             </p>
           </div>
@@ -174,7 +174,7 @@ export function ScheduleStep({ formData, setFormData, errors, company, showConse
 
       {/* Motif et notes */}
       <div className="space-y-4">
-        <Input
+        <Field
           label="Motif du transport"
           name="reason"
           value={formData.reason}
@@ -182,7 +182,7 @@ export function ScheduleStep({ formData, setFormData, errors, company, showConse
           placeholder="Consultation, hospitalisation, dialyse..."
         />
 
-        <Textarea
+        <FieldArea
           label="Notes supplémentaires"
           name="notes"
           value={formData.notes}
@@ -194,50 +194,50 @@ export function ScheduleStep({ formData, setFormData, errors, company, showConse
       </div>
 
       {/* Récapitulatif */}
-      <div className="bg-neutral-50 rounded-xl p-4 space-y-3">
-        <h4 className="font-medium text-neutral-900">Récapitulatif</h4>
+      <div className="bg-surface-2 border border-line rounded-2xl p-4 space-y-3">
+        <h4 className="font-bold text-ink">Récapitulatif</h4>
 
         <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-          <div className="text-neutral-500">Patient</div>
-          <div className="text-neutral-900 font-medium">
+          <div className="text-ink-3">Patient</div>
+          <div className="text-ink font-semibold">
             {formData.patientFirstName} {formData.patientLastName}
           </div>
 
-          <div className="text-neutral-500">Téléphone</div>
-          <div className="text-neutral-900">{formData.patientPhone}</div>
+          <div className="text-ink-3">Téléphone</div>
+          <div className="text-ink">{formData.patientPhone}</div>
 
-          <div className="text-neutral-500">Ambulancier</div>
-          <div className="text-neutral-900 font-medium">{company.name}</div>
+          <div className="text-ink-3">Ambulancier</div>
+          <div className="text-ink font-semibold">{company.name}</div>
 
-          <div className="text-neutral-500">Transport</div>
-          <div className="text-neutral-900">
+          <div className="text-ink-3">Transport</div>
+          <div className="text-ink">
             {TRANSPORT_LABELS[formData.transportType]} - {MOBILITY_LABELS[formData.mobilityType]}
           </div>
 
-          <div className="text-neutral-500">Trajet</div>
-          <div className="text-neutral-900">
+          <div className="text-ink-3">Trajet</div>
+          <div className="text-ink">
             {formData.tripType === "ROUND_TRIP" ? "Aller-retour" : "Aller simple"}
           </div>
 
-          <div className="col-span-2 border-t border-neutral-200 my-1" />
+          <div className="col-span-2 border-t border-line my-1" />
 
-          <div className="text-neutral-500">Départ</div>
-          <div className="text-neutral-900">
+          <div className="text-ink-3">Départ</div>
+          <div className="text-ink">
             {formData.pickupAddress}, {formData.pickupPostalCode} {formData.pickupCity}
           </div>
 
-          <div className="text-neutral-500">Arrivée</div>
-          <div className="text-neutral-900">
+          <div className="text-ink-3">Arrivée</div>
+          <div className="text-ink">
             {formData.destinationAddress}, {formData.destinationPostalCode} {formData.destinationCity}
           </div>
 
           {formData.requestedDate && (
             <>
-              <div className="col-span-2 border-t border-neutral-200 my-1" />
-              <div className="text-neutral-500">
+              <div className="col-span-2 border-t border-line my-1" />
+              <div className="text-ink-3">
                 {formData.tripType === "ROUND_TRIP" ? "Aller" : "Date"}
               </div>
-              <div className="text-neutral-900">
+              <div className="text-ink">
                 {new Date(formData.requestedDate).toLocaleDateString("fr-FR", {
                   weekday: "long",
                   day: "numeric",
@@ -248,8 +248,8 @@ export function ScheduleStep({ formData, setFormData, errors, company, showConse
 
               {formData.tripType === "ROUND_TRIP" && formData.returnDate && (
                 <>
-                  <div className="text-neutral-500">Retour</div>
-                  <div className="text-neutral-900">
+                  <div className="text-ink-3">Retour</div>
+                  <div className="text-ink">
                     {new Date(formData.returnDate).toLocaleDateString("fr-FR", {
                       weekday: "long",
                       day: "numeric",
@@ -267,31 +267,31 @@ export function ScheduleStep({ formData, setFormData, errors, company, showConse
       {/* Consentement RGPD - données de santé (art. 9) */}
       {showConsent && (
       <div
-        className={`rounded-lg border p-3 ${
+        className={`rounded-xl border p-3.5 ${
           errors.consentGiven
-            ? "border-danger-300 bg-danger-50/40"
-            : "border-neutral-200 bg-neutral-50"
+            ? "border-rouge/40 bg-rouge/8"
+            : "border-line bg-surface-2"
         }`}
       >
-        <Checkbox
+        <CheckRow
           label="J'accepte que mes données (dont données de santé) soient traitées par l'ambulancier et AmbuBook afin d'organiser ce transport sanitaire."
           checked={formData.consentGiven}
           onChange={(checked) => handleChange("consentGiven", checked)}
         />
-        <p className="mt-1 pl-8 text-xs text-neutral-500">
+        <p className="mt-1.5 pl-8 text-xs text-ink-3">
           Consentement requis (art. 9 RGPD). Voir notre{" "}
           <a
             href="/politique-confidentialite"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary-600 hover:underline"
+            className="text-brand hover:underline"
           >
             politique de confidentialité
           </a>
           .
         </p>
         {errors.consentGiven && (
-          <p className="mt-1 text-sm text-danger-600">{errors.consentGiven}</p>
+          <p className="mt-1.5 text-sm text-rouge">{errors.consentGiven}</p>
         )}
       </div>
       )}

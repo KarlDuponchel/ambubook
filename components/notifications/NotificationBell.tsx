@@ -46,13 +46,11 @@ export function NotificationBell({ variant = "landing" }: NotificationBellProps)
 
   const buttonClasses =
     variant === "landing"
-      ? "relative p-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"
-      : "relative p-2 text-neutral-400 hover:text-neutral-900 hover:bg-white/10 rounded-lg transition-colors";
+      ? "relative grid place-items-center w-10 h-10 text-ink-2 hover:text-brand border border-line bg-surface hover:border-brand rounded-[10px] transition-colors"
+      : "relative p-2 text-ink-2 hover:text-ink hover:bg-surface-2 rounded-lg transition-colors";
 
   const badgeClasses =
-    variant === "landing"
-      ? "absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center px-1 text-xs font-bold text-white bg-danger-500 rounded-full"
-      : "absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center px-1 text-xs font-bold text-white bg-danger-500 rounded-full";
+    "absolute top-1.5 right-1.5 h-4.5 min-w-4.5 flex items-center justify-center px-1 text-[10px] font-bold text-white bg-rouge rounded-full border-2 border-surface";
 
   return (
     <div className="relative">

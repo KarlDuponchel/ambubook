@@ -156,7 +156,7 @@ export function Autocomplete({
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
           {isLoading ? (
             <svg
-              className="w-5 h-5 text-neutral-400 animate-spin"
+              className="w-5 h-5 text-ink-3 animate-spin"
               fill="none"
               viewBox="0 0 24 24"
             >
@@ -176,7 +176,7 @@ export function Autocomplete({
             </svg>
           ) : (
             <svg
-              className="w-5 h-5 text-neutral-400"
+              className="w-5 h-5 text-ink-3"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -202,13 +202,13 @@ export function Autocomplete({
             }
           }}
           placeholder={placeholder}
-          className={`w-full pl-12 pr-4 ${sizeClasses} rounded-xl border border-neutral-300 bg-white shadow-sm placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 transition-all ${inputClassName}`}
+          className={`w-full pl-12 pr-4 ${sizeClasses} rounded-xl border border-line bg-surface text-ink shadow-sm placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all ${inputClassName}`}
         />
       </div>
 
       {/* Dropdown des suggestions */}
       {isOpen && suggestions.length > 0 && (
-        <div className="absolute z-[9999] w-full mt-2 bg-white rounded-xl border border-neutral-200 shadow-lg overflow-hidden">
+        <div className="absolute z-[9999] w-full mt-2 bg-surface rounded-2xl border border-line shadow-soft overflow-hidden">
           <ul className="py-1">
             {suggestions.map((suggestion, index) => (
               <li key={suggestion.id}>
@@ -216,8 +216,8 @@ export function Autocomplete({
                   onMouseEnter={() => setHighlightedIndex(index)}
                   className={`flex items-center gap-2 px-4 py-3 transition-colors ${
                     index === highlightedIndex
-                      ? "bg-primary-50"
-                      : "hover:bg-neutral-50"
+                      ? "bg-brand/10"
+                      : "hover:bg-surface-2"
                   }`}
                 >
                   <button
@@ -225,15 +225,15 @@ export function Autocomplete({
                     onClick={() => navigateToCompany(suggestion.slug)}
                     className="flex-1 text-left"
                   >
-                    <div className={`font-medium ${
-                      index === highlightedIndex ? "text-primary-700" : "text-neutral-900"
+                    <div className={`font-bold ${
+                      index === highlightedIndex ? "text-brand" : "text-ink"
                     }`}>
                       {suggestion.name}
                     </div>
-                    <div className="text-sm text-neutral-500 flex items-center gap-2">
+                    <div className="text-sm text-ink-3 flex items-center gap-2">
                       {suggestion.city && <span>{suggestion.city}</span>}
                       {suggestion.distance !== undefined && (
-                        <span className="text-primary-600">
+                        <span className="text-brand">
                           {suggestion.distance < 1
                             ? `${Math.round(suggestion.distance * 1000)} m`
                             : `${suggestion.distance.toFixed(1)} km`}
@@ -249,7 +249,7 @@ export function Autocomplete({
                         setIsOpen(false);
                         onBookClick(suggestion);
                       }}
-                      className="px-3 py-1.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors flex-shrink-0"
+                      className="px-3 py-1.5 text-sm font-bold text-white bg-brand hover:bg-brand-ink rounded-lg transition-colors flex-shrink-0"
                     >
                       Réserver
                     </button>
@@ -259,11 +259,11 @@ export function Autocomplete({
             ))}
           </ul>
           {/* Lien vers tous les résultats */}
-          <div className="border-t border-neutral-100">
+          <div className="border-t border-line">
             <button
               type="button"
               onClick={handleSubmit}
-              className="w-full px-4 py-3 text-sm text-primary-600 hover:bg-neutral-50 text-left font-medium transition-colors"
+              className="w-full px-4 py-3 text-sm text-brand hover:bg-surface-2 text-left font-semibold transition-colors"
             >
               Voir tous les résultats pour &quot;{query}&quot;
             </button>

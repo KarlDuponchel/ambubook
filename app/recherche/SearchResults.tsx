@@ -26,7 +26,7 @@ export async function SearchResults({ query }: SearchResultsProps) {
   if (!data) {
     return (
       <div className="text-center py-12">
-        <p className="text-neutral-600">
+        <p className="text-ink-2">
           Une erreur est survenue lors de la recherche.
         </p>
       </div>
@@ -49,9 +49,9 @@ export async function SearchResults({ query }: SearchResultsProps) {
 
     return (
       <div className="text-center py-12">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-neutral-100 flex items-center justify-center">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-surface-2 flex items-center justify-center">
           <svg
-            className="w-8 h-8 text-neutral-400"
+            className="w-8 h-8 text-ink-3"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -64,13 +64,13 @@ export async function SearchResults({ query }: SearchResultsProps) {
             />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-neutral-900 mb-2">
+        <h3 className="text-lg font-bold text-ink mb-2">
           Aucun résultat trouvé
         </h3>
-        <p className="text-neutral-600 max-w-md mx-auto">
+        <p className="text-ink-2 max-w-md mx-auto">
           {getMessage()}
         </p>
-        <p className="text-neutral-500 text-sm mt-4">
+        <p className="text-ink-3 text-sm mt-4">
           Essayez une autre ville, région ou un autre nom.
         </p>
       </div>
@@ -115,7 +115,7 @@ export async function SearchResults({ query }: SearchResultsProps) {
 
   return (
     <div>
-      <p className="text-neutral-600 mb-6">
+      <p className="text-ink-2 mb-6">
         {getResultMessage()}
       </p>
 

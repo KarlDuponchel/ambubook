@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { Input, Checkbox } from "@/components/ui";
+import { Field, CheckRow } from "../fields";
 import { TransportStepProps, BookingFormData } from "../types";
 
 type TransportType = BookingFormData["transportType"];
@@ -72,7 +72,7 @@ export function TransportStep({ formData, setFormData, errors, company }: Transp
     <div className="space-y-6">
       {/* Type de véhicule */}
       <div>
-        <label className="block text-sm font-medium text-neutral-700 mb-3">
+        <label className="block text-xs font-bold uppercase tracking-wide text-ink-3 mb-3">
           Type de véhicule
         </label>
         <div className={`grid gap-3 ${transportOptions.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
@@ -81,17 +81,15 @@ export function TransportStep({ formData, setFormData, errors, company }: Transp
               key={option.value}
               type="button"
               onClick={() => handleChange("transportType", option.value)}
-              className={`
-                p-4 rounded-xl border-2 text-left transition-all
-                ${formData.transportType === option.value
-                  ? "border-primary-500 bg-primary-50"
-                  : "border-neutral-200 hover:border-neutral-300 bg-white"
-                }
-              `}
+              className={`p-4 rounded-2xl border text-left transition-colors ${
+                formData.transportType === option.value
+                  ? "border-brand bg-brand/10"
+                  : "border-line hover:border-brand bg-surface"
+              }`}
             >
               <span className="text-2xl">{option.icon}</span>
-              <p className="font-medium text-neutral-900 mt-2">{option.label}</p>
-              <p className="text-sm text-neutral-500">{option.description}</p>
+              <p className="font-bold text-ink mt-2">{option.label}</p>
+              <p className="text-sm text-ink-2">{option.description}</p>
             </button>
           ))}
         </div>
@@ -99,7 +97,7 @@ export function TransportStep({ formData, setFormData, errors, company }: Transp
 
       {/* Type de trajet */}
       <div>
-        <label className="block text-sm font-medium text-neutral-700 mb-3">
+        <label className="block text-xs font-bold uppercase tracking-wide text-ink-3 mb-3">
           Type de trajet
         </label>
         <div className="flex gap-3">
@@ -108,13 +106,11 @@ export function TransportStep({ formData, setFormData, errors, company }: Transp
               key={option.value}
               type="button"
               onClick={() => handleChange("tripType", option.value)}
-              className={`
-                flex-1 py-3 px-4 rounded-lg border-2 font-medium transition-all
-                ${formData.tripType === option.value
-                  ? "border-primary-500 bg-primary-50 text-primary-700"
-                  : "border-neutral-200 hover:border-neutral-300 text-neutral-700"
-                }
-              `}
+              className={`flex-1 py-3 px-4 rounded-xl border font-bold transition-colors ${
+                formData.tripType === option.value
+                  ? "border-brand bg-brand/10 text-brand"
+                  : "border-line hover:border-brand text-ink-2"
+              }`}
             >
               {option.label}
             </button>
@@ -124,7 +120,7 @@ export function TransportStep({ formData, setFormData, errors, company }: Transp
 
       {/* Mobilité */}
       <div>
-        <label className="block text-sm font-medium text-neutral-700 mb-3">
+        <label className="block text-xs font-bold uppercase tracking-wide text-ink-3 mb-3">
           Mobilité du patient
         </label>
         <div className="grid grid-cols-3 gap-3">
@@ -133,16 +129,14 @@ export function TransportStep({ formData, setFormData, errors, company }: Transp
               key={option.value}
               type="button"
               onClick={() => handleChange("mobilityType", option.value)}
-              className={`
-                py-3 px-4 rounded-lg border-2 text-center transition-all
-                ${formData.mobilityType === option.value
-                  ? "border-primary-500 bg-primary-50"
-                  : "border-neutral-200 hover:border-neutral-300"
-                }
-              `}
+              className={`py-3 px-4 rounded-xl border text-center transition-colors ${
+                formData.mobilityType === option.value
+                  ? "border-brand bg-brand/10"
+                  : "border-line hover:border-brand"
+              }`}
             >
-              <p className="font-medium text-neutral-900">{option.label}</p>
-              <p className="text-xs text-neutral-500">{option.description}</p>
+              <p className="font-bold text-ink">{option.label}</p>
+              <p className="text-xs text-ink-2">{option.description}</p>
             </button>
           ))}
         </div>
@@ -150,14 +144,14 @@ export function TransportStep({ formData, setFormData, errors, company }: Transp
 
       {/* Accompagnant */}
       <div className="space-y-3">
-        <Checkbox
+        <CheckRow
           label="Besoin d'un accompagnant"
           checked={formData.needsAccompanist}
           onChange={(checked) => handleChange("needsAccompanist", checked)}
         />
 
         {formData.needsAccompanist && (
-          <Input
+          <Field
             label="Nom de l'accompagnant"
             name="accompanistName"
             value={formData.accompanistName}

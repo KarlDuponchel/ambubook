@@ -40,17 +40,17 @@ export function CompanyCard({ company }: CompanyCardProps) {
     <>
       <div
         onClick={handleCardClick}
-        className="block h-full flex-col p-6 bg-white rounded-xl border border-neutral-200 shadow-sm hover:shadow-md hover:border-primary-300 transition-all group cursor-pointer"
+        className="block h-full flex-col p-6 bg-surface rounded-2xl border border-line hover:shadow-soft hover:border-brand transition-all group cursor-pointer"
       >
         {/* Header avec distance */}
         <div className="flex items-start justify-between gap-4 mb-2">
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold text-neutral-900 group-hover:text-primary-600 transition-colors">
+            <h3 className="text-lg font-bold text-ink group-hover:text-brand transition-colors">
               {company.name}
             </h3>
           </div>
           {company.distance !== undefined && (
-            <span className="shrink-0 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-50 text-primary-700">
+            <span className="shrink-0 inline-flex items-center px-3 py-1 rounded-full text-sm font-bold text-brand bg-brand/10">
               {formatDistance(company.distance)}
             </span>
           )}
@@ -59,9 +59,9 @@ export function CompanyCard({ company }: CompanyCardProps) {
         {/* Contenu principal - prend l'espace disponible */}
         <div className="flex-1 min-w-0">
           {(company.address || company.city) && (
-            <p className="text-neutral-600 flex items-center gap-2 min-w-0">
+            <p className="text-ink-2 flex items-center gap-2 min-w-0">
               <svg
-                className="w-4 h-4 text-neutral-400 shrink-0"
+                className="w-4 h-4 text-ink-3 shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -88,9 +88,9 @@ export function CompanyCard({ company }: CompanyCardProps) {
           )}
 
           {company.phone && (
-            <p className="mt-1 text-neutral-600 flex items-center gap-2">
+            <p className="mt-1 text-ink-2 flex items-center gap-2">
               <svg
-                className="w-4 h-4 text-neutral-400 shrink-0"
+                className="w-4 h-4 text-ink-3 shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -108,16 +108,16 @@ export function CompanyCard({ company }: CompanyCardProps) {
         </div>
 
         {/* Bouton toujours en bas */}
-        <div className="mt-4 pt-4 border-t border-neutral-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="mt-4 pt-4 border-t border-line flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           {!company.acceptsOnlineBooking && (
-            <p className="text-xs sm:text-sm text-neutral-500 italic order-2 sm:order-1">
+            <p className="text-xs sm:text-sm text-ink-3 italic order-2 sm:order-1">
               Réservation en ligne indisponible
             </p>
           )}
           <button
             type="button"
             onClick={handleButtonClick}
-            className={`w-full sm:w-auto px-4 py-2.5 sm:py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors order-1 sm:order-2 ${company.acceptsOnlineBooking ? "sm:ml-auto" : ""}`}
+            className={`w-full sm:w-auto px-4 py-2.5 sm:py-2 text-sm font-bold text-white bg-brand hover:bg-brand-ink rounded-xl transition-colors order-1 sm:order-2 ${company.acceptsOnlineBooking ? "sm:ml-auto" : ""}`}
           >
             {company.acceptsOnlineBooking ? "Réserver" : "Voir les détails"}
           </button>

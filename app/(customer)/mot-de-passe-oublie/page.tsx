@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Mail } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+
+const inputClass =
+  "w-full border border-line rounded-xl px-3.5 py-3 text-[15px] text-ink bg-surface placeholder:text-ink-3 outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-colors";
+const labelClass =
+  "block text-xs font-bold uppercase tracking-wide text-ink-3 mb-1.5";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -41,37 +47,22 @@ export default function ForgotPasswordPage() {
 
   if (submitted) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-8">
+      <div className="bg-surface border border-line rounded-2xl shadow-soft p-8">
         <div className="text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg
-              className="w-8 h-8 text-green-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-              />
-            </svg>
+          <div className="w-16 h-16 rounded-2xl bg-vert/12 text-vert flex items-center justify-center mx-auto mb-5">
+            <Mail className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Vérifiez votre boîte mail
-          </h1>
-          <p className="text-gray-600 mb-6">
-            Si un compte existe avec l&apos;adresse <strong>{email}</strong>,
-            vous recevrez un email avec un lien pour réinitialiser votre mot de
-            passe.
+          <h1 className="serif text-2xl text-ink mb-2">Vérifiez votre boîte mail</h1>
+          <p className="text-ink-2 text-sm leading-relaxed mb-4">
+            Si un compte existe avec l&apos;adresse <strong className="text-ink">{email}</strong>,
+            vous recevrez un email avec un lien pour réinitialiser votre mot de passe.
           </p>
-          <p className="text-sm text-gray-500 mb-6">
+          <p className="text-sm text-ink-3 mb-6">
             Le lien expire dans 1 heure. Pensez à vérifier vos spams.
           </p>
           <Link
             href="/connexion"
-            className="text-primary-600 hover:underline font-medium"
+            className="text-brand hover:text-brand-ink font-semibold transition-colors"
           >
             Retour à la connexion
           </Link>
@@ -81,26 +72,23 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-8">
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Mot de passe oublié</h1>
-        <p className="text-gray-600 mt-2">
+    <div className="bg-surface border border-line rounded-2xl shadow-soft p-8">
+      <div className="mb-7">
+        <h1 className="serif text-2xl text-ink">Mot de passe oublié</h1>
+        <p className="text-ink-2 text-sm mt-1">
           Entrez votre adresse email pour recevoir un lien de réinitialisation
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
+          <div className="bg-rouge/10 border border-rouge/25 text-rouge p-3.5 rounded-xl text-sm">
             {error}
           </div>
         )}
 
         <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="email" className={labelClass}>
             Email
           </label>
           <input
@@ -109,7 +97,7 @@ export default function ForgotPasswordPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-black focus:ring-primary-500 focus:border-transparent"
+            className={inputClass}
             placeholder="votre@email.fr"
           />
         </div>
@@ -117,14 +105,14 @@ export default function ForgotPasswordPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary-600 text-white py-2 px-4 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-ink disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? "Envoi en cours..." : "Envoyer le lien"}
         </button>
       </form>
 
-      <div className="mt-6 text-center text-sm text-gray-600">
-        <Link href="/connexion" className="text-primary-600 hover:underline">
+      <div className="mt-6 text-center text-sm text-ink-2">
+        <Link href="/connexion" className="font-semibold text-brand hover:text-brand-ink transition-colors">
           Retour à la connexion
         </Link>
       </div>

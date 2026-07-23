@@ -5,9 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
-  User,
-  Mail,
-  Phone,
   Camera,
   Save,
   Loader2,
@@ -111,7 +108,7 @@ export default function ProfilClientPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-100">
-        <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-brand" />
       </div>
     );
   }
@@ -123,24 +120,27 @@ export default function ProfilClientPage() {
     .toUpperCase()
     .slice(0, 2);
 
+  const labelClass =
+    "block text-xs font-bold uppercase tracking-wide text-ink-3 mb-1.5";
+  const fieldBase =
+    "w-full px-3.5 py-3 border rounded-xl text-[15px] outline-none transition-colors";
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div>
         <Link
           href="/mon-compte"
-          className="p-2 -ml-2 hover:bg-neutral-100 rounded-lg transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-2 hover:text-ink transition-colors mb-3"
         >
-          <ArrowLeft className="h-5 w-5 text-neutral-600" />
+          <ArrowLeft className="h-4 w-4" /> Mon compte
         </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900">Mon profil</h1>
-          <p className="text-neutral-600">Gérez vos informations personnelles</p>
-        </div>
+        <h1 className="serif text-3xl text-ink">Mon profil</h1>
+        <p className="text-ink-2 mt-1">Gérez vos informations personnelles</p>
       </div>
 
       {/* Photo de profil */}
-      <div className="bg-white rounded-xl border border-neutral-200 p-6">
+      <div className="bg-surface rounded-2xl border border-line shadow-soft p-6">
         <div className="flex items-center gap-5">
           <div className="relative shrink-0">
             {imageUrl ? (
@@ -152,7 +152,10 @@ export default function ProfilClientPage() {
                 height={80}
               />
             ) : (
-              <div className="h-20 w-20 rounded-full bg-linear-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-xl font-semibold shadow-sm">
+              <div
+                className="h-20 w-20 rounded-full flex items-center justify-center text-white text-2xl font-bold"
+                style={{ background: "linear-gradient(150deg, var(--brand), var(--teal))" }}
+              >
                 {initials}
               </div>
             )}
@@ -174,15 +177,15 @@ export default function ProfilClientPage() {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploadingImage}
-              className="absolute bottom-0 right-0 p-1.5 bg-white border border-neutral-200 rounded-full shadow-sm hover:bg-neutral-50 transition-colors disabled:opacity-50"
+              className="absolute -bottom-0.5 -right-0.5 grid place-items-center w-8 h-8 bg-brand text-white border-[3px] border-surface rounded-full hover:bg-brand-ink transition-colors disabled:opacity-50"
             >
-              <Camera className="h-3.5 w-3.5 text-neutral-600" />
+              <Camera className="h-3.5 w-3.5" />
             </button>
           </div>
           <div>
-            <p className="font-semibold text-neutral-900">{formData.name}</p>
-            <p className="text-sm text-neutral-500">{formData.email}</p>
-            <p className="text-xs text-neutral-400 mt-1">
+            <p className="font-bold text-ink">Photo de profil</p>
+            <p className="text-sm text-ink-2">{formData.email}</p>
+            <p className="text-[13px] text-ink-3 mt-1">
               JPEG, PNG ou WebP · max 5 Mo
             </p>
           </div>
@@ -191,93 +194,75 @@ export default function ProfilClientPage() {
 
       {/* Informations personnelles */}
       <form onSubmit={handleSubmit}>
-        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-neutral-100 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <User className="h-5 w-5 text-neutral-400" />
-              <h2 className="font-semibold text-neutral-900">Informations personnelles</h2>
-            </div>
+        <div className="bg-surface rounded-2xl border border-line shadow-soft p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-bold text-ink">Informations personnelles</h2>
             {!isEditing && (
               <button
                 type="button"
                 onClick={() => setIsEditing(true)}
-                className="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors"
+                className="inline-flex items-center gap-1.5 bg-surface-2 border border-line rounded-lg px-3 py-1.5 text-[13px] font-bold text-ink hover:border-brand transition-colors"
               >
                 Modifier
               </button>
             )}
           </div>
 
-          <div className="p-6 space-y-5">
+          <div className="space-y-4">
             {/* Nom */}
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                Nom complet
-              </label>
-              <div className="flex items-center gap-3">
-                <User className="h-4 w-4 text-neutral-400 shrink-0" />
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  disabled={!isEditing}
-                  className="flex-1 px-4 py-2.5 border border-neutral-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-neutral-50 disabled:text-neutral-500"
-                />
-              </div>
+              <label className={labelClass}>Nom complet</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                disabled={!isEditing}
+                className={`${fieldBase} border-line text-ink bg-surface focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:bg-surface-2 disabled:text-ink-2`}
+              />
             </div>
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                Adresse email
+              <label className={labelClass}>
+                Adresse email{" "}
+                <span className="font-medium normal-case text-ink-3">· non modifiable</span>
               </label>
-              <div className="flex items-center gap-3">
-                <Mail className="h-4 w-4 text-neutral-400 shrink-0" />
-                <input
-                  type="email"
-                  value={formData.email}
-                  disabled
-                  className="flex-1 px-4 py-2.5 border border-neutral-200 rounded-lg text-sm bg-neutral-50 text-neutral-500"
-                />
-              </div>
-              <p className="mt-1 text-xs text-neutral-400 ml-7">
-                L&apos;email ne peut pas être modifié
-              </p>
+              <input
+                type="email"
+                value={formData.email}
+                disabled
+                className={`${fieldBase} border-line bg-surface-2 text-ink-3`}
+              />
             </div>
 
             {/* Téléphone */}
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                Téléphone
-              </label>
-              <div className="flex items-center gap-3">
-                <Phone className="h-4 w-4 text-neutral-400 shrink-0" />
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  disabled={!isEditing}
-                  placeholder="Non renseigné"
-                  className="flex-1 px-4 py-2.5 border border-neutral-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-neutral-50 disabled:text-neutral-500"
-                />
-              </div>
+              <label className={labelClass}>Téléphone</label>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                disabled={!isEditing}
+                placeholder="Non renseigné"
+                className={`${fieldBase} border-line text-ink bg-surface placeholder:text-ink-3 focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:bg-surface-2 disabled:text-ink-2`}
+              />
             </div>
           </div>
 
           {isEditing && (
-            <div className="px-6 py-4 border-t border-neutral-100 flex items-center justify-end gap-3">
+            <div className="flex items-center gap-3 mt-5">
               <button
                 type="button"
                 onClick={() => setIsEditing(false)}
                 disabled={isSaving}
-                className="px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-2.5 text-sm font-bold text-ink bg-surface-2 border border-line rounded-xl hover:border-brand transition-colors disabled:opacity-50"
               >
                 Annuler
               </button>
               <button
                 type="submit"
                 disabled={isSaving}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold bg-brand text-white rounded-xl hover:bg-brand-ink transition-colors disabled:opacity-50"
               >
                 {isSaving ? (
                   <>
@@ -297,27 +282,18 @@ export default function ProfilClientPage() {
       </form>
 
       {/* Sécurité */}
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-neutral-100 flex items-center gap-3">
-          <Lock className="h-5 w-5 text-neutral-400" />
-          <h2 className="font-semibold text-neutral-900">Sécurité</h2>
+      <div className="bg-surface rounded-2xl border border-line shadow-soft p-6 flex items-center justify-between gap-4">
+        <div>
+          <p className="font-bold text-ink">Sécurité</p>
+          <p className="text-sm text-ink-2">Mot de passe et connexion</p>
         </div>
-        <div className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-neutral-900">Mot de passe</p>
-              <p className="text-sm text-neutral-500">
-                Modifiez votre mot de passe pour sécuriser votre compte
-              </p>
-            </div>
-            <button
-              onClick={() => setIsPasswordModalOpen(true)}
-              className="px-4 py-2 text-sm text-primary-600 border border-primary-200 rounded-lg hover:bg-primary-50 transition-colors"
-            >
-              Changer le mot de passe
-            </button>
-          </div>
-        </div>
+        <button
+          onClick={() => setIsPasswordModalOpen(true)}
+          className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-ink bg-surface-2 border border-line rounded-xl hover:border-brand transition-colors whitespace-nowrap"
+        >
+          <Lock className="h-4 w-4" />
+          Changer le mot de passe
+        </button>
       </div>
 
       {/* Modal de changement de mot de passe */}

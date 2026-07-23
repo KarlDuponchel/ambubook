@@ -5,6 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "@/lib/auth-client";
 
+const inputClass =
+  "w-full border border-line rounded-xl px-3.5 py-3 text-[15px] text-ink bg-surface placeholder:text-ink-3 outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-colors";
+const labelClass =
+  "block text-xs font-bold uppercase tracking-wide text-ink-3 mb-1.5";
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -58,23 +63,23 @@ function LoginForm() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-8">
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Connexion</h1>
-        <p className="text-gray-600 mt-2">Accédez à votre espace patient</p>
+    <div className="bg-surface border border-line rounded-2xl shadow-soft p-8">
+      <div className="mb-7">
+        <h1 className="serif text-2xl text-ink">Connexion</h1>
+        <p className="text-ink-2 text-sm mt-1">Accédez à votre espace patient</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {registered && (
-          <div className="bg-green-50 text-green-700 p-3 rounded-md text-sm">
-            <strong>Compte créé avec succès !</strong>
+          <div className="bg-vert/10 border border-vert/25 text-ink-2 p-3.5 rounded-xl text-sm leading-relaxed">
+            <strong className="text-vert">Compte créé avec succès !</strong>
             <br />
             Un email de confirmation vous a été envoyé. Cliquez sur le lien qu&apos;il
             contient pour activer votre compte, puis connectez-vous.
             {linkedCount && parseInt(linkedCount) > 0 && (
               <>
                 <br />
-                <span className="text-green-600">
+                <span className="text-ink-2">
                   {parseInt(linkedCount) === 1
                     ? "1 demande de transport précédente a été ajoutée à votre compte."
                     : `${linkedCount} demandes de transport précédentes ont été ajoutées à votre compte.`}
@@ -85,24 +90,21 @@ function LoginForm() {
         )}
 
         {reset === "success" && (
-          <div className="bg-green-50 text-green-700 p-3 rounded-md text-sm">
-            <strong>Mot de passe modifié !</strong>
+          <div className="bg-vert/10 border border-vert/25 text-ink-2 p-3.5 rounded-xl text-sm leading-relaxed">
+            <strong className="text-vert">Mot de passe modifié !</strong>
             <br />
             Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
+          <div className="bg-rouge/10 border border-rouge/25 text-rouge p-3.5 rounded-xl text-sm">
             {error}
           </div>
         )}
 
         <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="email" className={labelClass}>
             Email
           </label>
           <input
@@ -111,16 +113,13 @@ function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-black focus:ring-primary-500 focus:border-transparent"
+            className={inputClass}
             placeholder="votre@email.fr"
           />
         </div>
 
         <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="password" className={labelClass}>
             Mot de passe
           </label>
           <input
@@ -129,13 +128,13 @@ function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-black focus:ring-primary-500 focus:border-transparent"
+            className={inputClass}
             placeholder="Votre mot de passe"
           />
-          <div className="text-right mt-1">
+          <div className="text-right mt-2">
             <Link
               href="/mot-de-passe-oublie"
-              className="text-sm text-primary-600 hover:underline"
+              className="text-sm font-semibold text-brand hover:text-brand-ink transition-colors"
             >
               Mot de passe oublié ?
             </Link>
@@ -145,18 +144,18 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary-600 text-white py-2 px-4 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-ink disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? "Connexion..." : "Se connecter"}
         </button>
       </form>
 
-      <div className="mt-6 text-center text-sm text-gray-600">
+      <div className="mt-6 text-center text-sm text-ink-2">
         <p>
           Pas encore de compte ?{" "}
           <Link
             href={redirect ? `/inscription?redirect=${encodeURIComponent(redirect)}` : "/inscription"}
-            className="text-primary-600 hover:underline"
+            className="font-semibold text-brand hover:text-brand-ink transition-colors"
           >
             Créer un compte
           </Link>
@@ -168,17 +167,19 @@ function LoginForm() {
 
 export default function CustomerLoginPage() {
   return (
-    <Suspense fallback={
-      <div className="bg-white rounded-lg shadow-md p-8 animate-pulse">
-        <div className="h-8 bg-gray-200 rounded w-1/2 mx-auto mb-4"></div>
-        <div className="h-4 bg-gray-200 rounded w-2/3 mx-auto mb-8"></div>
-        <div className="space-y-4">
-          <div className="h-10 bg-gray-200 rounded"></div>
-          <div className="h-10 bg-gray-200 rounded"></div>
-          <div className="h-10 bg-gray-200 rounded"></div>
+    <Suspense
+      fallback={
+        <div className="bg-surface border border-line rounded-2xl shadow-soft p-8 animate-pulse">
+          <div className="h-8 bg-surface-3 rounded w-1/2 mb-4"></div>
+          <div className="h-4 bg-surface-3 rounded w-2/3 mb-8"></div>
+          <div className="space-y-4">
+            <div className="h-11 bg-surface-3 rounded-xl"></div>
+            <div className="h-11 bg-surface-3 rounded-xl"></div>
+            <div className="h-11 bg-surface-3 rounded-xl"></div>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <LoginForm />
     </Suspense>
   );

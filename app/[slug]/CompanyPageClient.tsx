@@ -51,9 +51,12 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
     <>
       <Header />
 
-      <main className="min-h-screen bg-neutral-50">
+      <main className="min-h-screen bg-page">
         {/* Cover Image */}
-        <div className="relative h-64 md:h-80 bg-linear-to-br from-primary-100 to-primary-200">
+        <div
+          className="relative h-64 md:h-80"
+          style={{ background: "linear-gradient(150deg, color-mix(in srgb, var(--brand) 22%, var(--surface)), color-mix(in srgb, var(--teal) 22%, var(--surface)))" }}
+        >
           {company.coverImageUrl ? (
             <Image
               src={company.coverImageUrl}
@@ -64,7 +67,7 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
-              <Building2 className="h-24 w-24 text-primary-300 opacity-50" />
+              <Building2 className="h-24 w-24 text-ink-3 opacity-50" />
             </div>
           )}
           <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
@@ -73,12 +76,12 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
         {/* Contenu principal */}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-10 pb-16">
           {/* Header Card */}
-          <article className="bg-white rounded-2xl shadow-lg border border-neutral-200 overflow-hidden mb-6">
+          <article className="bg-surface rounded-2xl shadow-soft border border-line overflow-hidden mb-6">
             <div className="p-6 sm:p-8">
               <div className="flex flex-col sm:flex-row gap-6">
                 {/* Logo */}
                 <div className="shrink-0">
-                  <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-2xl bg-white border-4 border-white shadow-lg overflow-hidden">
+                  <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-2xl bg-surface border-4 border-surface shadow-soft overflow-hidden">
                     {company.logoUrl ? (
                       <Image
                         src={company.logoUrl}
@@ -88,8 +91,8 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
                         className="object-cover w-full h-full"
                       />
                     ) : (
-                      <div className="h-full w-full bg-primary-100 flex items-center justify-center">
-                        <Building2 className="h-12 w-12 text-primary-400" />
+                      <div className="h-full w-full bg-surface-2 flex items-center justify-center">
+                        <Building2 className="h-12 w-12 text-ink-3" />
                       </div>
                     )}
                   </div>
@@ -97,26 +100,35 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
 
                 {/* Infos principales */}
                 <div className="flex-1">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-2">
+                  <h1 className="serif text-2xl sm:text-3xl text-ink mb-2">
                     {company.name}
                   </h1>
 
                   {/* Badges services */}
                   <div className="flex flex-wrap gap-2 mb-4">
                     {company.hasAmbulance && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium bg-primary-100 text-primary-700 rounded-full">
+                      <span
+                        className="inline-flex items-center gap-1.5 px-3 py-1 text-sm font-bold rounded-full text-bleu"
+                        style={{ background: "color-mix(in srgb, var(--bleu) 13%, var(--surface))" }}
+                      >
                         <Ambulance className="h-4 w-4" />
                         Ambulance
                       </span>
                     )}
                     {company.hasVSL && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium bg-success-100 text-success-700 rounded-full">
+                      <span
+                        className="inline-flex items-center gap-1.5 px-3 py-1 text-sm font-bold rounded-full text-vert"
+                        style={{ background: "color-mix(in srgb, var(--vert) 13%, var(--surface))" }}
+                      >
                         <Car className="h-4 w-4" />
                         VSL
                       </span>
                     )}
                     {company.acceptsOnlineBooking && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium bg-info-100 text-info-700 rounded-full">
+                      <span
+                        className="inline-flex items-center gap-1.5 px-3 py-1 text-sm font-bold rounded-full text-teal"
+                        style={{ background: "color-mix(in srgb, var(--teal) 13%, var(--surface))" }}
+                      >
                         <Calendar className="h-4 w-4" />
                         Réservation en ligne
                       </span>
@@ -124,10 +136,10 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
                   </div>
 
                   {/* Coordonnées */}
-                  <address className="not-italic space-y-2 text-neutral-600">
+                  <address className="not-italic space-y-2 text-ink-2">
                     {(company.address || company.city) && (
                       <p className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-neutral-400 shrink-0" />
+                        <MapPin className="h-4 w-4 text-ink-3 shrink-0" />
                         <span>
                           {[company.address, company.postalCode, company.city]
                             .filter(Boolean)
@@ -137,10 +149,10 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
                     )}
                     {company.phone && (
                       <p className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-neutral-400 shrink-0" />
+                        <Phone className="h-4 w-4 text-ink-3 shrink-0" />
                         <Link
                           href={`tel:${company.phone}`}
-                          className="hover:text-primary-600 transition-colors"
+                          className="hover:text-brand transition-colors"
                         >
                           {company.phone}
                         </Link>
@@ -149,10 +161,10 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
                     )}
                     {company.email && (
                       <p className="flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-neutral-400 shrink-0" />
+                        <Mail className="h-4 w-4 text-ink-3 shrink-0" />
                         <Link
                           href={`mailto:${company.email}`}
-                          className="hover:text-primary-600 transition-colors"
+                          className="hover:text-brand transition-colors"
                         >
                           {company.email}
                         </Link>
@@ -166,7 +178,7 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
                 <div className="sm:self-start">
                   <button
                     onClick={() => setIsBookingModalOpen(true)}
-                    className="w-full sm:w-auto px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-primary-600/25"
+                    className="w-full sm:w-auto px-6 py-3 bg-brand hover:bg-brand-ink text-white font-bold rounded-xl transition-colors shadow-soft"
                   >
                     {company.acceptsOnlineBooking ? "Réserver un transport" : "Contacter"}
                   </button>
@@ -181,11 +193,11 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
             <div className="lg:col-span-2 space-y-6">
               {/* Description */}
               {company.description && (
-                <section className="bg-white rounded-xl border border-neutral-200 p-6">
-                  <h2 className="text-lg font-semibold text-neutral-900 mb-4">
+                <section className="bg-surface rounded-2xl border border-line shadow-soft p-6">
+                  <h2 className="text-lg font-bold text-ink mb-4">
                     À propos
                   </h2>
-                  <p className="text-neutral-600 whitespace-pre-wrap leading-relaxed">
+                  <p className="text-ink-2 whitespace-pre-wrap leading-relaxed">
                     {company.description}
                   </p>
                 </section>
@@ -193,8 +205,8 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
 
               {/* Galerie photos */}
               {company.photos && company.photos.length > 0 && (
-                <section className="bg-white rounded-xl border border-neutral-200 p-6">
-                  <h2 className="text-lg font-semibold text-neutral-900 mb-4">
+                <section className="bg-surface rounded-2xl border border-line shadow-soft p-6">
+                  <h2 className="text-lg font-bold text-ink mb-4">
                     Photos
                   </h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -202,7 +214,7 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
                       <button
                         key={photo.id}
                         onClick={() => setSelectedPhoto(photo.url)}
-                        className="relative aspect-4/3 rounded-lg overflow-hidden bg-neutral-100 hover:opacity-90 transition-opacity"
+                        className="relative aspect-4/3 rounded-lg overflow-hidden bg-surface-2 hover:opacity-90 transition-opacity"
                       >
                         <Image
                           src={photo.url}
@@ -221,28 +233,28 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
             <aside className="space-y-6">
               {/* Horaires */}
               {sortedHours.length > 0 && (
-                <section className="bg-white rounded-xl border border-neutral-200 p-6">
-                  <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-primary-600" />
+                <section className="bg-surface rounded-2xl border border-line shadow-soft p-6">
+                  <h2 className="text-lg font-bold text-ink mb-4 flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-brand" />
                     Horaires
                   </h2>
                   <div className="space-y-2">
                     {sortedHours.map((hour) => (
                       <div
                         key={hour.dayOfWeek}
-                        className="flex items-center justify-between py-2 border-b border-neutral-100 last:border-0"
+                        className="flex items-center justify-between py-2 border-b border-line last:border-0"
                       >
-                        <span className="font-medium text-neutral-700">
+                        <span className="font-semibold text-ink">
                           {DAY_LABELS[hour.dayOfWeek]}
                         </span>
                         {hour.isClosed ? (
-                          <span className="text-neutral-400">Fermé</span>
+                          <span className="text-ink-3">Fermé</span>
                         ) : hour.openTime && hour.closeTime ? (
-                          <span className="text-neutral-600">
+                          <span className="text-ink-2">
                             {hour.openTime} - {hour.closeTime}
                           </span>
                         ) : (
-                          <span className="text-neutral-400">-</span>
+                          <span className="text-ink-3">-</span>
                         )}
                       </div>
                     ))}
@@ -252,9 +264,9 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
 
               {/* Prochaines fermetures */}
               {company.timeOffs && company.timeOffs.length > 0 && (
-                <section className="bg-white rounded-xl border border-neutral-200 p-6">
-                  <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
-                    <CalendarOff className="h-5 w-5 text-warning-600" />
+                <section className="bg-surface rounded-2xl border border-line shadow-soft p-6">
+                  <h2 className="text-lg font-bold text-ink mb-4 flex items-center gap-2">
+                    <CalendarOff className="h-5 w-5 text-ambre" />
                     Prochaines fermetures
                   </h2>
                   <div className="space-y-3">
@@ -280,17 +292,17 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
                       return (
                         <div
                           key={timeOff.id}
-                          className={`p-3 rounded-lg ${isActive ? "bg-warning-50 border border-warning-200" : "bg-neutral-50"}`}
+                          className={`p-3 rounded-xl ${isActive ? "bg-ambre/10 border border-ambre/25" : "bg-surface-2"}`}
                         >
                           <div className="flex items-center gap-2">
                             {isActive && (
-                              <span className="px-2 py-0.5 text-xs font-medium bg-warning-100 text-warning-700 rounded-full">
+                              <span className="px-2 py-0.5 text-xs font-bold bg-ambre/15 text-ambre rounded-full">
                                 En cours
                               </span>
                             )}
-                            <span className="font-medium text-neutral-900">{timeOff.title}</span>
+                            <span className="font-semibold text-ink">{timeOff.title}</span>
                           </div>
-                          <p className="text-sm text-neutral-500 mt-1">{formatDateRange()}</p>
+                          <p className="text-sm text-ink-3 mt-1">{formatDateRange()}</p>
                         </div>
                       );
                     })}
@@ -300,44 +312,44 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
 
               {/* Infos complémentaires */}
               {(company.licenseNumber || company.foundedYear || company.fleetSize || company.coverageRadius) && (
-                <section className="bg-white rounded-xl border border-neutral-200 p-6">
-                  <h2 className="text-lg font-semibold text-neutral-900 mb-4">
+                <section className="bg-surface rounded-2xl border border-line shadow-soft p-6">
+                  <h2 className="text-lg font-bold text-ink mb-4">
                     Informations
                   </h2>
                   <div className="space-y-3">
                     {company.licenseNumber && (
                       <div className="flex items-center gap-3">
-                        <Shield className="h-5 w-5 text-neutral-400" />
+                        <Shield className="h-5 w-5 text-ink-3" />
                         <div>
-                          <p className="text-sm text-neutral-500">Agrément ARS</p>
-                          <p className="font-medium text-neutral-900">{company.licenseNumber}</p>
+                          <p className="text-sm text-ink-3">Agrément ARS</p>
+                          <p className="font-semibold text-ink">{company.licenseNumber}</p>
                         </div>
                       </div>
                     )}
                     {company.foundedYear && (
                       <div className="flex items-center gap-3">
-                        <Calendar className="h-5 w-5 text-neutral-400" />
+                        <Calendar className="h-5 w-5 text-ink-3" />
                         <div>
-                          <p className="text-sm text-neutral-500">Depuis</p>
-                          <p className="font-medium text-neutral-900">{company.foundedYear}</p>
+                          <p className="text-sm text-ink-3">Depuis</p>
+                          <p className="font-semibold text-ink">{company.foundedYear}</p>
                         </div>
                       </div>
                     )}
                     {company.fleetSize && (
                       <div className="flex items-center gap-3">
-                        <Users className="h-5 w-5 text-neutral-400" />
+                        <Users className="h-5 w-5 text-ink-3" />
                         <div>
-                          <p className="text-sm text-neutral-500">Véhicules</p>
-                          <p className="font-medium text-neutral-900">{company.fleetSize}</p>
+                          <p className="text-sm text-ink-3">Véhicules</p>
+                          <p className="font-semibold text-ink">{company.fleetSize}</p>
                         </div>
                       </div>
                     )}
                     {company.coverageRadius && (
                       <div className="flex items-center gap-3">
-                        <Target className="h-5 w-5 text-neutral-400" />
+                        <Target className="h-5 w-5 text-ink-3" />
                         <div>
-                          <p className="text-sm text-neutral-500">Rayon d&apos;intervention</p>
-                          <p className="font-medium text-neutral-900">{company.coverageRadius} km</p>
+                          <p className="text-sm text-ink-3">Rayon d&apos;intervention</p>
+                          <p className="font-semibold text-ink">{company.coverageRadius} km</p>
                         </div>
                       </div>
                     )}
@@ -349,7 +361,7 @@ export function CompanyPageClient({ company }: CompanyPageClientProps) {
               <div className="lg:hidden">
                 <button
                   onClick={() => setIsBookingModalOpen(true)}
-                  className="w-full px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors"
+                  className="w-full px-6 py-3 bg-brand hover:bg-brand-ink text-white font-bold rounded-xl transition-colors"
                 >
                   {company.acceptsOnlineBooking ? "Réserver un transport" : "Contacter"}
                 </button>

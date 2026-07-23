@@ -629,6 +629,27 @@
   display: none;
 }
 
+/* Scrollbar fine et discrète pour les carrousels horizontaux :
+   masquée au doigt sur mobile mais fournit une prise pour le scroll
+   à la souris sur desktop en fenêtre réduite. */
+.carousel-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+.carousel-scrollbar::-webkit-scrollbar {
+  height: 6px;
+}
+.carousel-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.carousel-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 999px;
+}
+.carousel-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-3);
+}
+
 /* Gradient médical pour les headers/hero */
 .gradient-medical {
   background: linear-gradient(135deg, var(--primary-500) 0%, var(--secondary-500) 100%);

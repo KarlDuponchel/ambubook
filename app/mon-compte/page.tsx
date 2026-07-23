@@ -53,7 +53,7 @@ export default function MonComptePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-100">
-        <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-brand" />
       </div>
     );
   }
@@ -67,129 +67,110 @@ export default function MonComptePage() {
         .slice(0, 2)
     : "";
 
+  const navItems = [
+    {
+      href: "/mes-transports",
+      icon: Calendar,
+      color: "var(--bleu)",
+      title: "Mes transports",
+      desc: "Consultez vos demandes et leur statut",
+    },
+    {
+      href: "/recherche",
+      icon: Truck,
+      color: "var(--teal)",
+      title: "Réserver un transport",
+      desc: "Trouvez un ambulancier près de chez vous",
+    },
+    {
+      href: "/mon-compte/profil",
+      icon: User,
+      color: "var(--violet)",
+      title: "Mon profil",
+      desc: "Nom, téléphone et photo de profil",
+    },
+    {
+      href: "/mon-compte/parametres",
+      icon: Settings,
+      color: "var(--neutre)",
+      title: "Paramètres",
+      desc: "Notifications et préférences",
+    },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-neutral-900">Mon compte</h1>
-        <p className="text-neutral-600 mt-1">
+        <h1 className="serif text-3xl text-ink">Mon compte</h1>
+        <p className="text-ink-2 mt-1">
           Gérez vos transports et vos préférences
         </p>
       </div>
 
       {/* Carte profil */}
       {user && (
-        <div className="bg-white rounded-xl border border-neutral-200">
-          <Link
-              href="/mon-compte/profil" className="flex items-center justify-between  p-6 hover:bg-neutral-50 transition-colors">
-            <div className="flex items-center gap-4">
-              <div className="relative shrink-0">
-                {user.imageUrl ? (
-                  <Image
-                    src={user.imageUrl}
-                    alt="Photo de profil"
-                    className="w-14 h-14 rounded-full object-cover shadow-sm"
-                    width={56}
-                    height={56}
-                  />
-                ) : (
-                  <div className="w-14 h-14 rounded-full bg-linear-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-xl font-semibold shadow-sm">
-                    {initials}
-                  </div>
-                )}
+        <Link
+          href="/mon-compte/profil"
+          className="flex items-center gap-4 bg-surface border border-line rounded-2xl shadow-soft p-5 hover:border-brand transition-colors"
+        >
+          <div className="relative shrink-0">
+            {user.imageUrl ? (
+              <Image
+                src={user.imageUrl}
+                alt="Photo de profil"
+                className="w-14 h-14 rounded-full object-cover"
+                width={56}
+                height={56}
+              />
+            ) : (
+              <div
+                className="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold"
+                style={{ background: "linear-gradient(150deg, var(--brand), var(--teal))" }}
+              >
+                {initials}
               </div>
-              <div>
-                <h2 className="text-lg font-semibold text-neutral-900">{user.name}</h2>
-                <p className="text-neutral-500">{user.email}</p>
-                {user.phone && (
-                  <p className="text-sm text-neutral-400">{user.phone}</p>
-                )}
-              </div>
-            </div>
-            <ChevronRight className="h-5 w-5 text-neutral-400" />
-          </Link>
-        </div>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-lg font-bold text-ink truncate">{user.name}</h2>
+            <p className="text-sm text-ink-2 truncate">{user.email}</p>
+            {user.phone && <p className="text-sm text-ink-2">{user.phone}</p>}
+          </div>
+          <ChevronRight className="h-5 w-5 text-ink-3 shrink-0" />
+        </Link>
       )}
 
       {/* Navigation */}
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden divide-y divide-neutral-100">
-        <Link
-          href="/mes-transports"
-          className="flex items-center justify-between p-4 hover:bg-neutral-50 transition-colors"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center">
-              <Calendar className="h-5 w-5 text-primary-600" />
+      <div className="flex flex-col gap-2.5">
+        {navItems.map(({ href, icon: Icon, color, title, desc }) => (
+          <Link
+            key={href}
+            href={href}
+            className="flex items-center gap-3.5 bg-surface border border-line rounded-2xl p-4 hover:border-brand hover:bg-surface-2 transition-colors"
+          >
+            <span
+              className="grid place-items-center w-10 h-10 rounded-xl shrink-0"
+              style={{
+                background: `color-mix(in srgb, ${color} 14%, var(--surface))`,
+                color,
+              }}
+            >
+              <Icon className="h-5 w-5" />
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-ink">{title}</p>
+              <p className="text-[13px] text-ink-2">{desc}</p>
             </div>
-            <div>
-              <p className="font-medium text-neutral-900">Mes transports</p>
-              <p className="text-sm text-neutral-500">
-                Consultez vos demandes et leur statut
-              </p>
-            </div>
-          </div>
-          <ChevronRight className="h-5 w-5 text-neutral-400" />
-        </Link>
-
-        <Link
-          href="/recherche"
-          className="flex items-center justify-between p-4 hover:bg-neutral-50 transition-colors"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-lg bg-accent-50 flex items-center justify-center">
-              <Truck className="h-5 w-5 text-accent-600" />
-            </div>
-            <div>
-              <p className="font-medium text-neutral-900">Réserver un transport</p>
-              <p className="text-sm text-neutral-500">
-                Trouvez un ambulancier près de chez vous
-              </p>
-            </div>
-          </div>
-          <ChevronRight className="h-5 w-5 text-neutral-400" />
-        </Link>
-
-        <Link
-          href="/mon-compte/profil"
-          className="flex items-center justify-between p-4 hover:bg-neutral-50 transition-colors"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center">
-              <User className="h-5 w-5 text-primary-600" />
-            </div>
-            <div>
-              <p className="font-medium text-neutral-900">Mon profil</p>
-              <p className="text-sm text-neutral-500">
-                Nom, téléphone et photo de profil
-              </p>
-            </div>
-          </div>
-          <ChevronRight className="h-5 w-5 text-neutral-400" />
-        </Link>
-
-        <Link
-          href="/mon-compte/parametres"
-          className="flex items-center justify-between p-4 hover:bg-neutral-50 transition-colors"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center">
-              <Settings className="h-5 w-5 text-neutral-600" />
-            </div>
-            <div>
-              <p className="font-medium text-neutral-900">Paramètres</p>
-              <p className="text-sm text-neutral-500">
-                Notifications et préférences
-              </p>
-            </div>
-          </div>
-          <ChevronRight className="h-5 w-5 text-neutral-400" />
-        </Link>
+            <ChevronRight className="h-5 w-5 text-ink-3 shrink-0" />
+          </Link>
+        ))}
       </div>
 
       {/* Info */}
-      <p className="text-center text-sm text-neutral-400">
+      <p className="text-center text-sm text-ink-3">
         Besoin d&apos;aide ?{" "}
-        <Link href="/#faq" className="text-primary-600 hover:underline">
+        <Link href="/#faq" className="font-semibold text-brand hover:text-brand-ink transition-colors">
           Consultez notre FAQ
         </Link>
       </p>

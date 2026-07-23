@@ -25,13 +25,13 @@ export function BookingProgress({ currentStep, onStepClick }: BookingProgressPro
               onClick={() => isClickable && onStepClick(step)}
               disabled={!isClickable}
               className={`
-                relative flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium
-                transition-all duration-200
+                relative flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold
+                transition-colors duration-200
                 ${isCompleted
-                  ? "bg-primary-600 text-white cursor-pointer hover:bg-primary-700"
+                  ? "bg-brand text-white cursor-pointer hover:bg-brand-ink"
                   : isCurrent
-                    ? "bg-primary-600 text-white"
-                    : "bg-neutral-200 text-neutral-500"
+                    ? "bg-brand text-white"
+                    : "bg-surface-3 text-ink-3"
                 }
                 ${!isClickable && !isCurrent ? "cursor-default" : ""}
               `}
@@ -58,8 +58,8 @@ export function BookingProgress({ currentStep, onStepClick }: BookingProgressPro
             {/* Label de l'étape (visible sur desktop) */}
             <span
               className={`
-                hidden sm:block ml-2 text-sm font-medium truncate
-                ${isCurrent ? "text-primary-600" : isCompleted ? "text-neutral-700" : "text-neutral-400"}
+                hidden sm:block ml-2 text-sm font-semibold truncate
+                ${isCurrent ? "text-brand" : isCompleted ? "text-ink-2" : "text-ink-3"}
               `}
             >
               {STEP_TITLES[step]}
@@ -71,7 +71,7 @@ export function BookingProgress({ currentStep, onStepClick }: BookingProgressPro
                 <div
                   className={`
                     h-0.5 rounded-full transition-colors duration-200
-                    ${isCompleted ? "bg-primary-600" : "bg-neutral-200"}
+                    ${isCompleted ? "bg-brand" : "bg-line"}
                   `}
                 />
               </div>

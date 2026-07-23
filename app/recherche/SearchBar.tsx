@@ -34,7 +34,7 @@ export function SearchBar() {
               handleSubmit(input.value.trim());
             }
           }}
-          className="px-3 sm:px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 active:bg-primary-800 transition-colors shadow-lg shadow-primary-500/25"
+          className="px-3 sm:px-6 py-3 bg-brand text-white font-bold rounded-xl hover:bg-brand-ink transition-colors"
           aria-label="Rechercher"
         >
           <Search className="w-5 h-5 sm:hidden" />

@@ -3,10 +3,28 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import useSWR from "swr";
-import { LogOut, Truck, ChevronDown, Calendar, User, LayoutDashboard, Building2, Search, Settings, Plus } from "lucide-react";
+import { LogOut, Truck, ChevronDown, Calendar, User, LayoutDashboard, Building2, Search, Settings, Plus, Sun, Moon } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
 import { NotificationBell } from "@/components/notifications";
+import { useTheme } from "@/components/theme/ThemeProvider";
 import Image from "next/image";
+
+/** Bouton de bascule clair/sombre — s'appuie sur le ThemeProvider global. */
+function ThemeToggle({ className = "" }: { className?: string }) {
+  const { theme, toggle } = useTheme();
+  const isDark = theme === "dark";
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-label={isDark ? "Activer le thème clair" : "Activer le thème sombre"}
+      title={isDark ? "Thème clair" : "Thème sombre"}
+      className={`grid place-items-center w-10 h-10 rounded-[10px] border border-line bg-surface text-ink-2 hover:border-brand hover:text-brand transition-colors ${className}`}
+    >
+      {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+    </button>
+  );
+}
 
 const fetcher = (url: string) => fetch(url).then((r) => r.ok ? r.json() : null);
 
@@ -158,6 +176,7 @@ export function Header() {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-2">
+            <ThemeToggle />
             {isCustomer ? (
               <>
                 {/* Notifications Bell */}
@@ -312,6 +331,9 @@ export function Header() {
 
           {/* Mobile actions */}
           <div className="flex lg:hidden items-center gap-1">
+            {/* Bascule thème */}
+            <ThemeToggle className="w-9 h-9 border-transparent bg-transparent" />
+
             {/* Recherche mobile */}
             <Link
               href="/recherche"

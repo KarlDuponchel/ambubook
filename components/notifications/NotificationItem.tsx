@@ -24,70 +24,30 @@ interface NotificationItemProps {
   onArchive: (id: string) => void;
 }
 
-// Icône et couleur selon le type
-function getTypeStyles(type: string) {
+// Icône et couleur (token éditorial) selon le type
+function getTypeStyles(type: string): { icon: typeof Bell; color: string } {
   switch (type) {
     case "TRANSPORT_ACCEPTED":
-      return {
-        icon: CheckCircle,
-        iconColor: "text-success-500",
-        bgColor: "bg-success-50",
-      };
+      return { icon: CheckCircle, color: "var(--vert)" };
     case "TRANSPORT_REFUSED":
-      return {
-        icon: XCircle,
-        iconColor: "text-danger-500",
-        bgColor: "bg-danger-50",
-      };
+      return { icon: XCircle, color: "var(--rouge)" };
     case "TRANSPORT_COUNTER_PROPOSAL":
-      return {
-        icon: MessageSquare,
-        iconColor: "text-accent-500",
-        bgColor: "bg-accent-50",
-      };
+      return { icon: MessageSquare, color: "var(--violet)" };
     case "TRANSPORT_NEW_REQUEST":
-      return {
-        icon: Bell,
-        iconColor: "text-primary-500",
-        bgColor: "bg-primary-50",
-      };
+      return { icon: Bell, color: "var(--brand)" };
     case "TRANSPORT_REMINDER":
-      return {
-        icon: Clock,
-        iconColor: "text-warning-500",
-        bgColor: "bg-warning-50",
-      };
+      return { icon: Clock, color: "var(--ambre)" };
     case "TRANSPORT_CUSTOMER_RESPONSE":
-      return {
-        icon: MessageSquare,
-        iconColor: "text-primary-500",
-        bgColor: "bg-primary-50",
-      };
+      return { icon: MessageSquare, color: "var(--brand)" };
     case "TRANSPORT_ATTACHMENT_ADDED":
-      return {
-        icon: Paperclip,
-        iconColor: "text-neutral-500",
-        bgColor: "bg-neutral-100",
-      };
+      return { icon: Paperclip, color: "var(--neutre)" };
     case "WELCOME_CUSTOMER":
     case "WELCOME_AMBULANCIER":
-      return {
-        icon: UserPlus,
-        iconColor: "text-success-500",
-        bgColor: "bg-success-50",
-      };
+      return { icon: UserPlus, color: "var(--vert)" };
     case "ACCOUNT_ACTIVATED":
-      return {
-        icon: CheckCircle,
-        iconColor: "text-success-500",
-        bgColor: "bg-success-50",
-      };
+      return { icon: CheckCircle, color: "var(--vert)" };
     default:
-      return {
-        icon: Bell,
-        iconColor: "text-neutral-500",
-        bgColor: "bg-neutral-100",
-      };
+      return { icon: Bell, color: "var(--neutre)" };
   }
 }
 
@@ -124,7 +84,7 @@ export function NotificationItem({
   onArchive,
 }: NotificationItemProps) {
   const router = useRouter();
-  const { icon: Icon, iconColor, bgColor } = getTypeStyles(type);
+  const { icon: Icon, color } = getTypeStyles(type);
   const isUnread = status === "UNREAD";
 
   const handleClick = () => {
@@ -146,29 +106,32 @@ export function NotificationItem({
       onClick={handleClick}
       className={`
         group relative flex items-start gap-3 p-3 cursor-pointer
-        hover:bg-neutral-50 transition-colors
-        ${isUnread ? "bg-primary-50/30" : ""}
+        hover:bg-surface-2 transition-colors
+        ${isUnread ? "bg-brand/5" : ""}
       `}
     >
       {/* Indicateur non-lu */}
       {isUnread && (
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary-500 rounded-r" />
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand rounded-r" />
       )}
 
       {/* Icône */}
-      <div className={`flex-shrink-0 p-2 rounded-full ${bgColor}`}>
-        <Icon className={`h-4 w-4 ${iconColor}`} />
+      <div
+        className="flex-shrink-0 grid place-items-center w-9 h-9 rounded-full"
+        style={{ background: `color-mix(in srgb, ${color} 14%, var(--surface))`, color }}
+      >
+        <Icon className="h-4 w-4" />
       </div>
 
       {/* Contenu */}
       <div className="flex-1 min-w-0">
-        <p className={`text-sm ${isUnread ? "font-semibold text-neutral-900" : "text-neutral-700"}`}>
+        <p className={`text-sm ${isUnread ? "font-bold text-ink" : "text-ink-2"}`}>
           {title}
         </p>
-        <p className="text-sm text-neutral-500 line-clamp-2 mt-0.5">
+        <p className="text-sm text-ink-3 line-clamp-2 mt-0.5">
           {message}
         </p>
-        <p className="text-xs text-neutral-400 mt-1">
+        <p className="text-xs text-ink-3 mt-1">
           {getRelativeTime(createdAt)}
         </p>
       </div>
@@ -179,11 +142,11 @@ export function NotificationItem({
         className="
           flex-shrink-0 p-1.5 rounded-full
           opacity-0 group-hover:opacity-100
-          hover:bg-neutral-200 transition-all
+          hover:bg-surface-3 transition-all
         "
         aria-label="Supprimer"
       >
-        <X className="h-4 w-4 text-neutral-400" />
+        <X className="h-4 w-4 text-ink-3" />
       </button>
     </div>
   );

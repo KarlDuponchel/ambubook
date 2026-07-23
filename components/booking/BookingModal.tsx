@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Button, useToast } from "@/components/ui";
+import { useToast } from "@/components/ui";
 import { BookingProgress } from "./BookingProgress";
 import { PatientInfoStep } from "./steps/PatientInfoStep";
 import { TransportStep } from "./steps/TransportStep";
@@ -209,25 +209,25 @@ export function BookingModal({ isOpen, onClose, company }: BookingModalProps) {
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
-      <div className="w-full max-w-2xl max-h-[90vh] bg-white rounded-2xl shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 flex flex-col overflow-hidden">
+      <div className="w-full max-w-2xl max-h-[90vh] bg-surface border border-line rounded-2xl shadow-soft animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-neutral-200 shrink-0">
+        <div className="px-6 py-4 border-b border-line shrink-0">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-lg font-semibold text-neutral-900">
+              <h2 className="serif text-xl text-ink">
                 {trackingId ? "Demande envoyée !" : "Réserver un transport"}
               </h2>
-              <p className="text-sm text-neutral-500">{company.name}</p>
+              <p className="text-sm text-ink-2">{company.name}</p>
             </div>
             <button
               type="button"
               onClick={handleClose}
-              className="p-2 -mr-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+              className="grid place-items-center w-9 h-9 -mr-2 text-ink-3 hover:text-ink hover:bg-surface-2 rounded-lg transition-colors"
             >
               <span className="sr-only">Fermer</span>
               <svg
@@ -261,7 +261,7 @@ export function BookingModal({ isOpen, onClose, company }: BookingModalProps) {
             <SuccessView trackingId={trackingId} onClose={handleClose} isLoggedIn={!!session?.user} />
           ) : (
             <>
-              <h3 className="text-lg font-medium text-neutral-900 mb-4">
+              <h3 className="font-bold text-ink mb-4">
                 {STEP_TITLES[currentStep]}
               </h3>
 
@@ -303,40 +303,34 @@ export function BookingModal({ isOpen, onClose, company }: BookingModalProps) {
 
         {/* Footer */}
         {!trackingId && (
-          <div className="px-6 py-4 border-t border-neutral-200 shrink-0">
+          <div className="px-6 py-4 border-t border-line shrink-0">
             <div className="flex justify-between gap-3">
-              {currentStep > 1 ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={handlePrevious}
-                  disabled={isSubmitting}
-                >
-                  Précédent
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={handleClose}
-                  disabled={isSubmitting}
-                >
-                  Annuler
-                </Button>
-              )}
+              <button
+                type="button"
+                onClick={currentStep > 1 ? handlePrevious : handleClose}
+                disabled={isSubmitting}
+                className="px-5 py-2.5 font-bold text-ink-2 hover:bg-surface-2 rounded-xl disabled:opacity-50 transition-colors"
+              >
+                {currentStep > 1 ? "Précédent" : "Annuler"}
+              </button>
 
               {currentStep < 4 ? (
-                <Button type="button" onClick={handleNext}>
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="px-5 py-2.5 font-bold text-white bg-brand hover:bg-brand-ink rounded-xl transition-colors"
+                >
                   Suivant
-                </Button>
+                </button>
               ) : (
-                <Button
+                <button
                   type="button"
                   onClick={handleSubmit}
                   disabled={isSubmitting}
+                  className="px-5 py-2.5 font-bold text-white bg-brand hover:bg-brand-ink rounded-xl disabled:opacity-50 transition-colors"
                 >
                   {isSubmitting ? "Envoi..." : "Envoyer la demande"}
-                </Button>
+                </button>
               )}
             </div>
           </div>
@@ -367,9 +361,9 @@ function SuccessView({
 
   return (
     <div className="text-center py-6">
-      <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-success-100 flex items-center justify-center">
+      <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-vert/12 text-vert flex items-center justify-center">
         <svg
-          className="w-8 h-8 text-success-600"
+          className="w-8 h-8"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -383,39 +377,46 @@ function SuccessView({
         </svg>
       </div>
 
-      <h3 className="text-xl font-semibold text-neutral-900 mb-2">
+      <h3 className="serif text-xl text-ink mb-2">
         Demande envoyée avec succès !
       </h3>
-      <p className="text-neutral-600 mb-6">
+      <p className="text-ink-2 mb-6">
         Votre demande de transport a été transmise à l&apos;ambulancier.
         <br />
         Vous serez contacté prochainement pour confirmation.
       </p>
 
-      <div className="bg-neutral-50 rounded-lg p-4 mb-6">
-        <p className="text-sm text-neutral-500 mb-1">Numéro de suivi</p>
-        <p className="text-lg font-mono font-semibold text-neutral-900">
+      <div className="bg-surface-2 border border-line rounded-xl p-4 mb-6">
+        <p className="text-sm text-ink-3 mb-1">Numéro de suivi</p>
+        <p className="text-lg font-mono font-bold text-ink">
           {trackingId.slice(0, 8).toUpperCase()}
         </p>
       </div>
 
       <div className="flex justify-center gap-2">
-        <Link href={trackingUrl}>
-          <Button variant="primary">Suivre ma demande</Button>
+        <Link
+          href={trackingUrl}
+          className="inline-flex items-center justify-center px-5 py-2.5 font-bold text-white bg-brand hover:bg-brand-ink rounded-xl transition-colors"
+        >
+          Suivre ma demande
         </Link>
-        <Button type="button" variant="outline" onClick={onClose}>
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-5 py-2.5 font-bold text-ink bg-surface-2 border border-line rounded-xl hover:border-brand transition-colors"
+        >
           Fermer
-        </Button>
+        </button>
       </div>
 
       {!isLoggedIn && (
-        <div className="mt-6 pt-6 border-t border-neutral-200">
-          <p className="text-sm text-neutral-600 mb-3">
+        <div className="mt-6 pt-6 border-t border-line">
+          <p className="text-sm text-ink-2 mb-3">
             Créez un compte pour retrouver toutes vos demandes au même endroit.
           </p>
           <Link
             href="/inscription"
-            className="text-sm text-primary-600 hover:text-primary-700 font-medium hover:underline"
+            className="text-sm text-brand hover:text-brand-ink font-semibold hover:underline"
           >
             Créer un compte gratuit
           </Link>

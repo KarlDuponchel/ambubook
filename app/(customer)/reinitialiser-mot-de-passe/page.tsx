@@ -3,7 +3,29 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { AlertTriangle, CheckCircle2, Check } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+
+const inputClass =
+  "w-full border border-line rounded-xl px-3.5 py-3 text-[15px] text-ink bg-surface placeholder:text-ink-3 outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-colors";
+const labelClass =
+  "block text-xs font-bold uppercase tracking-wide text-ink-3 mb-1.5";
+
+/** Ligne de critère (affichage dérivé de l'état du formulaire, sans logique métier). */
+function Criterion({ ok, label }: { ok: boolean; label: string }) {
+  return (
+    <li className="flex items-center gap-2 text-[13px]">
+      <span
+        className={`grid place-items-center w-4 h-4 rounded-full transition-colors ${
+          ok ? "bg-vert text-white" : "bg-surface-3 text-ink-3"
+        }`}
+      >
+        <Check className="w-3 h-3" strokeWidth={3} />
+      </span>
+      <span className={ok ? "text-ink-2" : "text-ink-3"}>{label}</span>
+    </li>
+  );
+}
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -19,32 +41,18 @@ function ResetPasswordForm() {
   // Si pas de token, afficher un message d'erreur
   if (!token) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-8">
+      <div className="bg-surface border border-line rounded-2xl shadow-soft p-8">
         <div className="text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg
-              className="w-8 h-8 text-red-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
+          <div className="w-16 h-16 rounded-2xl bg-rouge/12 text-rouge flex items-center justify-center mx-auto mb-5">
+            <AlertTriangle className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Lien invalide
-          </h1>
-          <p className="text-gray-600 mb-6">
+          <h1 className="serif text-2xl text-ink mb-2">Lien invalide</h1>
+          <p className="text-ink-2 text-sm mb-6">
             Ce lien de réinitialisation est invalide ou a expiré.
           </p>
           <Link
             href="/mot-de-passe-oublie"
-            className="inline-block bg-primary-600 text-white py-2 px-4 rounded-md hover:bg-primary-700 transition-colors"
+            className="inline-block bg-brand text-white font-bold py-3 px-5 rounded-xl hover:bg-brand-ink transition-colors"
           >
             Demander un nouveau lien
           </Link>
@@ -103,60 +111,39 @@ function ResetPasswordForm() {
 
   if (success) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-8">
+      <div className="bg-surface border border-line rounded-2xl shadow-soft p-8">
         <div className="text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg
-              className="w-8 h-8 text-green-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
+          <div className="w-16 h-16 rounded-2xl bg-vert/12 text-vert flex items-center justify-center mx-auto mb-5">
+            <CheckCircle2 className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Mot de passe modifié
-          </h1>
-          <p className="text-gray-600 mb-4">
+          <h1 className="serif text-2xl text-ink mb-2">Mot de passe modifié</h1>
+          <p className="text-ink-2 text-sm mb-4">
             Votre mot de passe a été réinitialisé avec succès.
           </p>
-          <p className="text-sm text-gray-500">
-            Redirection vers la page de connexion...
-          </p>
+          <p className="text-sm text-ink-3">Redirection vers la page de connexion...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-8">
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Nouveau mot de passe
-        </h1>
-        <p className="text-gray-600 mt-2">
+    <div className="bg-surface border border-line rounded-2xl shadow-soft p-8">
+      <div className="mb-7">
+        <h1 className="serif text-2xl text-ink">Nouveau mot de passe</h1>
+        <p className="text-ink-2 text-sm mt-1">
           Choisissez un nouveau mot de passe sécurisé
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
+          <div className="bg-rouge/10 border border-rouge/25 text-rouge p-3.5 rounded-xl text-sm">
             {error}
           </div>
         )}
 
         <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="password" className={labelClass}>
             Nouveau mot de passe
           </label>
           <input
@@ -166,16 +153,13 @@ function ResetPasswordForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-black focus:ring-primary-500 focus:border-transparent"
+            className={inputClass}
             placeholder="8 caractères minimum"
           />
         </div>
 
         <div>
-          <label
-            htmlFor="confirmPassword"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="confirmPassword" className={labelClass}>
             Confirmer le mot de passe
           </label>
           <input
@@ -184,22 +168,30 @@ function ResetPasswordForm() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-black focus:ring-primary-500 focus:border-transparent"
+            className={inputClass}
             placeholder="Confirmez votre mot de passe"
           />
         </div>
 
+        <ul className="space-y-1.5">
+          <Criterion ok={password.length >= 8} label="Au moins 8 caractères" />
+          <Criterion
+            ok={password.length > 0 && password === confirmPassword}
+            label="Les deux mots de passe correspondent"
+          />
+        </ul>
+
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary-600 text-white py-2 px-4 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-ink disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {loading ? "Modification..." : "Modifier le mot de passe"}
+          {loading ? "Modification..." : "Réinitialiser le mot de passe"}
         </button>
       </form>
 
-      <div className="mt-6 text-center text-sm text-gray-600">
-        <Link href="/connexion" className="text-primary-600 hover:underline">
+      <div className="mt-6 text-center text-sm text-ink-2">
+        <Link href="/connexion" className="font-semibold text-brand hover:text-brand-ink transition-colors">
           Retour à la connexion
         </Link>
       </div>
@@ -211,13 +203,13 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="bg-white rounded-lg shadow-md p-8 animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-2/3 mx-auto mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto mb-8"></div>
+        <div className="bg-surface border border-line rounded-2xl shadow-soft p-8 animate-pulse">
+          <div className="h-8 bg-surface-3 rounded w-2/3 mb-4"></div>
+          <div className="h-4 bg-surface-3 rounded w-1/2 mb-8"></div>
           <div className="space-y-4">
-            <div className="h-10 bg-gray-200 rounded"></div>
-            <div className="h-10 bg-gray-200 rounded"></div>
-            <div className="h-10 bg-gray-200 rounded"></div>
+            <div className="h-11 bg-surface-3 rounded-xl"></div>
+            <div className="h-11 bg-surface-3 rounded-xl"></div>
+            <div className="h-11 bg-surface-3 rounded-xl"></div>
           </div>
         </div>
       }

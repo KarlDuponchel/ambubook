@@ -69,19 +69,19 @@ export function NotificationDropdown({
       ref={dropdownRef}
       className={`
         absolute ${positionClasses} top-full mt-2 w-80 sm:w-96
-        bg-white rounded-xl shadow-lg border border-neutral-200
+        bg-surface rounded-2xl shadow-soft border border-line
         z-50 overflow-hidden
         animate-in fade-in slide-in-from-top-2 duration-200
       `}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
-        <h3 className="font-semibold text-neutral-900">Notifications</h3>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-line">
+        <h3 className="font-bold text-ink">Notifications</h3>
         {unreadCount > 0 && (
           <button
             onClick={onMarkAllAsRead}
             className="
-              flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700
+              flex items-center gap-1 text-sm font-semibold text-brand hover:text-brand-ink
               transition-colors
             "
           >
@@ -94,7 +94,7 @@ export function NotificationDropdown({
       {/* Liste */}
       <div className="max-h-[400px] overflow-y-auto">
         {notifications.length === 0 && !isLoading ? (
-          <div className="flex flex-col items-center justify-center py-12 text-neutral-400">
+          <div className="flex flex-col items-center justify-center py-12 text-ink-3">
             <Bell className="h-12 w-12 mb-3" />
             <p className="text-sm">Aucune notification</p>
           </div>
@@ -118,7 +118,7 @@ export function NotificationDropdown({
             {/* Loader */}
             {isLoading && (
               <div className="flex justify-center py-4">
-                <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
+                <Loader2 className="h-5 w-5 animate-spin text-ink-3" />
               </div>
             )}
 
@@ -127,7 +127,7 @@ export function NotificationDropdown({
               <button
                 onClick={onLoadMore}
                 className="
-                  w-full py-3 text-sm text-primary-600 hover:bg-neutral-50
+                  w-full py-3 text-sm font-semibold text-brand hover:bg-surface-2
                   transition-colors
                 "
               >

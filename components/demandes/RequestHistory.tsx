@@ -12,7 +12,7 @@ import {
   User,
   Building2,
 } from "lucide-react";
-import { Card, CardHeader, CardContent, useToast } from "@/components/ui";
+import { useToast } from "@/components/ui";
 import type {
   RequestHistoryEntry,
   HistoryEventType,
@@ -47,12 +47,12 @@ const STATUS_LABELS: Record<RequestStatus, string> = {
 };
 
 const STATUS_COLORS: Record<RequestStatus, string> = {
-  PENDING: "text-warning-600",
-  ACCEPTED: "text-success-600",
-  REFUSED: "text-danger-600",
-  COUNTER_PROPOSAL: "text-accent-600",
-  CANCELLED: "text-neutral-500",
-  COMPLETED: "text-primary-600",
+  PENDING: "text-ambre",
+  ACCEPTED: "text-vert",
+  REFUSED: "text-rouge",
+  COUNTER_PROPOSAL: "text-violet",
+  CANCELLED: "text-ink-3",
+  COMPLETED: "text-brand",
 };
 
 const ROLE_LABELS: Record<UserRole, string> = {
@@ -112,13 +112,13 @@ function getEventColor(entry: RequestHistoryEntry): string {
   }
   switch (entry.eventType) {
     case "CREATED":
-      return "text-primary-600";
+      return "text-brand";
     case "NOTE_ADDED":
-      return "text-neutral-600";
+      return "text-ink-2";
     case "ATTACHMENT_ADDED":
-      return "text-accent-600";
+      return "text-violet";
     default:
-      return "text-neutral-600";
+      return "text-ink-2";
   }
 }
 
@@ -156,109 +156,108 @@ export function RequestHistory({ requestId, history, onNoteAdded, readOnly = fal
   };
 
   return (
-    <Card>
-      <CardHeader
-        icon={History}
-        title="Historique"
-        action={
-          !readOnly ? (
-            <button
-              onClick={() => setShowAddNote(!showAddNote)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-            >
-              <Plus className="h-4 w-4" />
-              Note
-            </button>
-          ) : undefined
-        }
-      />
-      <CardContent noPadding>
-        {/* Formulaire d'ajout de note */}
-        {!readOnly && showAddNote && (
-          <div className="p-4 border-b border-card-border bg-neutral-50">
-            <textarea
-              value={noteText}
-              onChange={(e) => setNoteText(e.target.value)}
-              placeholder="Ajouter une note..."
-              className="w-full px-3 py-2 border border-input-border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none h-20 text-sm"
-            />
-            <div className="flex justify-end gap-2 mt-2">
-              <button
-                onClick={() => {
-                  setShowAddNote(false);
-                  setNoteText("");
-                }}
-                className="px-3 py-1.5 text-sm text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleAddNote}
-                disabled={!noteText.trim() || isSubmitting}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
-              >
-                <Send className="h-3.5 w-3.5" />
-                {isSubmitting ? "..." : "Envoyer"}
-              </button>
-            </div>
-          </div>
+    <div className="bg-surface border border-line rounded-2xl overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-line">
+        <div className="flex items-center gap-2.5">
+          <History className="h-5 w-5 text-ink-3" />
+          <h2 className="font-bold text-ink">Historique</h2>
+        </div>
+        {!readOnly && (
+          <button
+            onClick={() => setShowAddNote(!showAddNote)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-brand hover:bg-surface-2 rounded-lg transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            Note
+          </button>
         )}
+      </div>
 
-        {/* Liste des événements */}
-        {history.length === 0 ? (
-          <div className="p-6 text-center text-neutral-500 text-sm">
-            Aucun historique disponible
+      {/* Formulaire d'ajout de note */}
+      {!readOnly && showAddNote && (
+        <div className="p-4 border-b border-line bg-surface-2">
+          <textarea
+            value={noteText}
+            onChange={(e) => setNoteText(e.target.value)}
+            placeholder="Ajouter une note..."
+            className="w-full px-3 py-2 border border-line rounded-xl bg-surface text-ink text-sm placeholder:text-ink-3 focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 resize-none h-20 transition-colors"
+          />
+          <div className="flex justify-end gap-2 mt-2">
+            <button
+              onClick={() => {
+                setShowAddNote(false);
+                setNoteText("");
+              }}
+              className="px-3 py-1.5 text-sm font-semibold text-ink-2 hover:bg-surface-3 rounded-lg transition-colors"
+            >
+              Annuler
+            </button>
+            <button
+              onClick={handleAddNote}
+              disabled={!noteText.trim() || isSubmitting}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold bg-brand text-white rounded-lg hover:bg-brand-ink disabled:opacity-50 transition-colors"
+            >
+              <Send className="h-3.5 w-3.5" />
+              {isSubmitting ? "..." : "Envoyer"}
+            </button>
           </div>
-        ) : (
-          <div className="divide-y divide-card-border">
-            {history.map((entry) => {
-              const EventIcon = EVENT_ICONS[entry.eventType];
-              const color = getEventColor(entry);
+        </div>
+      )}
 
-              return (
-                <div key={entry.id} className="p-4 hover:bg-neutral-50 transition-colors">
-                  <div className="flex gap-3">
-                    {/* Icône */}
-                    <div className={`shrink-0 p-2 rounded-full bg-neutral-100 ${color}`}>
-                      <EventIcon className="h-4 w-4" />
-                    </div>
+      {/* Liste des événements */}
+      {history.length === 0 ? (
+        <div className="p-6 text-center text-ink-3 text-sm">
+          Aucun historique disponible
+        </div>
+      ) : (
+        <div className="divide-y divide-line">
+          {history.map((entry) => {
+            const EventIcon = EVENT_ICONS[entry.eventType];
+            const color = getEventColor(entry);
 
-                    {/* Contenu */}
-                    <div className="flex-1 min-w-0">
-                      <p className={`font-medium text-sm ${color}`}>
-                        {getEventDescription(entry)}
+            return (
+              <div key={entry.id} className="p-4 hover:bg-surface-2 transition-colors">
+                <div className="flex gap-3">
+                  {/* Icône */}
+                  <div className={`shrink-0 grid place-items-center w-9 h-9 rounded-full bg-surface-2 ${color}`}>
+                    <EventIcon className="h-4 w-4" />
+                  </div>
+
+                  {/* Contenu */}
+                  <div className="flex-1 min-w-0">
+                    <p className={`font-bold text-sm ${color}`}>
+                      {getEventDescription(entry)}
+                    </p>
+
+                    {entry.comment && (
+                      <p className="mt-1 text-sm text-ink-2 whitespace-pre-wrap">
+                        {entry.comment}
                       </p>
+                    )}
 
-                      {entry.comment && (
-                        <p className="mt-1 text-sm text-neutral-700 whitespace-pre-wrap">
-                          {entry.comment}
-                        </p>
-                      )}
-
-                      <div className="flex items-center gap-3 mt-2 text-xs text-neutral-500">
-                        <span>{formatDateTime(entry.createdAt)}</span>
-                        {entry.user && (
-                          <span className="flex items-center gap-1">
-                            {entry.user.role === "AMBULANCIER" ? (
-                              <Building2 className="h-3 w-3" />
-                            ) : (
-                              <User className="h-3 w-3" />
-                            )}
-                            {entry.user.name}
-                            <span className="text-neutral-400">
-                              ({ROLE_LABELS[entry.user.role]})
-                            </span>
+                    <div className="flex items-center gap-3 mt-2 text-xs text-ink-3">
+                      <span>{formatDateTime(entry.createdAt)}</span>
+                      {entry.user && (
+                        <span className="flex items-center gap-1">
+                          {entry.user.role === "AMBULANCIER" ? (
+                            <Building2 className="h-3 w-3" />
+                          ) : (
+                            <User className="h-3 w-3" />
+                          )}
+                          {entry.user.name}
+                          <span className="text-ink-3">
+                            ({ROLE_LABELS[entry.user.role]})
                           </span>
-                        )}
-                      </div>
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }

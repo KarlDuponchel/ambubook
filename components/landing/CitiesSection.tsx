@@ -57,15 +57,15 @@ export function CitiesSection() {
         </div>
 
         {/* Grandes villes */}
-        <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-ink-3 mb-3">
+        <p className="text-[11px] font-extrabold uppercase tracking-widest text-ink-3 mb-3">
           Grandes villes
         </p>
-        <div className="grid grid-rows-3 grid-flow-col auto-cols-max gap-2.5 overflow-x-auto -mx-4 px-4 pb-2 hide-scrollbar md:flex md:flex-wrap md:mx-0 md:px-0 md:pb-0 md:overflow-visible mb-7">
+        <div className="flex flex-wrap gap-2.5 mb-7 max-h-60 overflow-y-auto">
           {popularCities.map((city) => (
             <Link
               key={city.slug}
               href={`/ambulances/${city.slug}`}
-              className="whitespace-nowrap text-[13px] font-semibold text-ink-2 bg-surface-2 border border-line rounded-full px-3.5 py-2 transition-colors hover:border-brand hover:text-brand"
+              className="whitespace-nowrap text-[13px] max-w-full font-semibold text-ink-2 bg-surface-2 border border-line rounded-full px-3.5 py-2 transition-colors hover:border-brand hover:text-brand"
             >
               Ambulance {city.name}
             </Link>
@@ -73,10 +73,10 @@ export function CitiesSection() {
         </div>
 
         {/* Régions */}
-        <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-ink-3 mb-3">
+        <p className="text-[11px] font-extrabold uppercase tracking-widest text-ink-3 mb-3">
           Régions
         </p>
-        <div className="grid grid-rows-2 grid-flow-col auto-cols-max gap-2.5 overflow-x-auto -mx-4 px-4 pb-2 hide-scrollbar md:flex md:flex-wrap md:mx-0 md:px-0 md:pb-0 md:overflow-visible">
+        <div className="flex flex-wrap gap-2.5 max-h-60 overflow-y-auto">
           {regions.map((region) => (
             <Link
               key={region.slug}

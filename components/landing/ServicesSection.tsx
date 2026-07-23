@@ -81,11 +81,11 @@ export function ServicesSection() {
         </div>
 
         {/* Services : carrousel horizontal sur mobile, grille sur desktop */}
-        <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-5 overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none -mx-4 px-4 md:mx-0 md:px-0 pb-2 md:pb-0 hide-scrollbar">
+        <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-5 overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none -mx-4 px-4 md:mx-0 md:px-0 scroll-pl-4 md:scroll-pl-0 pb-3 md:pb-0 carousel-scrollbar">
           {services.map((service) => (
             <article
               key={service.title}
-              className="group bg-surface border border-line rounded-2xl p-6 transition-all duration-300 hover:shadow-soft hover:-translate-y-0.5 shrink-0 md:shrink min-w-[82%] sm:min-w-[46%] md:min-w-0 snap-start"
+              className="group bg-surface border border-line rounded-2xl p-6 transition-all duration-300 hover:shadow-soft hover:-translate-y-0.5 shrink-0 md:shrink w-[82%] sm:w-[46%] md:w-auto snap-start"
               style={{ borderTop: `3px solid ${service.color}` }}
             >
               <div className="flex items-center gap-3 mb-3.5">
