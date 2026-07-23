@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import useSWR from "swr";
-import { LogOut, Truck, ChevronDown, Calendar, User, LayoutDashboard, Building2, Search, Settings } from "lucide-react";
+import { LogOut, Truck, ChevronDown, Calendar, User, LayoutDashboard, Building2, Search, Settings, Plus } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
 import { NotificationBell } from "@/components/notifications";
 import Image from "next/image";
@@ -25,7 +25,7 @@ function UserAvatar({ name, imageUrl, size = "md" }: { name: string; imageUrl?: 
       <Image
         src={imageUrl}
         alt={name}
-        className={`${sizeClasses} rounded-full object-cover shadow-sm`}
+        className={`${sizeClasses} rounded-full object-cover`}
         width={size === "sm" ? 32 : 36}
         height={size === "sm" ? 32 : 36}
       />
@@ -34,10 +34,28 @@ function UserAvatar({ name, imageUrl, size = "md" }: { name: string; imageUrl?: 
 
   return (
     <div
-      className={`${sizeClasses} rounded-full bg-linear-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold shadow-sm`}
+      className={`${sizeClasses} rounded-full flex items-center justify-center text-white font-semibold`}
+      style={{ background: "linear-gradient(150deg, var(--brand), var(--teal))" }}
     >
       {initials}
     </div>
+  );
+}
+
+/** Logo AmbuBook — picto « + » + wordmark serif italic teal */
+function Wordmark() {
+  return (
+    <span className="flex items-center gap-2.5">
+      <span
+        className="grid place-items-center w-9 h-9 rounded-[11px] text-white"
+        style={{ background: "linear-gradient(150deg, var(--brand), var(--teal))" }}
+      >
+        <Plus className="w-5 h-5" strokeWidth={2.5} />
+      </span>
+      <span className="text-xl font-extrabold tracking-tight text-ink">
+        Ambu<span className="serif italic font-semibold text-teal">Book</span>
+      </span>
+    </span>
   );
 }
 
@@ -111,55 +129,35 @@ export function Header() {
     };
   }, [mobileMenuOpen]);
 
+  const navLink =
+    "px-3 py-2 text-sm font-semibold text-ink-2 hover:text-ink hover:bg-surface-2 rounded-[9px] transition-colors";
+
   return (
     <header className="fixed top-4 left-4 right-4 z-50 mx-auto max-w-7xl">
-      <nav className="flex items-center justify-between h-14 lg:h-16 px-4 lg:px-6 bg-white/80 backdrop-blur-md border border-neutral-200/60 rounded-2xl shadow-sm shadow-neutral-900/5">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 bg-linear-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
-              <svg
-                className="w-5 h-5 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2.5}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
-            </div>
-            <span className="text-xl font-bold text-neutral-900">
-              Ambu<span className="text-primary-600">Book</span>
-            </span>
+      <nav className="flex items-center justify-between h-14 lg:h-16 px-4 lg:px-5 bg-surface/85 backdrop-blur-md border border-line rounded-2xl shadow-soft">
+
+          <Link href="/" aria-label="Accueil AmbuBook" className="lg:hidden">
+            <Wordmark />
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1">
-            <Link
-              href="/recherche"
-              className="px-4 py-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 font-medium rounded-lg transition-all"
-            >
+            <Link href="/" aria-label="Accueil AmbuBook">
+              <Wordmark />
+            </Link>
+            <Link href="/recherche" className={navLink}>
               Trouver un ambulancier
             </Link>
-            <Link
-              href="/#comment-ca-marche"
-              className="px-4 py-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 font-medium rounded-lg transition-all"
-            >
+            <Link href="/#comment-ca-marche" className={navLink}>
               Comment ça marche
             </Link>
-            <Link
-              href="/#faq"
-              className="px-4 py-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 font-medium rounded-lg transition-all"
-            >
+            <Link href="/#faq" className={navLink}>
               FAQ
             </Link>
           </div>
 
           {/* Desktop Actions */}
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-2">
             {isCustomer ? (
               <>
                 {/* Notifications Bell */}
@@ -169,15 +167,15 @@ export function Header() {
                 <button
                   type="button"
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className={`flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border transition-all ${
+                  className={`flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border transition-colors ${
                     userMenuOpen
-                      ? "border-primary-200 bg-primary-50"
-                      : "border-neutral-200 hover:border-neutral-300 hover:bg-neutral-100"
+                      ? "border-brand/40 bg-surface-2"
+                      : "border-line hover:bg-surface-2"
                   }`}
                 >
                   <UserAvatar name={session?.user?.name || "U"} imageUrl={profileImageUrl} size="sm" />
                   <ChevronDown
-                    className={`w-4 h-4 text-neutral-500 transition-transform ${
+                    className={`w-4 h-4 text-ink-3 transition-transform ${
                       userMenuOpen ? "rotate-180" : ""
                     }`}
                   />
@@ -185,18 +183,18 @@ export function Header() {
 
                 {/* Dropdown menu */}
                 <div
-                  className={`absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden z-50 transform transition-all duration-200 origin-top-right ${
+                  className={`absolute right-0 mt-2 w-64 bg-surface rounded-xl shadow-soft border border-line overflow-hidden z-50 transform transition-all duration-200 origin-top-right ${
                     userMenuOpen
                       ? "opacity-100 scale-100"
                       : "opacity-0 scale-95 pointer-events-none"
                   }`}
                 >
                   {/* User info */}
-                  <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
-                    <p className="font-medium text-neutral-900 truncate">
+                  <div className="px-4 py-3 bg-surface-2 border-b border-line">
+                    <p className="font-semibold text-ink truncate">
                       {session?.user?.name}
                     </p>
-                    <p className="text-sm text-neutral-500 truncate">
+                    <p className="text-sm text-ink-3 truncate">
                       {session?.user?.email}
                     </p>
                   </div>
@@ -208,25 +206,25 @@ export function Header() {
                         <Link
                           href="/dashboard"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-100 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-ink-2 hover:bg-surface-2 transition-colors"
                         >
-                          <LayoutDashboard className="w-4 h-4 text-neutral-400" />
+                          <LayoutDashboard className="w-4 h-4 text-ink-3" />
                           <span>Tableau de bord</span>
                         </Link>
                         <Link
                           href="/dashboard/calendrier"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-100 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-ink-2 hover:bg-surface-2 transition-colors"
                         >
-                          <Calendar className="w-4 h-4 text-neutral-400" />
+                          <Calendar className="w-4 h-4 text-ink-3" />
                           <span>Calendrier</span>
                         </Link>
                         <Link
                           href="/dashboard/mon-entreprise"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-100 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-ink-2 hover:bg-surface-2 transition-colors"
                         >
-                          <Building2 className="w-4 h-4 text-neutral-400" />
+                          <Building2 className="w-4 h-4 text-ink-3" />
                           <span>Mon entreprise</span>
                         </Link>
                       </>
@@ -235,25 +233,25 @@ export function Header() {
                         <Link
                           href="/mes-transports"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-100 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-ink-2 hover:bg-surface-2 transition-colors"
                         >
-                          <Calendar className="w-4 h-4 text-neutral-400" />
+                          <Calendar className="w-4 h-4 text-ink-3" />
                           <span>Mes transports</span>
                         </Link>
                         <Link
                           href="/recherche"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-100 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-ink-2 hover:bg-surface-2 transition-colors"
                         >
-                          <Search className="w-4 h-4 text-neutral-400" />
+                          <Search className="w-4 h-4 text-ink-3" />
                           <span>Trouver un ambulancier</span>
                         </Link>
                         <Link
                           href="/mon-compte"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-100 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-ink-2 hover:bg-surface-2 transition-colors"
                         >
-                          <User className="w-4 h-4 text-neutral-400" />
+                          <User className="w-4 h-4 text-ink-3" />
                           <span>Mon compte</span>
                         </Link>
                       </>
@@ -261,19 +259,19 @@ export function Header() {
                     <Link
                       href={isAmbulancier ? "/dashboard/parametres" : "/mon-compte/parametres"}
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 hover:bg-neutral-100 transition-colors"
+                      className="flex items-center gap-3 px-4 py-2.5 text-ink-2 hover:bg-surface-2 transition-colors"
                     >
-                      <Settings className="w-4 h-4 text-neutral-400" />
+                      <Settings className="w-4 h-4 text-ink-3" />
                       <span>Paramètres</span>
                     </Link>
                   </div>
 
                   {/* Logout */}
-                  <div className="border-t border-neutral-100 py-1">
+                  <div className="border-t border-line py-1">
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="flex items-center gap-3 w-full px-4 py-2.5 text-neutral-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+                      className="flex items-center gap-3 w-full px-4 py-2.5 text-rouge hover:bg-surface-2 transition-colors"
                     >
                       <LogOut className="w-4 h-4" />
                       <span>Déconnexion</span>
@@ -285,15 +283,24 @@ export function Header() {
             ) : (
               !isPro && (
                 <>
+                  {/* CTA espace pro : visible pour les visiteurs et les pros, jamais pour un client */}
+                  {!isCustomer && (
+                    <Link
+                      href={isPro ? "/dashboard" : "/dashboard/connexion"}
+                      className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-ink-2 hover:text-ink hover:bg-surface-2 rounded-[10px] transition-colors"
+                    >
+                      <span>{isPro ? "Mon dashboard" : "Espace Ambulancier"}</span>
+                    </Link>
+                  )}
                   <Link
                     href="/connexion"
-                    className="px-4 py-2 text-primary-600 hover:text-primary-700 font-medium rounded-lg hover:bg-neutral-100 transition-all"
+                    className="px-4 py-2 text-sm font-semibold text-ink border border-line rounded-[10px] hover:bg-surface-2 transition-colors"
                   >
                     Connexion
                   </Link>
                   <Link
                     href="/inscription"
-                    className="px-4 py-2 text-white hover:bg-primary-700 font-medium rounded-lg bg-primary-600 transition-all"
+                    className="px-4 py-2 text-sm font-bold text-white rounded-[10px] bg-brand hover:bg-brand-ink transition-colors"
                   >
                     Créer un compte
                   </Link>
@@ -301,19 +308,6 @@ export function Header() {
               )
             )}
 
-            {/* CTA espace pro : visible pour les visiteurs et les pros, jamais pour un client */}
-            {!isCustomer && (
-              <>
-                {!isPro && <div className="w-px h-6 bg-neutral-200" />}
-                <Link
-                  href={isPro ? "/dashboard" : "/dashboard/connexion"}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white font-medium rounded-lg hover:bg-neutral-800 transition-all shadow-sm"
-                >
-                  <Truck className="w-4 h-4" />
-                  <span>{isPro ? "Mon dashboard" : "Espace Ambulancier"}</span>
-                </Link>
-              </>
-            )}
           </div>
 
           {/* Mobile actions */}
@@ -321,7 +315,7 @@ export function Header() {
             {/* Recherche mobile */}
             <Link
               href="/recherche"
-              className="p-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"
+              className="p-2 text-ink-2 hover:text-ink hover:bg-surface-2 rounded-lg transition-colors"
               aria-label="Rechercher"
             >
               <Search className="w-5 h-5" />
@@ -333,7 +327,7 @@ export function Header() {
             {/* Menu button */}
             <button
               type="button"
-              className="p-2 -mr-2 text-neutral-600 hover:text-neutral-900 transition-colors"
+              className="p-2 -mr-2 text-ink-2 hover:text-ink transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-expanded={mobileMenuOpen}
               aria-label="Menu principal"
@@ -361,7 +355,7 @@ export function Header() {
 
       {/* Mobile menu overlay */}
       <div
-        className={`fixed inset-0 bg-neutral-900/20 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-ink/20 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${
           mobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         style={{ top: "80px" }}
@@ -371,7 +365,7 @@ export function Header() {
       {/* Mobile menu panel */}
       <div
         ref={menuRef}
-        className={`absolute left-0 right-0 top-16 mt-2 bg-white border border-neutral-200/60 rounded-2xl shadow-lg z-50 lg:hidden transform transition-all duration-300 ease-out ${
+        className={`absolute left-0 right-0 top-16 mt-2 bg-surface border border-line rounded-2xl shadow-soft z-50 lg:hidden transform transition-all duration-300 ease-out ${
           mobileMenuOpen
             ? "translate-y-0 opacity-100"
             : "-translate-y-4 opacity-0 pointer-events-none"
@@ -382,28 +376,28 @@ export function Header() {
             <div className="space-y-1">
               <Link
                 href="/recherche"
-                className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
+                className="flex items-center gap-3 px-4 py-3 text-ink-2 hover:bg-surface-2 font-semibold rounded-xl transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Trouver un ambulancier
               </Link>
               <Link
                 href="/#comment-ca-marche"
-                className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
+                className="flex items-center gap-3 px-4 py-3 text-ink-2 hover:bg-surface-2 font-semibold rounded-xl transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Comment ça marche
               </Link>
               <Link
                 href="/#faq"
-                className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
+                className="flex items-center gap-3 px-4 py-3 text-ink-2 hover:bg-surface-2 font-semibold rounded-xl transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 FAQ
               </Link>
             </div>
 
-            <hr className="my-3 border-neutral-100" />
+            <hr className="my-3 border-line" />
 
             {/* User section */}
             {isCustomer ? (
@@ -411,10 +405,10 @@ export function Header() {
                 <div className="flex items-center gap-3 px-4 py-3">
                   <UserAvatar name={session?.user?.name || "U"} imageUrl={profileImageUrl} />
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-neutral-900 truncate">
+                    <p className="font-semibold text-ink truncate">
                       {session?.user?.name}
                     </p>
-                    <p className="text-sm text-neutral-500 truncate">
+                    <p className="text-sm text-ink-3 truncate">
                       {session?.user?.email}
                     </p>
                   </div>
@@ -425,26 +419,26 @@ export function Header() {
                   <>
                     <Link
                       href="/dashboard"
-                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-ink-2 hover:bg-surface-2 font-semibold rounded-xl transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      <LayoutDashboard className="w-5 h-5 text-neutral-400" />
+                      <LayoutDashboard className="w-5 h-5 text-ink-3" />
                       Tableau de bord
                     </Link>
                     <Link
                       href="/dashboard/calendrier"
-                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-ink-2 hover:bg-surface-2 font-semibold rounded-xl transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      <Calendar className="w-5 h-5 text-neutral-400" />
+                      <Calendar className="w-5 h-5 text-ink-3" />
                       Calendrier
                     </Link>
                     <Link
                       href="/dashboard/mon-entreprise"
-                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-ink-2 hover:bg-surface-2 font-semibold rounded-xl transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      <Building2 className="w-5 h-5 text-neutral-400" />
+                      <Building2 className="w-5 h-5 text-ink-3" />
                       Mon entreprise
                     </Link>
                   </>
@@ -452,26 +446,26 @@ export function Header() {
                   <>
                     <Link
                       href="/mes-transports"
-                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-ink-2 hover:bg-surface-2 font-semibold rounded-xl transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      <Calendar className="w-5 h-5 text-neutral-400" />
+                      <Calendar className="w-5 h-5 text-ink-3" />
                       Mes transports
                     </Link>
                     <Link
                       href="/recherche"
-                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-ink-2 hover:bg-surface-2 font-semibold rounded-xl transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      <Search className="w-5 h-5 text-neutral-400" />
+                      <Search className="w-5 h-5 text-ink-3" />
                       Trouver un ambulancier
                     </Link>
                     <Link
                       href="/mon-compte"
-                      className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-ink-2 hover:bg-surface-2 font-semibold rounded-xl transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      <Settings className="w-5 h-5 text-neutral-400" />
+                      <Settings className="w-5 h-5 text-ink-3" />
                       Mon compte
                     </Link>
                   </>
@@ -479,10 +473,10 @@ export function Header() {
 
                 <Link
                   href={isAmbulancier ? "/dashboard/profil" : "/mon-compte/profil"}
-                  className="flex items-center gap-3 px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-ink-2 hover:bg-surface-2 font-semibold rounded-xl transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <User className="w-5 h-5 text-neutral-400" />
+                  <User className="w-5 h-5 text-ink-3" />
                   Mon profil
                 </Link>
 
@@ -492,7 +486,7 @@ export function Header() {
                     handleLogout();
                     setMobileMenuOpen(false);
                   }}
-                  className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 font-medium rounded-xl transition-colors w-full"
+                  className="flex items-center gap-3 px-4 py-3 text-rouge hover:bg-surface-2 font-semibold rounded-xl transition-colors w-full"
                 >
                   <LogOut className="w-5 h-5" />
                   Déconnexion
@@ -503,14 +497,14 @@ export function Header() {
                 <div className="space-y-2">
                   <Link
                     href="/connexion"
-                    className="flex items-center justify-center px-4 py-3 text-neutral-700 hover:bg-neutral-100 font-medium rounded-xl border border-neutral-200 transition-colors"
+                    className="flex items-center justify-center px-4 py-3 text-ink font-semibold rounded-xl border border-line hover:bg-surface-2 transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Connexion patient
                   </Link>
                   <Link
                     href="/inscription"
-                    className="flex items-center justify-center px-4 py-3 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition-colors"
+                    className="flex items-center justify-center px-4 py-3 bg-brand text-white font-bold rounded-xl hover:bg-brand-ink transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Créer un compte patient
@@ -522,13 +516,12 @@ export function Header() {
             {/* CTA espace pro : visiteurs et pros, jamais pour un client */}
             {!isCustomer && (
               <>
-                <hr className="my-3 border-neutral-100" />
+                <hr className="my-3 border-line" />
                 <Link
                   href={isPro ? "/dashboard" : "/dashboard/connexion"}
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-neutral-900 text-white font-medium rounded-xl hover:bg-neutral-800 transition-colors"
+                  className="flex items-center justify-center gap-2 px-4 py-3 border border-line text-ink font-semibold rounded-xl hover:bg-surface-2 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <Truck className="w-5 h-5" />
                   {isPro ? "Mon dashboard" : "Espace Ambulancier"}
                 </Link>
               </>

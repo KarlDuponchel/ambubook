@@ -99,8 +99,8 @@ const faqItems: FAQItem[] = [
           des <strong>recommandations médicales</strong> :
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <div className="p-4 bg-primary-50 rounded-xl">
-            <h4 className="font-semibold text-primary-700 mb-2">Ambulance</h4>
+          <div className="p-4 rounded-xl border border-line" style={{ background: "color-mix(in srgb, var(--bleu) 8%, var(--surface))" }}>
+            <h3 className="font-semibold mb-2" style={{ color: "var(--bleu)" }}>Ambulance</h3>
             <ul className="text-sm space-y-1">
               <li>Position allongée ou semi-assise</li>
               <li>Surveillance médicale continue</li>
@@ -109,8 +109,8 @@ const faqItems: FAQItem[] = [
               <li>Urgences et transports médicalisés</li>
             </ul>
           </div>
-          <div className="p-4 bg-success-50 rounded-xl">
-            <h4 className="font-semibold text-success-700 mb-2">VSL</h4>
+          <div className="p-4 rounded-xl border border-line" style={{ background: "color-mix(in srgb, var(--vert) 8%, var(--surface))" }}>
+            <h3 className="font-semibold mb-2" style={{ color: "var(--vert)" }}>VSL</h3>
             <ul className="text-sm space-y-1">
               <li>Position assise uniquement</li>
               <li>Patient autonome ou peu dépendant</li>
@@ -265,24 +265,17 @@ export function AccordionSection() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
-      <section
-        id="faq"
-        className="py-20 lg:py-28 bg-white overflow-hidden"
-      >
+      <section id="faq" className="py-16 lg:py-24 bg-page overflow-hidden">
         <Container>
           {/* Header */}
-          <div className="text-center mb-12 lg:mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold mb-5 tracking-wide">
+          <div className="text-center max-w-2xl mx-auto mb-8">
+            <span className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.12em] text-teal">
               <MessageCircleQuestion className="h-3.5 w-3.5" />
-              Foire aux questions
-            </div>
-            <h2 className="text-3xl lg:text-4xl font-bold text-neutral-900 mb-4">
               Questions fréquentes
+            </span>
+            <h2 className="serif text-3xl lg:text-4xl text-ink mt-3">
+              Tout savoir sur le transport sanitaire
             </h2>
-            <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-              Tout ce que vous devez savoir sur le transport sanitaire et la réservation
-              d&apos;ambulances en ligne
-            </p>
           </div>
 
           {/* Accordion */}
@@ -291,14 +284,14 @@ export function AccordionSection() {
           </div>
 
           {/* CTA sous l'accordéon */}
-          <div className="mt-12 text-center">
-            <div className="inline-flex items-center gap-4 px-6 py-4 bg-primary-50 rounded-2xl border border-primary-100">
-              <div className="w-10 h-10 rounded-xl bg-primary-600 flex items-center justify-center shrink-0">
+          <div className="mt-10 text-center">
+            <div className="inline-flex items-center gap-4 px-6 py-4 bg-surface rounded-2xl border border-line shadow-soft">
+              <div className="w-10 h-10 rounded-xl bg-brand flex items-center justify-center shrink-0">
                 <HelpCircle className="h-5 w-5 text-white" />
               </div>
               <div className="text-left">
-                <p className="text-sm text-neutral-500">Vous avez d&apos;autres questions ?</p>
-                <p className="font-semibold text-neutral-900">
+                <p className="text-sm text-ink-3">Vous avez d&apos;autres questions ?</p>
+                <p className="font-semibold text-ink">
                   Contactez directement l&apos;ambulancier de votre choix
                 </p>
               </div>

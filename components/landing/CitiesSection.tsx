@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Container } from "@/components/ui";
-import { MapPin } from "lucide-react";
 
 const popularCities = [
   { name: "Paris", slug: "paris" },
@@ -40,73 +39,65 @@ const regions = [
 
 export function CitiesSection() {
   return (
-    <section className="py-20 lg:py-28 bg-neutral-50">
+    <section className="py-16 lg:py-24 bg-surface border-t border-line">
       <Container>
         {/* Header */}
-        <div className="text-center mb-12">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold mb-4 tracking-wide">
-            <MapPin className="h-3.5 w-3.5" />
-            Couverture nationale
+        <div className="text-center max-w-2xl mx-auto mb-8">
+          <span className="text-xs font-extrabold uppercase tracking-[0.12em] text-teal">
+            Partout en France
           </span>
-          <h2 className="text-3xl lg:text-4xl font-bold text-neutral-900 mb-4">
-            Ambulanciers dans{" "}
-            <span className="text-primary-600">toute la France</span>
+          <h2 className="serif text-3xl lg:text-4xl text-ink mt-3 mb-3">
+            Un ambulancier près de chez vous
           </h2>
-          <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-            Trouvez une société d&apos;ambulances près de chez vous. Notre réseau de partenaires
-            couvre l&apos;ensemble du territoire français.
+          <p className="text-ink-2 text-[15px] leading-relaxed">
+            AmbuBook référence des sociétés d&apos;ambulances et de VSL agréées dans les
+            principales villes et régions françaises, pour un transport de proximité comme
+            sur longue distance.
           </p>
         </div>
 
-        {/* Villes populaires */}
-        <div className="mb-10">
-          <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest text-center mb-5">
-            Villes les plus recherchées
-          </p>
-          <div className="flex flex-wrap justify-center gap-2.5">
-            {popularCities.map((city) => (
-              <Link
-                key={city.slug}
-                href={`/ambulances/${city.slug}`}
-                className="px-4 py-2 bg-white border border-neutral-200 rounded-full text-neutral-700 hover:border-primary-400 hover:text-primary-700 hover:bg-primary-50 hover:shadow-sm transition-all duration-200 text-sm font-medium"
-              >
-                Ambulance {city.name}
-              </Link>
-            ))}
-          </div>
+        {/* Grandes villes */}
+        <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-ink-3 mb-3">
+          Grandes villes
+        </p>
+        <div className="grid grid-rows-3 grid-flow-col auto-cols-max gap-2.5 overflow-x-auto -mx-4 px-4 pb-2 hide-scrollbar md:flex md:flex-wrap md:mx-0 md:px-0 md:pb-0 md:overflow-visible mb-7">
+          {popularCities.map((city) => (
+            <Link
+              key={city.slug}
+              href={`/ambulances/${city.slug}`}
+              className="whitespace-nowrap text-[13px] font-semibold text-ink-2 bg-surface-2 border border-line rounded-full px-3.5 py-2 transition-colors hover:border-brand hover:text-brand"
+            >
+              Ambulance {city.name}
+            </Link>
+          ))}
         </div>
 
         {/* Régions */}
-        <div className="bg-white rounded-2xl border border-neutral-200 p-6 lg:p-8">
-          <p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest text-center mb-6">
-            Transport sanitaire par région
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-            {regions.map((region) => (
-              <Link
-                key={region.slug}
-                href={`/region/${region.slug}`}
-                className="text-center px-3 py-2.5 rounded-xl border border-neutral-100 hover:border-primary-200 hover:bg-primary-50 transition-all duration-200 group"
-              >
-                <span className="text-neutral-600 group-hover:text-primary-700 text-sm font-medium leading-snug block">
-                  {region.name}
-                </span>
-              </Link>
-            ))}
-          </div>
+        <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-ink-3 mb-3">
+          Régions
+        </p>
+        <div className="grid grid-rows-2 grid-flow-col auto-cols-max gap-2.5 overflow-x-auto -mx-4 px-4 pb-2 hide-scrollbar md:flex md:flex-wrap md:mx-0 md:px-0 md:pb-0 md:overflow-visible">
+          {regions.map((region) => (
+            <Link
+              key={region.slug}
+              href={`/region/${region.slug}`}
+              className="whitespace-nowrap text-[13px] font-semibold text-ink-2 border border-line rounded-full px-3.5 py-2 transition-colors hover:border-teal hover:text-teal"
+            >
+              {region.name}
+            </Link>
+          ))}
         </div>
 
-        {/* SEO Text */}
-        <div className="mt-10 max-w-4xl mx-auto">
-          <p className="text-neutral-500 text-sm leading-relaxed text-center">
-            <strong className="text-neutral-600">Ambubook</strong> vous permet de trouver et réserver un transport sanitaire
-            partout en France. Que vous recherchiez une <strong className="text-neutral-600">ambulance à Paris</strong>,
-            un <strong className="text-neutral-600">VSL à Lyon</strong>, ou un transport médical dans n&apos;importe quelle
-            ville française, notre plateforme vous met en relation avec des professionnels
-            agréés près de chez vous. Consultations médicales, hospitalisations, dialyse,
-            radiothérapie : réservez votre transport en ligne en quelques clics.
-          </p>
-        </div>
+        {/* SEO text */}
+        <p className="mt-10 max-w-4xl mx-auto text-ink-3 text-sm leading-relaxed text-center">
+          <strong className="text-ink-2">Ambubook</strong> vous permet de trouver et réserver
+          un transport sanitaire partout en France. Que vous recherchiez une{" "}
+          <strong className="text-ink-2">ambulance à Paris</strong>, un{" "}
+          <strong className="text-ink-2">VSL à Lyon</strong>, ou un transport médical dans
+          n&apos;importe quelle ville française, notre plateforme vous met en relation avec des
+          professionnels agréés près de chez vous. Consultations médicales, hospitalisations,
+          dialyse, radiothérapie : réservez votre transport en ligne en quelques clics.
+        </p>
       </Container>
     </section>
   );

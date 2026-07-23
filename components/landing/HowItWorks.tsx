@@ -1,75 +1,63 @@
 import { Container } from "@/components/ui";
-import { Search, CalendarCheck, CheckCircle2 } from "lucide-react";
+import { Search, CalendarPlus, CheckCircle2 } from "lucide-react";
 
 const steps = [
   {
-    step: "01",
+    n: "1",
     title: "Recherchez",
     description:
-      "Entrez votre ville ou le nom de votre ambulancier pour trouver un transporteur disponible près de chez vous.",
+      "Trouvez un ambulancier agréé près de chez vous, ou accédez directement au vôtre via son lien.",
     Icon: Search,
   },
   {
-    step: "02",
+    n: "2",
     title: "Réservez",
     description:
-      "Remplissez le formulaire avec vos informations : date, heure, adresses de départ et d'arrivée, type de transport.",
-    Icon: CalendarCheck,
+      "Renseignez votre trajet, vos horaires et le type de transport en quelques clics.",
+    Icon: CalendarPlus,
   },
   {
-    step: "03",
+    n: "3",
     title: "Confirmé",
     description:
-      "Recevez la confirmation par SMS et email. Suivez l'état de votre demande en temps réel jusqu'au jour J.",
+      "Recevez la confirmation par SMS et email, et suivez votre demande en temps réel — sans appel.",
     Icon: CheckCircle2,
   },
 ];
 
 export function HowItWorks() {
   return (
-    <section id="comment-ca-marche" className="py-20 lg:py-28 bg-primary-900 overflow-hidden">
-      {/* Ambient decoration */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-primary-700/20 rounded-full blur-3xl -translate-x-1/2" />
-        <div className="absolute bottom-0 right-0 w-80 h-80 bg-accent-700/15 rounded-full blur-3xl translate-x-1/2" />
-      </div>
-
-      <Container className="relative">
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <span className="inline-block px-4 py-1.5 bg-white/10 text-primary-300 text-sm font-semibold rounded-full mb-4 tracking-wide">
-            Simple et efficace
+    <section
+      id="comment-ca-marche"
+      className="py-16 lg:py-24 text-white"
+      style={{ background: "linear-gradient(165deg, #0f2338, #0b1a2b)" }}
+    >
+      <Container>
+        <div className="text-center max-w-xl mx-auto mb-10">
+          <span className="text-xs font-extrabold uppercase tracking-[0.12em] text-teal">
+            En 3 étapes
           </span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white">
-            Comment ça marche ?
+          <h2 className="serif text-3xl lg:text-4xl text-white mt-3">
+            Comment ça marche
           </h2>
-          <p className="mt-4 text-lg text-primary-300/80">
-            Réserver votre transport médical n&apos;a jamais été aussi simple.
-            En 3 étapes, c&apos;est fait.
-          </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-          {steps.map((step, index) => (
-            <div key={step.step} className="relative h-full">
-              {/* Connector */}
-              {index < steps.length - 1 && (
-                <div className="hidden md:block absolute top-10 left-[calc(50%+4rem)] right-0 h-px bg-linear-to-r from-primary-700 to-transparent z-0" />
-              )}
-
-              <div className="relative h-full flex flex-col bg-white/6 border border-white/10 backdrop-blur-sm rounded-2xl p-7 hover:bg-white/10 hover:border-white/20 transition-all duration-300 group">
-                {/* Step badge */}
-                <div className="absolute -top-3 left-6 px-3 py-1 bg-primary-600 text-white text-xs font-bold rounded-full tracking-widest">
-                  {step.step}
-                </div>
-
-                {/* Icon */}
-                <div className="w-14 h-14 rounded-xl bg-primary-800/60 text-primary-300 flex items-center justify-center mb-5 group-hover:bg-primary-700/60 transition-colors">
-                  <step.Icon className="w-6 h-6" strokeWidth={1.75} />
-                </div>
-
-                <h3 className="text-xl font-bold text-white mb-2">{step.title}</h3>
-                <p className="text-primary-300/80 leading-relaxed text-sm flex-1">{step.description}</p>
+        <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
+          {steps.map((step) => (
+            <div
+              key={step.n}
+              className="rounded-2xl p-7 border border-white/10 bg-white/5 backdrop-blur-sm hover:-translate-y-0.5 duration-300 transition-all hover:shadow-soft hover:bg-white/10"
+            >
+              <div className="flex items-center gap-3 mb-3.5">
+                <span className="serif text-[34px] leading-none text-teal font-semibold">
+                  {step.n}
+                </span>
+                <span className="grid place-items-center w-10.5 h-10.5 rounded-xl bg-white/10 text-white">
+                  <step.Icon className="w-5.25 h-5.25" strokeWidth={2} />
+                </span>
               </div>
+              <h3 className="font-extrabold text-lg mb-1.5">{step.title}</h3>
+              <p className="text-white/70 text-sm leading-relaxed">{step.description}</p>
             </div>
           ))}
         </div>

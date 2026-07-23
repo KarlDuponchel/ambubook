@@ -1,47 +1,29 @@
 import { Container } from "@/components/ui";
-import { Zap, Shield, CheckCircle, PhoneOff } from "lucide-react";
+import { Zap, Lock, Bell, PhoneOff } from "lucide-react";
 
 const badges = [
-  {
-    icon: Zap,
-    title: "Rapide",
-    description: "Réservation en moins de 2 minutes",
-  },
-  {
-    icon: Shield,
-    title: "Sécurisé",
-    description: "Vos données de santé sont protégées",
-  },
-  {
-    icon: CheckCircle,
-    title: "Confirmé",
-    description: "Notification SMS et email immédiate",
-  },
-  {
-    icon: PhoneOff,
-    title: "Sans appel",
-    description: "Plus besoin de téléphoner",
-  },
+  { icon: Zap, title: "Rapide", description: "Réservation en moins de 2 minutes." },
+  { icon: Lock, title: "Sécurisé", description: "Vos données de santé protégées." },
+  { icon: Bell, title: "Confirmé", description: "Notification par SMS et email." },
+  { icon: PhoneOff, title: "Sans appel", description: "Plus besoin de téléphoner." },
 ];
 
 export function TrustBadges() {
   return (
-    <section className="py-10 bg-white border-b border-neutral-100">
-      <Container>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-neutral-100 rounded-2xl overflow-hidden shadow-sm border border-neutral-100">
-          {badges.map((badge, i) => (
-            <div
-              key={badge.title}
-              className={`flex items-center gap-4 px-6 py-5 bg-white ${
-                i < badges.length - 1 ? "" : ""
-              }`}
-            >
-              <div className="shrink-0 w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center">
-                <badge.icon className="w-5 h-5 text-primary-600" strokeWidth={1.75} />
-              </div>
+    <section className="bg-surface border-y border-line">
+      <Container className="py-7">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-8">
+          {badges.map((badge) => (
+            <div key={badge.title} className="flex items-start gap-3">
+              <span
+                className="shrink-0 grid place-items-center w-10 h-10 rounded-xl text-brand"
+                style={{ background: "color-mix(in srgb, var(--brand) 11%, var(--surface))" }}
+              >
+                <badge.icon className="w-5 h-5" strokeWidth={2} />
+              </span>
               <div>
-                <p className="font-semibold text-neutral-900 text-sm">{badge.title}</p>
-                <p className="text-xs text-neutral-500 mt-0.5 leading-snug">{badge.description}</p>
+                <p className="font-bold text-[15px] text-ink leading-tight">{badge.title}</p>
+                <p className="text-[13px] text-ink-2 leading-snug mt-0.5">{badge.description}</p>
               </div>
             </div>
           ))}

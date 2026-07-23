@@ -181,18 +181,17 @@ const breadcrumbSchema = {
 
 function HeroSkeleton() {
   return (
-    <section className="relative bg-primary-900 pt-28 pb-20 lg:pt-36 lg:pb-28">
+    <section className="relative bg-surface pt-28 pb-16 lg:pt-36 lg:pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto text-center animate-pulse">
-          <div className="h-6 bg-white/10 rounded-full w-72 mx-auto mb-8" />
-          <div className="h-14 bg-white/10 rounded-xl w-3/4 mx-auto mb-3" />
-          <div className="h-14 bg-white/10 rounded-xl w-1/2 mx-auto mb-6" />
-          <div className="h-5 bg-white/8 rounded w-2/3 mx-auto mb-2" />
-          <div className="h-5 bg-white/8 rounded w-1/2 mx-auto mb-10" />
-          <div className="bg-white rounded-2xl p-2 max-w-xl mx-auto">
+        <div className="max-w-3xl animate-pulse">
+          <div className="h-7 bg-surface-3 rounded-full w-64 mb-6" />
+          <div className="h-12 bg-surface-3 rounded-xl w-11/12 mb-3" />
+          <div className="h-12 bg-surface-3 rounded-xl w-2/3 mb-6" />
+          <div className="h-5 bg-surface-2 rounded w-1/2 mb-8" />
+          <div className="bg-surface border border-line rounded-2xl p-2 max-w-xl">
             <div className="flex gap-2">
-              <div className="flex-1 h-12 bg-neutral-100 rounded-xl" />
-              <div className="w-28 h-12 bg-primary-200 rounded-xl" />
+              <div className="flex-1 h-12 bg-surface-2 rounded-xl" />
+              <div className="w-32 h-12 bg-surface-3 rounded-xl" />
             </div>
           </div>
         </div>
@@ -226,7 +225,7 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-page">
         <Header />
         <main className="flex-1">
           <Suspense fallback={<HeroSkeleton />}>

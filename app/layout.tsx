@@ -1,13 +1,25 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Public_Sans, Newsreader } from "next/font/google";
 import { ToastProvider } from "@/components/ui";
 import { AuthenticatedFeedbackWidget } from "@/components/feedback";
 import { Axeptio } from "@/components/common/Axeptio";
 import "./globals.css";
 
-const inter = Inter({
-  weight: ["300", "400", "500", "600", "700"],
+// Public Sans : sans institutionnel pour le corps de texte
+const publicSans = Public_Sans({
+  weight: ["400", "500", "600", "700", "800"],
   subsets: ["latin"],
+  variable: "--font-public-sans",
+  display: "swap",
+});
+
+// Newsreader : serif éditoriale pour les titres et accents
+const newsreader = Newsreader({
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  variable: "--font-newsreader",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -21,9 +33,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className="light" suppressHydrationWarning>
+    <html
+      lang="fr"
+      className={`light ${publicSans.variable} ${newsreader.variable}`}
+      suppressHydrationWarning
+    >
       <body
-        className={`${inter.className} antialiased bg-background text-foreground`}
+        className="antialiased bg-background text-foreground"
         suppressHydrationWarning
       >
         <ToastProvider>

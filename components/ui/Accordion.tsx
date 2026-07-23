@@ -23,34 +23,25 @@ function AccordionItem({ question, answer, isOpen, onToggle, index }: AccordionI
   }, [isOpen]);
 
   return (
-    <div
-      className={`
-        border-b border-neutral-200 last:border-b-0
-        transition-colors duration-300
-        ${isOpen ? "bg-primary-50/50" : "bg-transparent hover:bg-neutral-50"}
-      `}
-    >
+    <div className="bg-surface border border-line rounded-2xl overflow-hidden transition-colors">
       <button
         onClick={onToggle}
-        className="w-full px-6 py-5 flex items-center justify-between text-left group"
+        className="w-full px-5 py-4 flex items-center gap-3.5 text-left group"
         aria-expanded={isOpen}
         aria-controls={`accordion-content-${index}`}
       >
-        <span className={`
-          text-lg font-semibold transition-colors duration-300
-          ${isOpen ? "text-primary-700" : "text-neutral-900 group-hover:text-primary-600"}
-        `}>
+        <span
+          className={`flex-1 text-[15px] font-bold transition-colors ${
+            isOpen ? "text-brand" : "text-ink group-hover:text-brand"
+          }`}
+        >
           {question}
         </span>
-        <span className={`
-          shrink-0 ml-4 p-2 rounded-full transition-all duration-300
-          ${isOpen
-            ? "bg-primary-100 text-primary-600 rotate-180"
-            : "bg-neutral-100 text-neutral-500 group-hover:bg-primary-50 group-hover:text-primary-500"
-          }
-        `}>
-          <ChevronDown className="h-5 w-5" />
-        </span>
+        <ChevronDown
+          className={`shrink-0 h-5 w-5 text-ink-3 transition-transform duration-300 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
       </button>
 
       <div
@@ -58,8 +49,8 @@ function AccordionItem({ question, answer, isOpen, onToggle, index }: AccordionI
         style={{ height: `${height}px` }}
         className="overflow-hidden transition-all duration-500 ease-out"
       >
-        <div ref={contentRef} className="px-6 pb-6">
-          <div className="text-neutral-600 leading-relaxed prose prose-neutral max-w-none">
+        <div ref={contentRef} className="px-5 pb-5">
+          <div className="text-ink-2 text-sm leading-relaxed prose prose-sm max-w-none">
             {answer}
           </div>
         </div>
@@ -97,7 +88,7 @@ export function Accordion({ items, allowMultiple = false, className = "" }: Acco
   };
 
   return (
-    <div className={`rounded-2xl border border-neutral-200 bg-white shadow-sm overflow-hidden ${className}`}>
+    <div className={`flex flex-col gap-2.5 ${className}`}>
       {items.map((item, index) => (
         <AccordionItem
           key={index}
