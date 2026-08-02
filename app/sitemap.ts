@@ -4,6 +4,10 @@ import { cities, regions } from "@/lib/seo-data";
 
 const BASE_URL = "https://ambubook.fr";
 
+// Généré à la requête (lit la liste des entreprises actives en DB) : évite
+// toute dépendance à la base au moment du build Docker.
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Pages statiques
   const staticPages: MetadataRoute.Sitemap = [

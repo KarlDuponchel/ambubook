@@ -5,6 +5,10 @@ import { Container } from "@/components/ui";
 import { Home, Search, Users, FileText, Shield, Map } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 
+// Lit les entreprises actives en DB : rendu à la requête pour ne pas dépendre
+// de la base au build Docker.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Plan du site | Ambubook",
   description:

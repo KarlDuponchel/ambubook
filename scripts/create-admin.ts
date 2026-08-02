@@ -1,6 +1,5 @@
 import "dotenv/config";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../generated/prisma/client";
+import { prisma } from "../lib/prisma";
 
 /**
  * Bootstrap du premier administrateur (production).
@@ -13,11 +12,10 @@ import { PrismaClient } from "../generated/prisma/client";
  *
  * Si ADMIN_PASSWORD n'est pas fourni, un mot de passe fort est généré et
  * affiché une seule fois. Le script est idempotent (upsert sur l'email).
+ *
+ * Utilise l'instance Prisma partagée (`lib/prisma`) : même configuration SSL
+ * que l'application (gestion des certificats auto-signés des bases managées).
  */
-
-const connectionString = process.env.DATABASE_URL!;
-const adapter = new PrismaPg({ connectionString });
-const prisma = new PrismaClient({ adapter });
 
 const MIN_PASSWORD_LENGTH = 12;
 

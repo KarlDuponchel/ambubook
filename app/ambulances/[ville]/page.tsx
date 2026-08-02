@@ -12,7 +12,11 @@ interface PageProps {
   params: Promise<{ ville: string }>;
 }
 
-// Génération statique pour les villes connues
+// Rendu dynamique : la page lit les entreprises en DB à la requête, on évite
+// ainsi toute dépendance à la base au moment du build Docker.
+export const dynamic = "force-dynamic";
+
+// Liste des villes connues (sert de référence SEO ; inerte sous force-dynamic)
 export async function generateStaticParams() {
   return getAllCitySlugs().map((ville) => ({ ville }));
 }

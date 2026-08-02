@@ -28,6 +28,20 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Variables factices requises UNIQUEMENT au build (module-eval de Next lors de la
+# collecte des routes). Elles restent dans ce stage `builder` : le stage `runner`
+# repart de `base` et ne les hérite pas → aucun secret dans l'image finale.
+# Au runtime, Scaleway injecte les vraies valeurs (process.env serveur lu au runtime).
+#  - DATABASE_URL : exigé par prisma.config.ts (env('DATABASE_URL')) ; aucune connexion.
+#  - BETTER_AUTH_SECRET : better-auth throw si absent en NODE_ENV=production.
+#  - GOOGLE_CLIENT_ID/SECRET : le provider Google de better-auth valide leur présence.
+#  - RESEND_API_KEY : new Resend(...) construit au chargement de lib/email.ts.
+ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
+ENV BETTER_AUTH_SECRET="build-placeholder-not-used-at-runtime"
+ENV GOOGLE_CLIENT_ID="build-placeholder"
+ENV GOOGLE_CLIENT_SECRET="build-placeholder"
+ENV RESEND_API_KEY="re_build_placeholder"
+
 # Generate Prisma client
 RUN npx prisma generate
 

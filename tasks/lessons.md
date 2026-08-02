@@ -139,3 +139,28 @@ Et traduire le message d'erreur 429 (Better Auth le renvoie en anglais) côté c
 - **Backdrop de modale theme-safe** : utiliser `bg-black/50` (et non `bg-ink/40`, qui devient un voile clair en mode sombre car `--ink` s'inverse). Vaut pour BookingModal et ChangePasswordModal.
 - **Case à cocher peer** : le SVG de coche n'est pas frère de l'input → utiliser la variante arbitraire `peer-checked:[&>svg]:opacity-100` sur la boîte (sibling de l'input) pour révéler la coche.
 - **Parallélisation** : /recherche et /[slug] délégués à des forks (héritant du contexte : cheatsheet tokens + patterns), pendant le traitement du booking en direct. Vérif Playwright clair+sombre 390/1280 → overflow=0 partout.
+
+### [2026-08-02] - Build Docker : découpler build et secrets/DB (mise en prod)
+**Contexte** : Premier build de l'image Docker de prod (`docker build --platform linux/amd64`). Le build local Windows marchait (avec `.env` complet) mais le build Docker, lui, n'a **aucune** variable d'env.
+**Erreurs successives** :
+1. `prisma generate` → `PrismaConfigEnvError: Cannot resolve environment variable: DATABASE_URL` : `prisma.config.ts` fait `env('DATABASE_URL')` qui **throw si absent** au chargement.
+2. `next build` → `Failed to collect page data for /api/ambulancier/demandes` : à la collecte des routes, Next évalue les modules. `betterAuth({...})` (lib/auth.ts) s'exécute au chargement et, en `NODE_ENV=production` (mis par `next build`), **throw si `BETTER_AUTH_SECRET` absent** ; le provider Google valide `GOOGLE_CLIENT_ID/SECRET` ; `new Resend(...)` (lib/email.ts) se construit au chargement.
+3. (potentiel) pages statiques interrogeant la DB au build : `sitemap.ts`, `plan-du-site`, `ambulances/[ville]`, `region/[region]` (via `generateStaticParams` → prerender → `prisma.company.findMany`).
+**Cause racine** : des clients (auth, Resend) sont instanciés **au chargement des modules**, et des pages lisent la DB **au build**. Le build devient impossible sans tous les secrets + une DB joignable → non CI-friendly.
+**Solution** :
+- `Dockerfile` (stage `builder` uniquement) : placeholders `DATABASE_URL`, `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID/SECRET`, `RESEND_API_KEY`. Le stage `runner` repart de `base` → **ne les hérite pas** → aucun secret dans l'image. Côté serveur, `process.env` est lu **au runtime** (jamais inliné, sauf `NEXT_PUBLIC_*`) → Scaleway injecte les vraies valeurs.
+- `export const dynamic = "force-dynamic"` sur les 4 fichiers qui lisent la DB → rendus à la requête, plus au build (bonus : sitemap/plan reflètent les entreprises en temps réel).
+**Vérif** : build exit 0, image 347 MB, smoke test `docker run` → landing `/` = **200**, dégradation propre si DB injoignable (`siteConfig` catché).
+**Prévention** : ne jamais instancier de client tiers (auth, SDK email/SMS/S3) au top-level d'un module sans placeholder de build OU instanciation paresseuse. Toute page publique lisant la DB doit être `force-dynamic` (ou ISR avec DB dispo au build). Un build d'image ne doit exiger **ni secret réel ni DB**.
+
+### [2026-08-02] - TLS base managée : le moteur de migration passe, le client Prisma échoue
+**Contexte** : Connexion à une **Managed PostgreSQL Scaleway** (certificat **auto-signé**) via `@prisma/adapter-pg` (Prisma 7). URL en `?sslmode=require`.
+**Erreurs** :
+1. `permission denied for database "ambubook" — User does not have CONNECT privilege` : créer un user Scaleway ne donne PAS accès aux bases → assigner les permissions (console → Permissions → All) au couple user/base.
+2. `prisma migrate deploy` **passe** mais le **client** au runtime → `Error opening a TLS connection: self-signed certificate` (`P1011 / TlsConnectionError`).
+**Cause** : deux chemins TLS distincts. Le moteur de migration (Rust) lit `sslmode=require` et chiffre sans vérifier la chaîne. Le **client node-postgres**, lui, re-parse `sslmode` depuis la connection string et son interprétation **écrase** tout objet `ssl` passé explicitement → il tente de vérifier le certificat auto-signé et le rejette.
+**Solution** (dans `lib/prisma.ts`, source unique de connexion) :
+- Si `sslmode` présent : **retirer `sslmode` de l'URL** passée au client (`new URL(...).searchParams.delete('sslmode')`) et piloter le TLS **uniquement** via l'objet `ssl`.
+- `ssl: { ca: <CA>, rejectUnauthorized: true }` si `DATABASE_CA_CERT_PATH` fourni (prod/HDS) ; sinon `ssl: { rejectUnauthorized: false }` (staging).
+- Faire pointer **tous** les scripts (`scripts/create-admin.ts`, etc.) sur `lib/prisma` au lieu de reconstruire un `PrismaPg` local, sinon le correctif est contourné.
+**Prévention** : une base managée à certificat auto-signé impose une config SSL **côté client** distincte de `sslmode` dans l'URL. Le succès de `migrate deploy` ne garantit **pas** que le client runtime se connectera. Centraliser la construction du client Prisma (une seule instance partagée) pour que tout correctif de connexion s'applique partout. Pour l'HDS, préférer la vérification de chaîne via la CA de l'hébergeur (`rejectUnauthorized: true` + `ca`).
